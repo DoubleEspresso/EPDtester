@@ -15,8 +15,8 @@
 
 #directories
 #c#
-bin\
-obj\
+bin
+obj
 
 #cpp
-x64\
+x64
