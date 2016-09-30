@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LogViewer));
             this.button1 = new System.Windows.Forms.Button();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.commandText = new System.Windows.Forms.TextBox();
@@ -86,8 +87,9 @@
             this.Controls.Add(this.commandText);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.tabControl);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "LogViewer";
-            this.Text = "LogViewer";
+            this.Text = "..log";
             this.ResumeLayout(false);
             this.PerformLayout();
 
