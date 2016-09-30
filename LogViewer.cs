@@ -16,11 +16,13 @@ namespace epdTester
     {
         List<LogTextbox> logViews = new List<LogTextbox>();
         List<TabPage> Tabs = new List<TabPage>();
+        List<Engine> monitoredEngines = new List<Engine>();
+        bool isEngineTab = false;
 
-        public LogViewer()
+        public LogViewer(List<Engine> engines)
         {
             InitializeComponent();
-            checkNewLogs();
+            checkNewLogs(engines);
         }
         private bool isMonitored(string filename)
         {
@@ -33,13 +35,23 @@ namespace epdTester
             filename = StringUtils.BaseName(filename);
             string result = filename.Replace(Log.LogName, "").Replace(".log", "");
             if (result.StartsWith("-")) result = result.Substring(1, result.Length - 1);
+            int idx = result.LastIndexOf("-");
+            if (idx > 0) result = result.Substring(0, idx);
             if (string.IsNullOrWhiteSpace(result)) return null;
             return result;
         }
 
-        private void checkNewLogs()
+        private void checkNewLogs(List<Engine> engines)
         {
-            List<string> log_files = new List<string>(Directory.GetFiles(Log.DirectoryName, string.Format("{0}*.log", Log.LogName)));
+            List<string> log_files = new List<string>(Directory.GetFiles(Log.DirectoryName, string.Format("{0}*.log", Log.LogName))); // main log
+            monitoredEngines.Clear();
+            foreach (Engine e in engines)
+            {
+                if (e.EngineLogFilename == null) continue;
+                List<string> engineLogs = new List<string>(Directory.GetFiles(Log.DirectoryName, e.EngineLogFilename));
+                log_files.AddRange(engineLogs);
+                monitoredEngines.Add(e);
+            }
             if (log_files.Count == 0) return;
             if (log_files.Count == logViews.Count) return; // no new file ...
 
@@ -51,6 +63,7 @@ namespace epdTester
 
                 LogTextbox view = new LogTextbox();
                 view.Filename = lf;
+
                 logViews.Add(view);
 
                 string tn = SubLogName(lf);
@@ -85,6 +98,49 @@ namespace epdTester
             }
         }
 
+        List<string> CommandHistory = new List<string>();
+        int lastCommandIdx = -1;
+        void textChanged(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Enter: issueEngineCommand(); e.Handled = true;  break;
+                case Keys.Up: updateHistoryIdx(-1); e.Handled = true; break;
+                case Keys.Down: updateHistoryIdx(1); e.Handled = true; break;
+            }
+        }
+        void updateHistoryIdx(int d)
+        {
+            int newidx = lastCommandIdx + d;
+            if (newidx < 0) lastCommandIdx = CommandHistory.Count - 1;
+            else if (newidx > CommandHistory.Count - 1) lastCommandIdx = 0;
+
+            if (newidx >= 0 && newidx < CommandHistory.Count - 1)
+                commandText.Text = CommandHistory[newidx];
+        }
+        void issueEngineCommand()
+        {
+            try
+            {
+                int idx = tabControl.SelectedIndex;
+                if (idx < 0 || idx > logViews.Count) return;
+                LogTextbox current = logViews[idx];
+                foreach (Engine engine in monitoredEngines)
+                {
+                    if (current.Filename.Contains(engine.EngineLogFilename))
+                    {
+                        // shorten the refresh rate
+                        current.setRefreshRate(100);
+                        engine.Command(commandText.Text);
+                        CommandHistory.Add(commandText.Text);
+                        ++lastCommandIdx;
+                        commandText.Text = "";
+                    }
+
+                }
+            }
+            catch { } // ignore failed engine command attempts
+        }
         public class LogTextbox : RichTextBox
         {
             Timer refresh = null;
@@ -118,6 +174,10 @@ namespace epdTester
             public void suspend()
             {
                 refresh.Stop();
+            }
+            public void setRefreshRate(int r)
+            {
+                refresh.Interval = r;
             }
             public string Filename
             {

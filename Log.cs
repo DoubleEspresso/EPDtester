@@ -15,6 +15,7 @@ namespace epdTester
         static private StreamWriter logWriter = null;
         private static string dirName = null;
         static private string logName = null;
+        static private string customLogName = null;
         static bool inited = false;
 
         static public string DirectoryName
@@ -25,13 +26,25 @@ namespace epdTester
                 return dirName;
             }
         }
+        static public string CustomLogName
+        {
+            get
+            {
+                if (customLogName == null) return "";
+                return customLogName;
+            }
+            set
+            {
+                customLogName = value;
+            }
+        }
         static public string LogName
         {
             get
             {
                 if (logName == null)
                 {
-                    logName = string.Format("log-{0}", StringUtils.TimeStamp());
+                    logName = string.Format("{0}log-{1}", CustomLogName, StringUtils.TimeStamp());
                 }
                 return logName;
             }

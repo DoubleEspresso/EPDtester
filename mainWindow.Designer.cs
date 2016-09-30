@@ -310,6 +310,7 @@
             this.startEngine.TabIndex = 10;
             this.startEngine.Text = "Start";
             this.startEngine.UseVisualStyleBackColor = true;
+            this.startEngine.Click += new System.EventHandler(this.startEngine_Click);
             // 
             // eOpeningBookBox
             // 
@@ -368,6 +369,7 @@
             this.engineList.Name = "engineList";
             this.engineList.Size = new System.Drawing.Size(433, 199);
             this.engineList.TabIndex = 8;
+            this.engineList.SelectedIndexChanged += new System.EventHandler(this.engineList_SelectedEngineChanged);
             // 
             // button8
             // 

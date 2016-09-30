@@ -23,9 +23,12 @@ namespace epdTester
         public string Version = null;
         public bool Loaded = false;
         public bool Running = false;
+        public string EngineLogFilename = null;
+        public string EngineLogDirectory = null;
         Process eprocess = null;
         StreamWriter engineWriter = null;
         StreamReader engineReader = null;
+        private StreamWriter logWriter = null;
         public enum Type { UCI, WINBOARD, UNKNOWN }
         public Type EngineProtocol = Type.UCI;
         ChessParser Parser = null;
@@ -96,7 +99,7 @@ namespace epdTester
         {
             if (!Running || !Loaded || eprocess == null || engineWriter == null) return;
             engineWriter.WriteLine(cmd);
-            Thread.Sleep(100);
+            Thread.Sleep(20);
         }
         public void Start(string args = "")
         {            
@@ -113,7 +116,13 @@ namespace epdTester
                     UseShellExecute = false,
                     WindowStyle = ProcessWindowStyle.Hidden
                 };
-                eprocess = Process.Start(pinfo);
+                EngineLogFilename = Name + "-" + StringUtils.TimeStamp() + ".log";
+                EngineLogDirectory = Log.DirectoryName;
+                if (!openEngineLog(EngineLogDirectory, EngineLogFilename))
+                {
+                    Log.WriteLine("..[engine] Warning: failed to start log file for engine @({0})", EngineLogFilename);
+                }
+                eprocess = Process.Start(pinfo);                
                 engineWriter = eprocess.StandardInput;
                 engineReader = eprocess.StandardOutput;
                 new Task(LogOutputAsync).Start();
@@ -131,10 +140,42 @@ namespace epdTester
             while (!eprocess.HasExited)
             {
                 int length = await engineReader.ReadAsync(buff, 0, buff.Length);
-                Log.WriteLine("{0}", (new string(buff)).Substring(0, length-1)); // event handler for engine output
+                Log.CustomLogName = Name;
+                WriteLine((new string(buff)).Substring(0, length-1)); // event handler for engine output
                 Thread.Sleep(1);
             }
             Running = false;
+        }
+        object LogLock = new object();
+        public void WriteLine(string str)
+        {
+            lock (LogLock)
+            {
+                logWriter.Write(string.Format("{0}", str));
+                logWriter.Flush();
+            }
+        }
+        bool openEngineLog(string DirectoryName, string EngineLogName)
+        {
+            if (!Running)
+            {
+                try
+                {
+                    if (!Directory.Exists(DirectoryName))
+                    {
+                        Directory.CreateDirectory(DirectoryName);
+                    }
+                    string fname = DirectoryName + "\\" + EngineLogName;
+                    FileStream fsout = new FileStream(fname, FileMode.Create, FileAccess.Write, FileShare.ReadWrite | FileShare.Delete);
+                    logWriter = new StreamWriter(fsout);
+                    logWriter.AutoFlush = true;
+                }
+                catch (Exception)
+                {
+                    logWriter = null;
+                }
+            }
+            return (logWriter != null);
         }
         public void Close()
         {

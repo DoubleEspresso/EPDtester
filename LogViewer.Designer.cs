@@ -30,7 +30,7 @@
         {
             this.button1 = new System.Windows.Forms.Button();
             this.tabControl = new System.Windows.Forms.TabControl();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.commandText = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
@@ -56,14 +56,15 @@
             this.tabControl.Size = new System.Drawing.Size(1031, 361);
             this.tabControl.TabIndex = 0;
             // 
-            // textBox1
+            // commandText
             // 
-            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.commandText.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox1.Location = new System.Drawing.Point(73, 408);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(966, 20);
-            this.textBox1.TabIndex = 2;
+            this.commandText.Location = new System.Drawing.Point(73, 408);
+            this.commandText.Name = "commandText";
+            this.commandText.Size = new System.Drawing.Size(966, 20);
+            this.commandText.TabIndex = 2;
+            this.commandText.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textChanged);
             // 
             // label1
             // 
@@ -82,7 +83,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1055, 443);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.commandText);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.tabControl);
             this.Name = "LogViewer";
@@ -96,7 +97,7 @@
 
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.TabControl tabControl;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox commandText;
         private System.Windows.Forms.Label label1;
     }
 }

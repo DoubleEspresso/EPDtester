@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -15,20 +16,15 @@ namespace epdTester
     {
         List<Engine> engines = new List<Engine>();
         List<EpdTest> tests = new List<EpdTest>();
-
         public mainWindow()
         {
             InitializeComponent();
             LoadEnginesFromSettings();
-            
-            //addListViewItem(new string[] { "title1", "title2", "title3" });
         }
-
         private void addListViewItem(string[] row)
         {
             listView1.Items.Add(new ListViewItem(row));
         }
-
 
         /*engine management*/
         private void LoadEnginesFromSettings()
@@ -42,6 +38,12 @@ namespace epdTester
                     engines.Add(e);
                     AddEngineToUI(e);
                 }
+            }
+            int curr_selected = -1; Settings.get("Engine\\Selected", ref curr_selected);
+            if (curr_selected >= 0 && curr_selected < engines.Count)
+            {
+                engineList.SelectedIndex = curr_selected;
+                engineList_SelectedEngineChanged(null, null);
             }
         }
         private void engineAddClick(object sender, EventArgs ea)
@@ -73,11 +75,6 @@ namespace epdTester
             {
                 e.Name = StringUtils.RemoveExtension(StringUtils.BaseName(e.FileName));
             }
-            else
-            {
-                Log.WriteLine("..[engine] attempt to add engine to UI failed, abort.");
-                return;
-            }
             if (isDuplicateEngine(e))
             {
                 Log.WriteLine("..[engine] duplicate engine already in list, ignored.");
@@ -85,7 +82,21 @@ namespace epdTester
             }
             // textbox update
             engineList.Items.Add(e.Name);
+            updateDisplay(e);
         }
+        void updateDisplay(Engine e)
+        {
+            eNameBox.Text = e.Name;
+            ePathBox.Text = e.FileName;
+            eOpeningBookBox.Text = e.OpeningBook;
+            eEndgameBookBox.Text = e.TableBase;
+            eConfigfileBox.Text = e.ConfigFile;
+            eEloBox.Text = e.Elo.ToString();
+            authorLabel.Text = "Author: " + e.Author;
+            protocolLabel.Text = "Protocol: " + (e.EngineProtocol == Engine.Type.UCI ? "UCI" :
+                    e.EngineProtocol == Engine.Type.WINBOARD ? "WinBoard" : "Unknown");
+        }
+
         bool isDuplicateEngine(Engine e)
         {
             return false;
@@ -94,10 +105,20 @@ namespace epdTester
         {
 
         }
-
+        private void engineList_SelectedEngineChanged(object sender, EventArgs args)
+        {
+            int idx = engineList.SelectedIndex;
+            if (idx >=0 && idx < engines.Count)
+            {
+                Engine e = engines[idx];
+                updateDisplay(e);
+                Settings.set("Engine\\Selected", idx);
+            }
+        }
         private void showLog_Click(object sender, EventArgs e)
         {
-            LogViewer logViewer = new LogViewer();
+            // fixme : opens multiple log views
+            LogViewer logViewer = new LogViewer(engines);
             logViewer.Show();
             logViewer.BringToFront();
         }
@@ -120,6 +141,21 @@ namespace epdTester
         private void updatePath_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void startEngine_Click(object sender, EventArgs args)
+        {
+            int idx = engineList.SelectedIndex;
+            if (idx >= 0 && idx < engines.Count)
+            {
+                Engine e = engines[idx];
+                if (e.Running)
+                {
+                    Log.WriteLine("..[engine] {0} already running, ignored", e.Name);
+                    return;
+                }
+                e.Start(eCommandBox.Text);
+            }
         }
     }
 }
