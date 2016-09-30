@@ -17,35 +17,87 @@ namespace epdTester
         public string Name = null;
         public string ConfigFile = null;
         public string[] Options = null;
-        public uint Elo = 0;       
+        public int Elo = 0;       
         public string FileName = null;
+        public string Author = null;
+        public string Version = null;
         public bool Loaded = false;
         public bool Running = false;
         Process eprocess = null;
         StreamWriter engineWriter = null;
         StreamReader engineReader = null;
         public enum Type { UCI, WINBOARD, UNKNOWN }
+        public Type EngineProtocol = Type.UCI;
         ChessParser Parser = null;
 
         public Engine() { }
-        public bool open()
+        public bool canOpen()
         {
             if (!Loaded)
             {
-                    Loaded = File.Exists(FileName);
-                    return Loaded;
+                Loaded = File.Exists(FileName);
+                return Loaded;
             }
             Log.WriteLine("..[engine] {0} already loaded", Name);
             return true;
         }
+        public bool SaveSettings(int eidx)
+        {
+            try
+            {
+                // basic chess engine configuration/path location
+                string basetag = string.Format("Engine\\{0}", eidx);
+                Settings.set(string.Format("{0}\\Name", basetag), Name);
+                Settings.set(string.Format("{0}\\Path", basetag), FileName);
+                Settings.set(string.Format("{0}\\Opening Book\\Path", basetag), OpeningBook);
+                Settings.set(string.Format("{0}\\Use Opening Book", basetag), useBook);
+                Settings.set(string.Format("{0}\\Table Base\\Path", basetag), TableBase);
+                Settings.set(string.Format("{0}\\Config file\\Path", basetag), ConfigFile);
+                Settings.set(string.Format("{0}\\elo", basetag), (int) Elo);
+                Settings.set(string.Format("{0}\\Author", basetag), Author);
+                Settings.set(string.Format("{0}\\Version", basetag), Version);
+                Settings.set(string.Format("{0}\\Protocol", basetag), (EngineProtocol == Type.UCI ? "UCI" : EngineProtocol == Type.WINBOARD ? "Winboard" : "Unknown"));
+            }
+            catch (Exception any)
+            {
+                Log.WriteLine("..[engine] exception saving settings entries for engine ({0}) : {1}", FileName, any.Message);
+                return false;
+            }
+            return true;
+        }
+        public bool ReadSettings(int eidx)
+        {
+            try
+            {
+                // basic chess engine configuration/path location
+                string basetag = string.Format("Engine\\{0}", eidx);
+                Settings.get(string.Format("{0}\\Name", basetag), ref Name);
+                Settings.get(string.Format("{0}\\Path", basetag), ref FileName);
+                if (!canOpen()) return false;
+                Settings.get(string.Format("{0}\\Opening Book\\Path", basetag), ref OpeningBook);
+                Settings.get(string.Format("{0}\\Use Opening Book", basetag), ref useBook);
+                Settings.get(string.Format("{0}\\Table Base\\Path", basetag), ref TableBase);
+                Settings.get(string.Format("{0}\\Config file\\Path", basetag), ref ConfigFile);
+                Settings.get(string.Format("{0}\\elo", basetag), ref Elo);
+                Settings.get(string.Format("{0}\\Author", basetag), ref Author);
+                Settings.get(string.Format("{0}\\Version", basetag), ref Version);
+                string p = "Unknown";  Settings.get(string.Format("{0}\\Protocol", basetag), ref p);
+                EngineProtocol = (p == "Unknown" ? Type.UNKNOWN : p == "UCI" ? Type.UCI : Type.WINBOARD);
+            }
+            catch (Exception any)
+            {
+                Log.WriteLine("..[engine] exception saving settings entries for engine ({0}) : {1}", FileName, any.Message);
+                return false;
+            }
+            return true;
 
+        }
         public void Command(string cmd)
         {
             if (!Running || !Loaded || eprocess == null || engineWriter == null) return;
             engineWriter.WriteLine(cmd);
             Thread.Sleep(100);
         }
-
         public void Start(string args = "")
         {            
             try
@@ -73,7 +125,6 @@ namespace epdTester
                 Log.WriteLine("..[engine] exception running {0} with args ({1}).\nStackTrace :\n {2}", Name, args, any.StackTrace);
             }
         }
-
         private async void LogOutputAsync()
         {
             char [] buff = new char[1024];
@@ -85,8 +136,7 @@ namespace epdTester
             }
             Running = false;
         }
-
-        public void stop()
+        public void Close()
         {
             if (!Running || !Loaded || eprocess == null) return;
             try

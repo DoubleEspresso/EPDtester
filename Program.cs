@@ -16,12 +16,20 @@ namespace epdTester
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Settings.Read();
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
+            Log.WriteLine("");
             Application.Run(new mainWindow());
+        }
+
+        static void OnProcessExit(object sender, EventArgs e)
+        {
+            Settings.save();
         }
 
         internal static string appname()
         {
-           return "Epd testing application";
+           return "Epd Tester";
         }
 
         internal static string versionStr()

@@ -35,26 +35,48 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.button7 = new System.Windows.Forms.Button();
-            this.button6 = new System.Windows.Forms.Button();
-            this.button5 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.listBox1 = new System.Windows.Forms.ListBox();
+            this.engineDetailsGroupBox = new System.Windows.Forms.GroupBox();
+            this.eEloBox = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.updatePath = new System.Windows.Forms.Button();
+            this.ePathBox = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.findConfigFile = new System.Windows.Forms.Button();
+            this.eConfigfileBox = new System.Windows.Forms.TextBox();
+            this.findOpeningBook = new System.Windows.Forms.Button();
+            this.findEndgameBook = new System.Windows.Forms.Button();
+            this.authorLabel = new System.Windows.Forms.Label();
+            this.protocolLabel = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.eEndgameBookBox = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.startEngine = new System.Windows.Forms.Button();
+            this.eOpeningBookBox = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.eCommandBox = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.eNameBox = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.engineList = new System.Windows.Forms.ListBox();
+            this.button8 = new System.Windows.Forms.Button();
+            this.removeEngineFromList = new System.Windows.Forms.Button();
+            this.addEngineToList = new System.Windows.Forms.Button();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.button1 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.button8 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
+            this.engineDetailsGroupBox.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.SuspendLayout();
             // 
             // listView1
             // 
+            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2,
@@ -62,9 +84,9 @@
             this.listView1.FullRowSelect = true;
             this.listView1.GridLines = true;
             this.listView1.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.listView1.Location = new System.Drawing.Point(18, 306);
+            this.listView1.Location = new System.Drawing.Point(18, 297);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(991, 172);
+            this.listView1.Size = new System.Drawing.Size(1079, 218);
             this.listView1.TabIndex = 1;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -84,9 +106,12 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Location = new System.Drawing.Point(12, 290);
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Location = new System.Drawing.Point(0, 278);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(1003, 194);
+            this.groupBox1.Size = new System.Drawing.Size(1103, 248);
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Epd results";
@@ -100,95 +125,285 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1027, 272);
+            this.tabControl1.Size = new System.Drawing.Size(1107, 272);
             this.tabControl1.TabIndex = 6;
             // 
             // tabPage3
             // 
             this.tabPage3.BackColor = System.Drawing.SystemColors.Menu;
+            this.tabPage3.Controls.Add(this.engineDetailsGroupBox);
+            this.tabPage3.Controls.Add(this.engineList);
             this.tabPage3.Controls.Add(this.button8);
-            this.tabPage3.Controls.Add(this.button7);
-            this.tabPage3.Controls.Add(this.button6);
-            this.tabPage3.Controls.Add(this.button5);
-            this.tabPage3.Controls.Add(this.button4);
-            this.tabPage3.Controls.Add(this.button3);
-            this.tabPage3.Controls.Add(this.button2);
-            this.tabPage3.Controls.Add(this.listBox1);
+            this.tabPage3.Controls.Add(this.removeEngineFromList);
+            this.tabPage3.Controls.Add(this.addEngineToList);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(1019, 246);
+            this.tabPage3.Size = new System.Drawing.Size(1099, 246);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "engine..";
             // 
-            // button7
+            // engineDetailsGroupBox
             // 
-            this.button7.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button7.Location = new System.Drawing.Point(437, 185);
-            this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(34, 33);
-            this.button7.TabIndex = 6;
-            this.button7.Text = "-";
-            this.button7.UseVisualStyleBackColor = true;
-            this.button7.Click += new System.EventHandler(this.engineDeleteClick);
+            this.engineDetailsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.engineDetailsGroupBox.Controls.Add(this.eEloBox);
+            this.engineDetailsGroupBox.Controls.Add(this.label10);
+            this.engineDetailsGroupBox.Controls.Add(this.updatePath);
+            this.engineDetailsGroupBox.Controls.Add(this.ePathBox);
+            this.engineDetailsGroupBox.Controls.Add(this.label9);
+            this.engineDetailsGroupBox.Controls.Add(this.findConfigFile);
+            this.engineDetailsGroupBox.Controls.Add(this.eConfigfileBox);
+            this.engineDetailsGroupBox.Controls.Add(this.findOpeningBook);
+            this.engineDetailsGroupBox.Controls.Add(this.findEndgameBook);
+            this.engineDetailsGroupBox.Controls.Add(this.authorLabel);
+            this.engineDetailsGroupBox.Controls.Add(this.protocolLabel);
+            this.engineDetailsGroupBox.Controls.Add(this.label6);
+            this.engineDetailsGroupBox.Controls.Add(this.eEndgameBookBox);
+            this.engineDetailsGroupBox.Controls.Add(this.label5);
+            this.engineDetailsGroupBox.Controls.Add(this.startEngine);
+            this.engineDetailsGroupBox.Controls.Add(this.eOpeningBookBox);
+            this.engineDetailsGroupBox.Controls.Add(this.label4);
+            this.engineDetailsGroupBox.Controls.Add(this.eCommandBox);
+            this.engineDetailsGroupBox.Controls.Add(this.label3);
+            this.engineDetailsGroupBox.Controls.Add(this.eNameBox);
+            this.engineDetailsGroupBox.Controls.Add(this.label2);
+            this.engineDetailsGroupBox.Location = new System.Drawing.Point(465, 5);
+            this.engineDetailsGroupBox.Name = "engineDetailsGroupBox";
+            this.engineDetailsGroupBox.Size = new System.Drawing.Size(625, 199);
+            this.engineDetailsGroupBox.TabIndex = 9;
+            this.engineDetailsGroupBox.TabStop = false;
+            this.engineDetailsGroupBox.Text = "Engine setup..";
             // 
-            // button6
+            // eEloBox
             // 
-            this.button6.Font = new System.Drawing.Font("Wingdings", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(2)));
-            this.button6.Location = new System.Drawing.Point(170, 185);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(46, 33);
-            this.button6.TabIndex = 5;
-            this.button6.Text = "â";
-            this.button6.UseVisualStyleBackColor = true;
+            this.eEloBox.Location = new System.Drawing.Point(95, 172);
+            this.eEloBox.Name = "eEloBox";
+            this.eEloBox.Size = new System.Drawing.Size(252, 20);
+            this.eEloBox.TabIndex = 24;
             // 
-            // button5
+            // label10
             // 
-            this.button5.Font = new System.Drawing.Font("Wingdings", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(2)));
-            this.button5.Location = new System.Drawing.Point(118, 185);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(46, 33);
-            this.button5.TabIndex = 4;
-            this.button5.Text = "á";
-            this.button5.UseVisualStyleBackColor = true;
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(14, 175);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(22, 13);
+            this.label10.TabIndex = 22;
+            this.label10.Text = "Elo";
             // 
-            // button4
+            // updatePath
             // 
-            this.button4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button4.Location = new System.Drawing.Point(397, 185);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(34, 33);
-            this.button4.TabIndex = 3;
-            this.button4.Text = "+";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.engineAddClick);
+            this.updatePath.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.updatePath.Location = new System.Drawing.Point(353, 143);
+            this.updatePath.Name = "updatePath";
+            this.updatePath.Size = new System.Drawing.Size(35, 23);
+            this.updatePath.TabIndex = 20;
+            this.updatePath.Text = "...";
+            this.updatePath.UseVisualStyleBackColor = true;
+            this.updatePath.Click += new System.EventHandler(this.updatePath_Click);
             // 
-            // button3
+            // ePathBox
             // 
-            this.button3.Font = new System.Drawing.Font("Wingdings", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(2)));
-            this.button3.Location = new System.Drawing.Point(66, 185);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(46, 33);
-            this.button3.TabIndex = 2;
-            this.button3.Text = "à";
-            this.button3.UseVisualStyleBackColor = true;
+            this.ePathBox.Location = new System.Drawing.Point(95, 146);
+            this.ePathBox.Name = "ePathBox";
+            this.ePathBox.Size = new System.Drawing.Size(252, 20);
+            this.ePathBox.TabIndex = 21;
             // 
-            // button2
+            // label9
             // 
-            this.button2.Font = new System.Drawing.Font("Wingdings", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(2)));
-            this.button2.Location = new System.Drawing.Point(14, 185);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(46, 33);
-            this.button2.TabIndex = 1;
-            this.button2.Text = "ß";
-            this.button2.UseVisualStyleBackColor = true;
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(14, 149);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(29, 13);
+            this.label9.TabIndex = 19;
+            this.label9.Text = "Path";
             // 
-            // listBox1
+            // findConfigFile
             // 
-            this.listBox1.FormattingEnabled = true;
-            this.listBox1.Location = new System.Drawing.Point(14, 19);
-            this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(457, 160);
-            this.listBox1.TabIndex = 0;
+            this.findConfigFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.findConfigFile.Location = new System.Drawing.Point(353, 117);
+            this.findConfigFile.Name = "findConfigFile";
+            this.findConfigFile.Size = new System.Drawing.Size(35, 23);
+            this.findConfigFile.TabIndex = 17;
+            this.findConfigFile.Text = "...";
+            this.findConfigFile.UseVisualStyleBackColor = true;
+            this.findConfigFile.Click += new System.EventHandler(this.findConfigFile_Click);
+            // 
+            // eConfigfileBox
+            // 
+            this.eConfigfileBox.Location = new System.Drawing.Point(95, 120);
+            this.eConfigfileBox.Name = "eConfigfileBox";
+            this.eConfigfileBox.Size = new System.Drawing.Size(252, 20);
+            this.eConfigfileBox.TabIndex = 18;
+            // 
+            // findOpeningBook
+            // 
+            this.findOpeningBook.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.findOpeningBook.Location = new System.Drawing.Point(353, 62);
+            this.findOpeningBook.Name = "findOpeningBook";
+            this.findOpeningBook.Size = new System.Drawing.Size(35, 23);
+            this.findOpeningBook.TabIndex = 16;
+            this.findOpeningBook.Text = "...";
+            this.findOpeningBook.UseVisualStyleBackColor = true;
+            this.findOpeningBook.Click += new System.EventHandler(this.findOpeningBook_Click);
+            // 
+            // findEndgameBook
+            // 
+            this.findEndgameBook.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.findEndgameBook.Location = new System.Drawing.Point(353, 90);
+            this.findEndgameBook.Name = "findEndgameBook";
+            this.findEndgameBook.Size = new System.Drawing.Size(35, 23);
+            this.findEndgameBook.TabIndex = 10;
+            this.findEndgameBook.Text = "...";
+            this.findEndgameBook.UseVisualStyleBackColor = true;
+            this.findEndgameBook.Click += new System.EventHandler(this.findEndgameBook_Click);
+            // 
+            // authorLabel
+            // 
+            this.authorLabel.AutoSize = true;
+            this.authorLabel.Location = new System.Drawing.Point(410, 36);
+            this.authorLabel.Name = "authorLabel";
+            this.authorLabel.Size = new System.Drawing.Size(41, 13);
+            this.authorLabel.TabIndex = 15;
+            this.authorLabel.Text = "Author:";
+            // 
+            // protocolLabel
+            // 
+            this.protocolLabel.AutoSize = true;
+            this.protocolLabel.Location = new System.Drawing.Point(410, 16);
+            this.protocolLabel.Name = "protocolLabel";
+            this.protocolLabel.Size = new System.Drawing.Size(49, 13);
+            this.protocolLabel.TabIndex = 14;
+            this.protocolLabel.Text = "Protocol:";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(14, 123);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(53, 13);
+            this.label6.TabIndex = 13;
+            this.label6.Text = "Config file";
+            // 
+            // eEndgameBookBox
+            // 
+            this.eEndgameBookBox.Location = new System.Drawing.Point(95, 93);
+            this.eEndgameBookBox.Name = "eEndgameBookBox";
+            this.eEndgameBookBox.Size = new System.Drawing.Size(252, 20);
+            this.eEndgameBookBox.TabIndex = 12;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(15, 96);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(80, 13);
+            this.label5.TabIndex = 11;
+            this.label5.Text = "Endgame Book";
+            // 
+            // startEngine
+            // 
+            this.startEngine.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.startEngine.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.startEngine.Location = new System.Drawing.Point(560, 161);
+            this.startEngine.Name = "startEngine";
+            this.startEngine.Size = new System.Drawing.Size(59, 32);
+            this.startEngine.TabIndex = 10;
+            this.startEngine.Text = "Start";
+            this.startEngine.UseVisualStyleBackColor = true;
+            // 
+            // eOpeningBookBox
+            // 
+            this.eOpeningBookBox.Location = new System.Drawing.Point(95, 65);
+            this.eOpeningBookBox.Name = "eOpeningBookBox";
+            this.eOpeningBookBox.Size = new System.Drawing.Size(252, 20);
+            this.eOpeningBookBox.TabIndex = 5;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(14, 68);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(75, 13);
+            this.label4.TabIndex = 4;
+            this.label4.Text = "Opening Book";
+            // 
+            // eCommandBox
+            // 
+            this.eCommandBox.Location = new System.Drawing.Point(95, 39);
+            this.eCommandBox.Name = "eCommandBox";
+            this.eCommandBox.Size = new System.Drawing.Size(252, 20);
+            this.eCommandBox.TabIndex = 3;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(14, 42);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(54, 13);
+            this.label3.TabIndex = 2;
+            this.label3.Text = "Command";
+            // 
+            // eNameBox
+            // 
+            this.eNameBox.Location = new System.Drawing.Point(95, 15);
+            this.eNameBox.Name = "eNameBox";
+            this.eNameBox.Size = new System.Drawing.Size(252, 20);
+            this.eNameBox.TabIndex = 1;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(14, 18);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(35, 13);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "Name";
+            // 
+            // engineList
+            // 
+            this.engineList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.engineList.FormattingEnabled = true;
+            this.engineList.Location = new System.Drawing.Point(6, 5);
+            this.engineList.Name = "engineList";
+            this.engineList.Size = new System.Drawing.Size(433, 199);
+            this.engineList.TabIndex = 8;
+            // 
+            // button8
+            // 
+            this.button8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button8.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button8.Location = new System.Drawing.Point(1026, 209);
+            this.button8.Name = "button8";
+            this.button8.Size = new System.Drawing.Size(57, 32);
+            this.button8.TabIndex = 7;
+            this.button8.Text = "..log";
+            this.button8.UseVisualStyleBackColor = true;
+            this.button8.Click += new System.EventHandler(this.showLog_Click);
+            // 
+            // removeEngineFromList
+            // 
+            this.removeEngineFromList.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.removeEngineFromList.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.removeEngineFromList.Location = new System.Drawing.Point(404, 210);
+            this.removeEngineFromList.Name = "removeEngineFromList";
+            this.removeEngineFromList.Size = new System.Drawing.Size(34, 33);
+            this.removeEngineFromList.TabIndex = 6;
+            this.removeEngineFromList.Text = "-";
+            this.removeEngineFromList.UseVisualStyleBackColor = true;
+            this.removeEngineFromList.Click += new System.EventHandler(this.engineDeleteClick);
+            // 
+            // addEngineToList
+            // 
+            this.addEngineToList.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.addEngineToList.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.addEngineToList.Location = new System.Drawing.Point(364, 210);
+            this.addEngineToList.Name = "addEngineToList";
+            this.addEngineToList.Size = new System.Drawing.Size(34, 33);
+            this.addEngineToList.TabIndex = 3;
+            this.addEngineToList.Text = "+";
+            this.addEngineToList.UseVisualStyleBackColor = true;
+            this.addEngineToList.Click += new System.EventHandler(this.engineAddClick);
             // 
             // tabPage1
             // 
@@ -239,23 +454,12 @@
             this.tabPage2.Text = "tournament..";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // button8
-            // 
-            this.button8.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button8.Location = new System.Drawing.Point(964, 211);
-            this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(52, 32);
-            this.button8.TabIndex = 7;
-            this.button8.Text = "..log";
-            this.button8.UseVisualStyleBackColor = true;
-            this.button8.Click += new System.EventHandler(this.showLog_Click);
-            // 
             // mainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.InactiveBorder;
-            this.ClientSize = new System.Drawing.Size(1027, 496);
+            this.ClientSize = new System.Drawing.Size(1107, 530);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.listView1);
             this.Controls.Add(this.groupBox1);
@@ -263,6 +467,8 @@
             this.Text = "Form1";
             this.tabControl1.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
+            this.engineDetailsGroupBox.ResumeLayout(false);
+            this.engineDetailsGroupBox.PerformLayout();
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
             this.ResumeLayout(false);
@@ -279,17 +485,35 @@
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.ColumnHeader columnHeader3;
         private System.Windows.Forms.TabPage tabPage3;
-        private System.Windows.Forms.Button button7;
-        private System.Windows.Forms.Button button6;
-        private System.Windows.Forms.Button button5;
-        private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.ListBox listBox1;
+        private System.Windows.Forms.Button removeEngineFromList;
+        private System.Windows.Forms.Button addEngineToList;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.Button button8;
+        private System.Windows.Forms.ListBox engineList;
+        private System.Windows.Forms.GroupBox engineDetailsGroupBox;
+        private System.Windows.Forms.Label authorLabel;
+        private System.Windows.Forms.Label protocolLabel;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox eEndgameBookBox;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Button startEngine;
+        private System.Windows.Forms.TextBox eOpeningBookBox;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox eCommandBox;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox eNameBox;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button updatePath;
+        private System.Windows.Forms.TextBox ePathBox;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Button findConfigFile;
+        private System.Windows.Forms.TextBox eConfigfileBox;
+        private System.Windows.Forms.Button findOpeningBook;
+        private System.Windows.Forms.Button findEndgameBook;
+        private System.Windows.Forms.TextBox eEloBox;
+        private System.Windows.Forms.Label label10;
     }
 }
 

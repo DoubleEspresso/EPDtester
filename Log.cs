@@ -14,7 +14,7 @@ namespace epdTester
         static object LogLock = new object();
         static private StreamWriter logWriter = null;
         private static string dirName = null;
-        static private string baseName = null;
+        static private string logName = null;
         static bool inited = false;
 
         static public string DirectoryName
@@ -25,22 +25,22 @@ namespace epdTester
                 return dirName;
             }
         }
-        static public string BaseName
+        static public string LogName
         {
             get
             {
-                if (baseName == null)
+                if (logName == null)
                 {
-                    baseName = string.Format("log-{0}", StringUtils.TimeStamp());
+                    logName = string.Format("log-{0}", StringUtils.TimeStamp());
                 }
-                return baseName;
+                return logName;
             }
         }
         static public string FileName
         {
             get
             {
-                return string.Format("{0}\\{1}.log", DirectoryName, BaseName);
+                return string.Format("{0}\\{1}.log", DirectoryName, LogName);
             }
         }
         static private bool open()
