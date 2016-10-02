@@ -16,6 +16,7 @@ namespace epdTester
     {
         List<Engine> engines = new List<Engine>();
         List<EpdFile> tests = new List<EpdFile>();
+        public Engine ActiveEngine = null;
         List<string> epd_filenames = new List<string>(); // for epd test selection
         public mainWindow()
         {
@@ -132,6 +133,7 @@ namespace epdTester
                 Engine e = engines[idx];
                 updateDisplay(e);
                 Settings.set("Engine\\Selected", idx);
+                ActiveEngine = e;
             }
         }
         private void showLog_Click(object sender, EventArgs e)
@@ -201,8 +203,18 @@ namespace epdTester
             if (epdCombobox.SelectedIndex >= 0 && epdCombobox.SelectedIndex < epd_filenames.Count)
             {
                 tests.Add(new EpdFile(epd_filenames[epdCombobox.SelectedIndex]));
-                epdTabDisplay.AddTest(tests[tests.Count - 1]); // last added
+                epdTabDisplay.AddTest(tests[tests.Count - 1], this); // last added
+
             }
+        }
+        public void SendEngineCommand(object sender, string s)
+        {
+            if (ActiveEngine == null)
+            {
+                MessageBox.Show("..please load a chess engine and try again.");
+                return;
+            }
+            ActiveEngine.Command(s); // multiple lines ok?
         }
     }
 }

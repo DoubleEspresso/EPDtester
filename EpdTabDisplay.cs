@@ -19,7 +19,7 @@ namespace epdTester
             if (testViews == null) testViews = new List<EpdTestTab>();
             InitializeComponent();
         }
-        public void AddTest(EpdFile epdfile)
+        public void AddTest(EpdFile epdfile, mainWindow mw)
         {
             foreach (EpdTestTab t in testViews)
             {
@@ -49,7 +49,7 @@ namespace epdTester
             tabControl.Controls.Add(lt);
             Tabs.Add(lt);
             tab_added = true;
-
+            view.SendEngineCommand += mw.SendEngineCommand;
             if (tab_added)
             {
                 if (selected == null)
@@ -85,6 +85,37 @@ namespace epdTester
                 Columns.Add("position", 256);
                 Columns.Add("best move", 16);
                 Columns.Add("test-id", 256);
+
+                Click += EpdTestTab_Click;
+                MouseDown += new MouseEventHandler(ItemMouseDown);
+            }
+
+            private void EpdTestTab_Click(object sender, EventArgs e)
+            {
+           }
+
+            // mouse-right-click on fen string
+            private void ItemMouseDown(object sender, MouseEventArgs e)
+            {
+                switch (e.Button)
+                {
+                    case MouseButtons.Right:
+                        {
+                            ContextMenu cm = new ContextMenu();
+                            cm.MenuItems.Add("Analyze (see log)", AnalyzeEvent);
+                            ContextMenu = cm;
+                            cm.Show(this, new Point(e.X, e.Y));
+                        }
+                        break;
+                }
+            }
+            public event EventHandler<string> SendEngineCommand = null;
+            private void AnalyzeEvent(object sender, EventArgs args)
+            {
+                int i = SelectedIndices[0]; // only the fen string is clickable
+                string fen = Items[i].Text;
+                string command = "position fen " + fen + "\ngo movetime 15000";
+                if (SendEngineCommand != null) SendEngineCommand(this, command);
             }
             public void update()
             {
