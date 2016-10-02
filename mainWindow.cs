@@ -201,6 +201,7 @@ namespace epdTester
             if (epdCombobox.SelectedIndex >= 0 && epdCombobox.SelectedIndex < epd_filenames.Count)
             {
                 tests.Add(new EpdFile(epd_filenames[epdCombobox.SelectedIndex]));
+                epdTabDisplay.AddTest(tests[tests.Count - 1]); // last added
             }
         }
     }

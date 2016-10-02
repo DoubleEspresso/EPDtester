@@ -90,16 +90,14 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.epdTabDisplay = new epdTester.EpdTabDisplay();
             this.chessPlot1 = new epdTester.ChessPlot();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.tabControl = new System.Windows.Forms.TabControl();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.engineDetailsGroupBox.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
-            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -728,6 +726,13 @@
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "board..";
             // 
+            // epdTabDisplay
+            // 
+            this.epdTabDisplay.Location = new System.Drawing.Point(4, 278);
+            this.epdTabDisplay.Name = "epdTabDisplay";
+            this.epdTabDisplay.Size = new System.Drawing.Size(1072, 246);
+            this.epdTabDisplay.TabIndex = 7;
+            // 
             // chessPlot1
             // 
             this.chessPlot1.Location = new System.Drawing.Point(746, 29);
@@ -735,38 +740,14 @@
             this.chessPlot1.Size = new System.Drawing.Size(318, 211);
             this.chessPlot1.TabIndex = 43;
             // 
-            // groupBox1
-            // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox1.Controls.Add(this.tabControl);
-            this.groupBox1.Location = new System.Drawing.Point(0, 278);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(1076, 248);
-            this.groupBox1.TabIndex = 5;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Epd results";
-            // 
-            // tabControl
-            // 
-            this.tabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tabControl.Location = new System.Drawing.Point(12, 19);
-            this.tabControl.Name = "tabControl";
-            this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(1056, 221);
-            this.tabControl.TabIndex = 7;
-            // 
             // mainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.InactiveBorder;
             this.ClientSize = new System.Drawing.Size(1080, 530);
+            this.Controls.Add(this.epdTabDisplay);
             this.Controls.Add(this.tabControl1);
-            this.Controls.Add(this.groupBox1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "mainWindow";
             this.Text = "..EPD tester";
@@ -780,7 +761,6 @@
             this.groupBox3.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
-            this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -848,8 +828,7 @@
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.Label label21;
         private ChessPlot chessPlot1;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.TabControl tabControl;
+        private EpdTabDisplay epdTabDisplay;
     }
 }
 

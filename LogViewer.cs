@@ -17,7 +17,6 @@ namespace epdTester
         List<LogTextbox> logViews = new List<LogTextbox>();
         List<TabPage> Tabs = new List<TabPage>();
         List<Engine> monitoredEngines = new List<Engine>();
-        bool isEngineTab = false;
 
         public LogViewer(List<Engine> engines)
         {

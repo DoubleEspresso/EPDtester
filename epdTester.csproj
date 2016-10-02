@@ -80,6 +80,12 @@
     </Compile>
     <Compile Include="Engine.cs" />
     <Compile Include="EpdFile.cs" />
+    <Compile Include="EpdTabDisplay.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="EpdTabDisplay.Designer.cs">
+      <DependentUpon>EpdTabDisplay.cs</DependentUpon>
+    </Compile>
     <Compile Include="Log.cs" />
     <Compile Include="LogViewer.cs">
       <SubType>Form</SubType>
@@ -99,6 +105,9 @@
     <Compile Include="StringUtils.cs" />
     <EmbeddedResource Include="ChessPlot.resx">
       <DependentUpon>ChessPlot.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EpdTabDisplay.resx">
+      <DependentUpon>EpdTabDisplay.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LogViewer.resx">
       <DependentUpon>LogViewer.cs</DependentUpon>

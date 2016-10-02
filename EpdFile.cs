@@ -121,7 +121,7 @@ namespace epdTester
                    if (line.IndexOf(t) >= 0) tagdict.Add(line.IndexOf(t), t);
                 }
                 List<int> indices = tagdict.Keys.ToList(); indices.Sort(); // smallest to largest by default
-                int lastidx = 0;
+                int lastidx = 0; string lasttag = "";
                 foreach (int idx in indices)
                 {
                     string tag = tagdict[idx];
@@ -132,9 +132,12 @@ namespace epdTester
                     }
                     lastidx = idx;
                     // load struct -- just basic tags
-                    LoadTagData(ref p, tag, substring); // cleanup tag and load into EPDPosition structure
+                    LoadTagData(ref p, lasttag, substring); // cleanup tag and load into EPDPosition structure
+                    lasttag = tag;
                 }
                 string last_substring = line.Substring(lastidx, line.Length - lastidx);
+                LoadTagData(ref p, lasttag, last_substring); 
+
                 // initialize engine result struct
                 p.EngineResult.enginemove = "(none)";
                 p.EngineResult.depth = p.EngineResult.time = p.EngineResult.nodes = p.EngineResult.nps = p.EngineResult.hHits = 0;
@@ -147,38 +150,38 @@ namespace epdTester
                 return false;
             }
         }
-        string Clean(string tag)
+        string Clean(string tag, string data)
         {
-            return tag.Replace(tag, "").Replace(";", "");
+            return data.Replace(tag, "").Replace(";", "");
         }
         void LoadTagData(ref EPDPosition p, string tag, string data)
         {
             switch(tag)
             {
-                case "acn": p.acn = Clean(tag); break;
-                case "acs": p.acs = Clean(tag); break;
-                case "am": p.am = Clean(tag); break;
-                case "bm": p.bm = Clean(tag); break;
-                case "c0": p.c0 = Clean(tag); break;
-                case "ce": p.ce = Clean(tag); break;
-                case "dm": p.dm = Clean(tag); break;
-                case "draw_accept": p.draw_accept = Clean(tag); break;
-                case "draw_offer": p.draw_offer = Clean(tag); break;
-                case "draw_reject": p.draw_reject = Clean(tag); break;
-                case "eco": p.eco = Clean(tag); break;
-                case "fmvn": p.fmvn = Clean(tag); break;
-                case "hmvc": p.hmvc = Clean(tag); break;
-                case "id": p.id = Clean(tag); break;
-                case "nic": p.nic = Clean(tag); break;
-                case "noop": p.noop = Clean(tag); break;
-                case "pm": p.pm = Clean(tag); break;
-                case "pv": p.pv = Clean(tag); break;
-                case "rc": p.rc = Clean(tag); break;
-                case "resign": p.resign = Clean(tag); break;
-                case "sm": p.sm = Clean(tag); break;
-                case "tcgs": p.tcgs = Clean(tag); break;
-                case "tcri": p.tcri = Clean(tag); break;
-                case "tcsi": p.tcsi = Clean(tag); break;
+                case "acn": p.acn = Clean(tag, data); break;
+                case "acs": p.acs = Clean(tag, data); break;
+                case "am": p.am = Clean(tag, data); break;
+                case "bm": p.bm = Clean(tag, data); break;
+                case "c0": p.c0 = Clean(tag, data); break;
+                case "ce": p.ce = Clean(tag, data); break;
+                case "dm": p.dm = Clean(tag, data); break;
+                case "draw_accept": p.draw_accept = Clean(tag, data); break;
+                case "draw_offer": p.draw_offer = Clean(tag, data); break;
+                case "draw_reject": p.draw_reject = Clean(tag, data); break;
+                case "eco": p.eco = Clean(tag, data); break;
+                case "fmvn": p.fmvn = Clean(tag, data); break;
+                case "hmvc": p.hmvc = Clean(tag, data); break;
+                case "id": p.id = Clean(tag, data); break;
+                case "nic": p.nic = Clean(tag, data); break;
+                case "noop": p.noop = Clean(tag, data); break;
+                case "pm": p.pm = Clean(tag, data); break;
+                case "pv": p.pv = Clean(tag, data); break;
+                case "rc": p.rc = Clean(tag, data); break;
+                case "resign": p.resign = Clean(tag, data); break;
+                case "sm": p.sm = Clean(tag, data); break;
+                case "tcgs": p.tcgs = Clean(tag, data); break;
+                case "tcri": p.tcri = Clean(tag, data); break;
+                case "tcsi": p.tcsi = Clean(tag, data); break;
                 default: Log.WriteLine("..[epd-file] unknown tag ({0}) .. ignored", tag); break;
             }
         }
