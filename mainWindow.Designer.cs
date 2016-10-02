@@ -29,11 +29,6 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(mainWindow));
-            this.listView1 = new System.Windows.Forms.ListView();
-            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.engineDetailsGroupBox = new System.Windows.Forms.GroupBox();
@@ -63,90 +58,49 @@
             this.removeEngineFromList = new System.Windows.Forms.Button();
             this.addEngineToList = new System.Windows.Forms.Button();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.label22 = new System.Windows.Forms.Label();
+            this.label21 = new System.Windows.Forms.Label();
+            this.label19 = new System.Windows.Forms.Label();
+            this.label20 = new System.Windows.Forms.Label();
+            this.label18 = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.button3 = new System.Windows.Forms.Button();
+            this.button4 = new System.Windows.Forms.Button();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.button2 = new System.Windows.Forms.Button();
+            this.checkBox2 = new System.Windows.Forms.CheckBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.epdFixedTotalNodes = new System.Windows.Forms.TextBox();
+            this.label14 = new System.Windows.Forms.Label();
+            this.epdFixedNodesDepth = new System.Windows.Forms.TextBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.epdFixedTotalTime = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
+            this.epdFixedTimePosition = new System.Windows.Forms.TextBox();
+            this.label16 = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.epdFixedSearchDepth = new System.Windows.Forms.TextBox();
+            this.epdDirLabel = new System.Windows.Forms.Label();
             this.setEPDdirectory = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.epdCombobox = new System.Windows.Forms.ComboBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.epdDirLabel = new System.Windows.Forms.Label();
-            this.epdFixedSearchDepth = new System.Windows.Forms.TextBox();
-            this.label11 = new System.Windows.Forms.Label();
-            this.epdFixedTimePosition = new System.Windows.Forms.TextBox();
-            this.label16 = new System.Windows.Forms.Label();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.epdFixedTotalTime = new System.Windows.Forms.TextBox();
-            this.label12 = new System.Windows.Forms.Label();
-            this.epdFixedNodesDepth = new System.Windows.Forms.TextBox();
-            this.label13 = new System.Windows.Forms.Label();
-            this.epdFixedTotalNodes = new System.Windows.Forms.TextBox();
-            this.label14 = new System.Windows.Forms.Label();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
-            this.button2 = new System.Windows.Forms.Button();
-            this.label8 = new System.Windows.Forms.Label();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.button3 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.label15 = new System.Windows.Forms.Label();
-            this.label17 = new System.Windows.Forms.Label();
-            this.label18 = new System.Windows.Forms.Label();
-            this.label19 = new System.Windows.Forms.Label();
-            this.label20 = new System.Windows.Forms.Label();
-            this.label21 = new System.Windows.Forms.Label();
-            this.label22 = new System.Windows.Forms.Label();
             this.chessPlot1 = new epdTester.ChessPlot();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.tabControl = new System.Windows.Forms.TabControl();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.engineDetailsGroupBox.SuspendLayout();
             this.tabPage1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // listView1
-            // 
-            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2,
-            this.columnHeader3});
-            this.listView1.FullRowSelect = true;
-            this.listView1.GridLines = true;
-            this.listView1.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.listView1.Location = new System.Drawing.Point(18, 297);
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(1052, 218);
-            this.listView1.TabIndex = 1;
-            this.listView1.UseCompatibleStateImageBehavior = false;
-            this.listView1.View = System.Windows.Forms.View.Details;
-            // 
-            // columnHeader1
-            // 
-            this.columnHeader1.Text = "title-1";
-            // 
-            // columnHeader2
-            // 
-            this.columnHeader2.Text = "title 2";
-            // 
-            // columnHeader3
-            // 
-            this.columnHeader3.Text = "title 3";
-            this.columnHeader3.Width = 120;
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox1.Location = new System.Drawing.Point(0, 278);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(1076, 248);
-            this.groupBox1.TabIndex = 5;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Epd results";
             // 
             // tabControl1
             // 
@@ -458,82 +412,115 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "epd testing..";
             // 
-            // setEPDdirectory
+            // groupBox3
             // 
-            this.setEPDdirectory.Location = new System.Drawing.Point(316, 24);
-            this.setEPDdirectory.Name = "setEPDdirectory";
-            this.setEPDdirectory.Size = new System.Drawing.Size(30, 23);
-            this.setEPDdirectory.TabIndex = 6;
-            this.setEPDdirectory.Text = "...";
-            this.setEPDdirectory.UseVisualStyleBackColor = true;
+            this.groupBox3.Controls.Add(this.label22);
+            this.groupBox3.Controls.Add(this.label21);
+            this.groupBox3.Controls.Add(this.label19);
+            this.groupBox3.Controls.Add(this.label20);
+            this.groupBox3.Controls.Add(this.label18);
+            this.groupBox3.Controls.Add(this.label17);
+            this.groupBox3.Controls.Add(this.label15);
+            this.groupBox3.Controls.Add(this.button3);
+            this.groupBox3.Controls.Add(this.button4);
+            this.groupBox3.Location = new System.Drawing.Point(352, 24);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(388, 216);
+            this.groupBox3.TabIndex = 42;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "test progress..";
             // 
-            // label1
+            // label22
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 29);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(48, 13);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "EPD File";
+            this.label22.AutoSize = true;
+            this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label22.Location = new System.Drawing.Point(283, 29);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(44, 13);
+            this.label22.TabIndex = 54;
+            this.label22.Text = "elapsed";
             // 
-            // epdCombobox
+            // label21
             // 
-            this.epdCombobox.FormattingEnabled = true;
-            this.epdCombobox.Location = new System.Drawing.Point(58, 26);
-            this.epdCombobox.Name = "epdCombobox";
-            this.epdCombobox.Size = new System.Drawing.Size(250, 21);
-            this.epdCombobox.TabIndex = 0;
+            this.label21.AutoSize = true;
+            this.label21.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label21.Location = new System.Drawing.Point(23, 29);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(70, 13);
+            this.label21.TabIndex = 53;
+            this.label21.Text = "engine status";
             // 
-            // tabPage2
+            // label19
             // 
-            this.tabPage2.BackColor = System.Drawing.SystemColors.Menu;
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(1072, 246);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "regression..";
+            this.label19.AutoSize = true;
+            this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label19.Location = new System.Drawing.Point(23, 155);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(48, 13);
+            this.label19.TabIndex = 52;
+            this.label19.Text = "incorrect";
             // 
-            // epdDirLabel
+            // label20
             // 
-            this.epdDirLabel.AutoSize = true;
-            this.epdDirLabel.Location = new System.Drawing.Point(57, 10);
-            this.epdDirLabel.Name = "epdDirLabel";
-            this.epdDirLabel.Size = new System.Drawing.Size(47, 13);
-            this.epdDirLabel.TabIndex = 7;
-            this.epdDirLabel.Text = "directory";
+            this.label20.AutoSize = true;
+            this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label20.Location = new System.Drawing.Point(23, 128);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(83, 13);
+            this.label20.TabIndex = 51;
+            this.label20.Text = "nodes searched";
             // 
-            // epdFixedSearchDepth
+            // label18
             // 
-            this.epdFixedSearchDepth.Location = new System.Drawing.Point(6, 42);
-            this.epdFixedSearchDepth.Name = "epdFixedSearchDepth";
-            this.epdFixedSearchDepth.Size = new System.Drawing.Size(82, 20);
-            this.epdFixedSearchDepth.TabIndex = 36;
+            this.label18.AutoSize = true;
+            this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label18.Location = new System.Drawing.Point(141, 104);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(48, 13);
+            this.label18.TabIndex = 50;
+            this.label18.Text = "incorrect";
             // 
-            // label11
+            // label17
             // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(94, 45);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(97, 13);
-            this.label11.TabIndex = 35;
-            this.label11.Text = "Fixed search depth";
+            this.label17.AutoSize = true;
+            this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label17.Location = new System.Drawing.Point(23, 104);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(40, 13);
+            this.label17.TabIndex = 49;
+            this.label17.Text = "correct";
             // 
-            // epdFixedTimePosition
+            // label15
             // 
-            this.epdFixedTimePosition.Location = new System.Drawing.Point(6, 19);
-            this.epdFixedTimePosition.Name = "epdFixedTimePosition";
-            this.epdFixedTimePosition.Size = new System.Drawing.Size(82, 20);
-            this.epdFixedTimePosition.TabIndex = 26;
+            this.label15.AutoSize = true;
+            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label15.Location = new System.Drawing.Point(23, 78);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(47, 13);
+            this.label15.TabIndex = 48;
+            this.label15.Text = "progress";
             // 
-            // label16
+            // button3
             // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(94, 22);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(95, 13);
-            this.label16.TabIndex = 25;
-            this.label16.Text = "Fixed time/position";
+            this.button3.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.button3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button3.Location = new System.Drawing.Point(258, 178);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(64, 32);
+            this.button3.TabIndex = 40;
+            this.button3.Text = "Start";
+            this.button3.UseVisualStyleBackColor = true;
+            // 
+            // button4
+            // 
+            this.button4.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.button4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button4.Location = new System.Drawing.Point(328, 178);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(57, 32);
+            this.button4.TabIndex = 41;
+            this.button4.Text = "Stop";
+            this.button4.UseVisualStyleBackColor = true;
             // 
             // groupBox2
             // 
@@ -558,37 +545,43 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "search conditions..";
             // 
-            // epdFixedTotalTime
+            // label8
             // 
-            this.epdFixedTotalTime.Location = new System.Drawing.Point(6, 66);
-            this.epdFixedTotalTime.Name = "epdFixedTotalTime";
-            this.epdFixedTotalTime.Size = new System.Drawing.Size(82, 20);
-            this.epdFixedTotalTime.TabIndex = 40;
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(146, 163);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(44, 13);
+            this.label8.TabIndex = 47;
+            this.label8.Text = "location";
             // 
-            // label12
+            // button2
             // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(94, 69);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(77, 13);
-            this.label12.TabIndex = 39;
-            this.label12.Text = "Fixed total time";
+            this.button2.Location = new System.Drawing.Point(110, 158);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(30, 23);
+            this.button2.TabIndex = 40;
+            this.button2.Text = "...";
+            this.button2.UseVisualStyleBackColor = true;
             // 
-            // epdFixedNodesDepth
+            // checkBox2
             // 
-            this.epdFixedNodesDepth.Location = new System.Drawing.Point(6, 89);
-            this.epdFixedNodesDepth.Name = "epdFixedNodesDepth";
-            this.epdFixedNodesDepth.Size = new System.Drawing.Size(82, 20);
-            this.epdFixedNodesDepth.TabIndex = 42;
+            this.checkBox2.AutoSize = true;
+            this.checkBox2.Location = new System.Drawing.Point(6, 162);
+            this.checkBox2.Name = "checkBox2";
+            this.checkBox2.Size = new System.Drawing.Size(99, 17);
+            this.checkBox2.TabIndex = 46;
+            this.checkBox2.Text = "save test report";
+            this.checkBox2.UseVisualStyleBackColor = true;
             // 
-            // label13
+            // checkBox1
             // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(94, 92);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(96, 13);
-            this.label13.TabIndex = 41;
-            this.label13.Text = "Fixed nodes/depth";
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(6, 139);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(134, 17);
+            this.checkBox1.TabIndex = 45;
+            this.checkBox1.Text = "test all running engines";
+            this.checkBox1.UseVisualStyleBackColor = true;
             // 
             // epdFixedTotalNodes
             // 
@@ -606,33 +599,116 @@
             this.label14.TabIndex = 43;
             this.label14.Text = "Fixed total nodes ";
             // 
-            // checkBox2
+            // epdFixedNodesDepth
             // 
-            this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(6, 162);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(99, 17);
-            this.checkBox2.TabIndex = 46;
-            this.checkBox2.Text = "save test report";
-            this.checkBox2.UseVisualStyleBackColor = true;
+            this.epdFixedNodesDepth.Location = new System.Drawing.Point(6, 89);
+            this.epdFixedNodesDepth.Name = "epdFixedNodesDepth";
+            this.epdFixedNodesDepth.Size = new System.Drawing.Size(82, 20);
+            this.epdFixedNodesDepth.TabIndex = 42;
             // 
-            // button2
+            // label13
             // 
-            this.button2.Location = new System.Drawing.Point(110, 158);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(30, 23);
-            this.button2.TabIndex = 40;
-            this.button2.Text = "...";
-            this.button2.UseVisualStyleBackColor = true;
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(94, 92);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(96, 13);
+            this.label13.TabIndex = 41;
+            this.label13.Text = "Fixed nodes/depth";
             // 
-            // label8
+            // epdFixedTotalTime
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(146, 163);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(44, 13);
-            this.label8.TabIndex = 47;
-            this.label8.Text = "location";
+            this.epdFixedTotalTime.Location = new System.Drawing.Point(6, 66);
+            this.epdFixedTotalTime.Name = "epdFixedTotalTime";
+            this.epdFixedTotalTime.Size = new System.Drawing.Size(82, 20);
+            this.epdFixedTotalTime.TabIndex = 40;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(94, 69);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(77, 13);
+            this.label12.TabIndex = 39;
+            this.label12.Text = "Fixed total time";
+            // 
+            // epdFixedTimePosition
+            // 
+            this.epdFixedTimePosition.Location = new System.Drawing.Point(6, 19);
+            this.epdFixedTimePosition.Name = "epdFixedTimePosition";
+            this.epdFixedTimePosition.Size = new System.Drawing.Size(82, 20);
+            this.epdFixedTimePosition.TabIndex = 26;
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(94, 22);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(95, 13);
+            this.label16.TabIndex = 25;
+            this.label16.Text = "Fixed time/position";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(94, 45);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(97, 13);
+            this.label11.TabIndex = 35;
+            this.label11.Text = "Fixed search depth";
+            // 
+            // epdFixedSearchDepth
+            // 
+            this.epdFixedSearchDepth.Location = new System.Drawing.Point(6, 42);
+            this.epdFixedSearchDepth.Name = "epdFixedSearchDepth";
+            this.epdFixedSearchDepth.Size = new System.Drawing.Size(82, 20);
+            this.epdFixedSearchDepth.TabIndex = 36;
+            // 
+            // epdDirLabel
+            // 
+            this.epdDirLabel.AutoSize = true;
+            this.epdDirLabel.Location = new System.Drawing.Point(57, 10);
+            this.epdDirLabel.Name = "epdDirLabel";
+            this.epdDirLabel.Size = new System.Drawing.Size(47, 13);
+            this.epdDirLabel.TabIndex = 7;
+            this.epdDirLabel.Text = "directory";
+            // 
+            // setEPDdirectory
+            // 
+            this.setEPDdirectory.Location = new System.Drawing.Point(316, 24);
+            this.setEPDdirectory.Name = "setEPDdirectory";
+            this.setEPDdirectory.Size = new System.Drawing.Size(30, 23);
+            this.setEPDdirectory.TabIndex = 6;
+            this.setEPDdirectory.Text = "...";
+            this.setEPDdirectory.UseVisualStyleBackColor = true;
+            this.setEPDdirectory.Click += new System.EventHandler(this.setEPDdirectory_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 29);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(48, 13);
+            this.label1.TabIndex = 3;
+            this.label1.Text = "EPD File";
+            // 
+            // epdCombobox
+            // 
+            this.epdCombobox.FormattingEnabled = true;
+            this.epdCombobox.Location = new System.Drawing.Point(58, 26);
+            this.epdCombobox.Name = "epdCombobox";
+            this.epdCombobox.Size = new System.Drawing.Size(250, 21);
+            this.epdCombobox.TabIndex = 0;
+            this.epdCombobox.SelectedIndexChanged += new System.EventHandler(this.epdCombobox_SelectedIndexChanged);
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.BackColor = System.Drawing.SystemColors.Menu;
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(1072, 246);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "regression..";
             // 
             // tabPage4
             // 
@@ -652,132 +728,36 @@
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "board..";
             // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(6, 139);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(134, 17);
-            this.checkBox1.TabIndex = 45;
-            this.checkBox1.Text = "test all running engines";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            // 
-            // button3
-            // 
-            this.button3.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.button3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button3.Location = new System.Drawing.Point(258, 178);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(64, 32);
-            this.button3.TabIndex = 40;
-            this.button3.Text = "Start";
-            this.button3.UseVisualStyleBackColor = true;
-            // 
-            // button4
-            // 
-            this.button4.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.button4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button4.Location = new System.Drawing.Point(328, 178);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(57, 32);
-            this.button4.TabIndex = 41;
-            this.button4.Text = "Stop";
-            this.button4.UseVisualStyleBackColor = true;
-            // 
-            // groupBox3
-            // 
-            this.groupBox3.Controls.Add(this.label22);
-            this.groupBox3.Controls.Add(this.label21);
-            this.groupBox3.Controls.Add(this.label19);
-            this.groupBox3.Controls.Add(this.label20);
-            this.groupBox3.Controls.Add(this.label18);
-            this.groupBox3.Controls.Add(this.label17);
-            this.groupBox3.Controls.Add(this.label15);
-            this.groupBox3.Controls.Add(this.button3);
-            this.groupBox3.Controls.Add(this.button4);
-            this.groupBox3.Location = new System.Drawing.Point(352, 24);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(388, 216);
-            this.groupBox3.TabIndex = 42;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "test progress..";
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label15.Location = new System.Drawing.Point(23, 78);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(47, 13);
-            this.label15.TabIndex = 48;
-            this.label15.Text = "progress";
-            // 
-            // label17
-            // 
-            this.label17.AutoSize = true;
-            this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label17.Location = new System.Drawing.Point(23, 104);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(40, 13);
-            this.label17.TabIndex = 49;
-            this.label17.Text = "correct";
-            // 
-            // label18
-            // 
-            this.label18.AutoSize = true;
-            this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label18.Location = new System.Drawing.Point(141, 104);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(48, 13);
-            this.label18.TabIndex = 50;
-            this.label18.Text = "incorrect";
-            // 
-            // label19
-            // 
-            this.label19.AutoSize = true;
-            this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label19.Location = new System.Drawing.Point(23, 155);
-            this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(48, 13);
-            this.label19.TabIndex = 52;
-            this.label19.Text = "incorrect";
-            // 
-            // label20
-            // 
-            this.label20.AutoSize = true;
-            this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label20.Location = new System.Drawing.Point(23, 128);
-            this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(83, 13);
-            this.label20.TabIndex = 51;
-            this.label20.Text = "nodes searched";
-            // 
-            // label21
-            // 
-            this.label21.AutoSize = true;
-            this.label21.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label21.Location = new System.Drawing.Point(23, 29);
-            this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(70, 13);
-            this.label21.TabIndex = 53;
-            this.label21.Text = "engine status";
-            // 
-            // label22
-            // 
-            this.label22.AutoSize = true;
-            this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label22.Location = new System.Drawing.Point(283, 29);
-            this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(44, 13);
-            this.label22.TabIndex = 54;
-            this.label22.Text = "elapsed";
-            // 
             // chessPlot1
             // 
             this.chessPlot1.Location = new System.Drawing.Point(746, 29);
             this.chessPlot1.Name = "chessPlot1";
             this.chessPlot1.Size = new System.Drawing.Size(318, 211);
             this.chessPlot1.TabIndex = 43;
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.tabControl);
+            this.groupBox1.Location = new System.Drawing.Point(0, 278);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(1076, 248);
+            this.groupBox1.TabIndex = 5;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Epd results";
+            // 
+            // tabControl
+            // 
+            this.tabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tabControl.Location = new System.Drawing.Point(12, 19);
+            this.tabControl.Name = "tabControl";
+            this.tabControl.SelectedIndex = 0;
+            this.tabControl.Size = new System.Drawing.Size(1056, 221);
+            this.tabControl.TabIndex = 7;
             // 
             // mainWindow
             // 
@@ -786,7 +766,6 @@
             this.BackColor = System.Drawing.SystemColors.InactiveBorder;
             this.ClientSize = new System.Drawing.Size(1080, 530);
             this.Controls.Add(this.tabControl1);
-            this.Controls.Add(this.listView1);
             this.Controls.Add(this.groupBox1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "mainWindow";
@@ -797,23 +776,19 @@
             this.engineDetailsGroupBox.PerformLayout();
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
-        private System.Windows.Forms.ListView listView1;
-        private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.ColumnHeader columnHeader1;
-        private System.Windows.Forms.ColumnHeader columnHeader2;
-        private System.Windows.Forms.ColumnHeader columnHeader3;
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.Button removeEngineFromList;
         private System.Windows.Forms.Button addEngineToList;
@@ -873,6 +848,8 @@
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.Label label21;
         private ChessPlot chessPlot1;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.TabControl tabControl;
     }
 }
 

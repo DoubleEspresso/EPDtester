@@ -34,7 +34,7 @@
             // 
             // canvas
             // 
-            this.canvas.BackColor = System.Drawing.Color.AliceBlue;
+            this.canvas.BackColor = System.Drawing.SystemColors.Window;
             this.canvas.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.canvas.Dock = System.Windows.Forms.DockStyle.Fill;
             this.canvas.Location = new System.Drawing.Point(0, 0);

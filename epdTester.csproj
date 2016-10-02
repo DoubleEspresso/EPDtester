@@ -79,7 +79,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Engine.cs" />
-    <Compile Include="EpdTestResults.cs" />
+    <Compile Include="EpdFile.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="LogViewer.cs">
       <SubType>Form</SubType>

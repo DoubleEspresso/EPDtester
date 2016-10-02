@@ -15,17 +15,37 @@ namespace epdTester
     public partial class mainWindow : Form
     {
         List<Engine> engines = new List<Engine>();
-        List<EpdTest> tests = new List<EpdTest>();
+        List<EpdFile> tests = new List<EpdFile>();
+        List<string> epd_filenames = new List<string>(); // for epd test selection
         public mainWindow()
         {
             InitializeComponent();
             LoadEnginesFromSettings();
+            LoadEPDSettings();
         }
-        private void addListViewItem(string[] row)
+        /*EPD file management*/
+        private void LoadEPDSettings()
         {
-            listView1.Items.Add(new ListViewItem(row));
+            string tmp = "";
+            Settings.get(string.Format("EPD\\Base directory"), ref tmp);            
+            try
+            {
+                if (Directory.Exists(tmp))
+                {
+                    epd_filenames = new List<string>(Directory.GetFiles(tmp, "*.epd"));
+                    foreach (string file in epd_filenames)
+                    {
+                        epdCombobox.Items.Add(StringUtils.RemoveExtension(StringUtils.BaseName(file)));
+                    }
+                    epdDirLabel.Text = "directory " + tmp;
+                }
+                else epdDirLabel.Text = "directory " + "(none selected)";
+            }
+            catch (Exception any)
+            {
+                Log.WriteLine("..[epd] exception loading epd-directory ({0}) from settings: {1}", tmp, any.Message);
+            }
         }
-
         /*engine management*/
         private void LoadEnginesFromSettings()
         {
@@ -96,7 +116,6 @@ namespace epdTester
             protocolLabel.Text = "Protocol: " + (e.EngineProtocol == Engine.Type.UCI ? "UCI" :
                     e.EngineProtocol == Engine.Type.WINBOARD ? "WinBoard" : "Unknown");
         }
-
         bool isDuplicateEngine(Engine e)
         {
             return false;
@@ -122,27 +141,22 @@ namespace epdTester
             logViewer.Show();
             logViewer.BringToFront();
         }
-
         private void findOpeningBook_Click(object sender, EventArgs e)
         {
 
         }
-
         private void findEndgameBook_Click(object sender, EventArgs e)
         {
 
         }
-
         private void findConfigFile_Click(object sender, EventArgs e)
         {
 
         }
-
         private void updatePath_Click(object sender, EventArgs e)
         {
 
         }
-
         private void startEngine_Click(object sender, EventArgs args)
         {
             int idx = engineList.SelectedIndex;
@@ -155,6 +169,38 @@ namespace epdTester
                     return;
                 }
                 e.Start(eCommandBox.Text);
+            }
+        }
+        private void setEPDdirectory_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog fd = new FolderBrowserDialog(); 
+            if (fd.ShowDialog() == DialogResult.OK &&
+                !string.IsNullOrWhiteSpace(fd.SelectedPath) &&
+                Directory.Exists(fd.SelectedPath))
+            {
+                try
+                {
+                    epd_filenames = new List<string>();
+                    epdDirLabel.Text = "directory " + fd.SelectedPath;
+                    epd_filenames = new List<string>(Directory.GetFiles(fd.SelectedPath, "*.epd"));
+                    foreach (string file in epd_filenames)
+                    {
+                        epdCombobox.Items.Add(StringUtils.RemoveExtension(StringUtils.BaseName(file)));
+                    }
+                    Settings.set(string.Format("EPD\\Base directory"), fd.SelectedPath);
+                }
+                catch (Exception any)
+                {
+                    Log.WriteLine("..[epd] exception loading epd-files from directory ({0}), {1}", fd.SelectedPath, any.Message);
+                }
+            }
+        }
+        // todo: avoid adding/parsing the same epd file multiple times
+        private void epdCombobox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (epdCombobox.SelectedIndex >= 0 && epdCombobox.SelectedIndex < epd_filenames.Count)
+            {
+                tests.Add(new EpdFile(epd_filenames[epdCombobox.SelectedIndex]));
             }
         }
     }

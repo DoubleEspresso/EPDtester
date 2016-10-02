@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Drawing.Drawing2D;
 
 namespace epdTester
 {
@@ -15,13 +16,17 @@ namespace epdTester
         Pen plotPen = null;
         Pen gridPen = null;
         PointF[] points = null;
+        Color winColor = Color.AliceBlue;
+        Color loseColor = Color.IndianRed;
         public ChessPlot()
         {
             InitializeComponent();
             canvas.Dock = DockStyle.Fill;
             canvas.Paint += new System.Windows.Forms.PaintEventHandler(Draw);
-            plotPen = new Pen(Pens.LightBlue.Color, 2.5f);
-            gridPen = new Pen(Pens.MediumBlue.Color, 0.2f);
+            plotPen = new Pen(Color.DodgerBlue, 2.0f);
+            
+            gridPen = new Pen(Color.DarkBlue, 0.2f);
+            
             makePoints();
         }
         protected override void OnLoad(EventArgs e)
@@ -30,13 +35,14 @@ namespace epdTester
         }
         void makePoints()
         {
+            int npts = 1024;
             float midY = (canvas.Bottom - canvas.Top) * 0.5f;
             float a = 0.6f;
             float lambdaBox = (float) ((canvas.Right - canvas.Left) * 0.5f);
-            float dX = (float)((canvas.Right - canvas.Left) / 1024.0);
+            float dX = (float)((canvas.Right - canvas.Left) / (float) npts);
             float k = (float) (2 * Math.PI / lambdaBox);
-            points = new PointF[1024];
-            for (int i = 0; i < 1024; ++i)
+            points = new PointF[npts];
+            for (int i = 0; i < npts; ++i)
             {
                 float x = i * dX;
                 points[i].X = (float) i;
@@ -47,10 +53,13 @@ namespace epdTester
         {
             // Create a local version of the graphics object for the PictureBox.
             Graphics g = e.Graphics;
-            g.DrawString("Current eval",  new Font("Arial", 10), System.Drawing.Brushes.Blue, new Point(1, 1));
-            //g.DrawLine(plotPen, canvas.Left, canvas.Top, canvas.Right, canvas.Bottom);
-            g.DrawBeziers(plotPen, points);
-           
+            e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+            FillMode newFillMode = FillMode.Alternate;
+            SolidBrush fillBrush = new SolidBrush(winColor);
+            g.FillClosedCurve(fillBrush, points, newFillMode, 0);
+          
+            g.DrawClosedCurve(gridPen, points);
+            g.DrawCurve(plotPen, points);
         }
     }
 }
