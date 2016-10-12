@@ -182,7 +182,7 @@ namespace epdTester
                 case "tcgs": p.tcgs = Clean(tag, data); break;
                 case "tcri": p.tcri = Clean(tag, data); break;
                 case "tcsi": p.tcsi = Clean(tag, data); break;
-                default: Log.WriteLine("..[epd-file] unknown tag ({0}) .. ignored", tag); break;
+                default: if (tag != null && tag != "") Log.WriteLine("..[epd-file] unknown tag ({0}) .. ignored", tag); break;
             }
         }
         public uint EloEstimate

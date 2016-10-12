@@ -58,6 +58,7 @@
             this.removeEngineFromList = new System.Windows.Forms.Button();
             this.addEngineToList = new System.Windows.Forms.Button();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.chessPlot1 = new epdTester.ChessPlot();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.label22 = new System.Windows.Forms.Label();
             this.label21 = new System.Windows.Forms.Label();
@@ -66,7 +67,7 @@
             this.label18 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
             this.label15 = new System.Windows.Forms.Label();
-            this.button3 = new System.Windows.Forms.Button();
+            this.epdStart = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.label8 = new System.Windows.Forms.Label();
@@ -91,7 +92,6 @@
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.tabPage5 = new System.Windows.Forms.TabPage();
             this.epdTabDisplay = new epdTester.EpdTabDisplay();
-            this.chessPlot1 = new epdTester.ChessPlot();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.engineDetailsGroupBox.SuspendLayout();
@@ -410,6 +410,13 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "epd testing..";
             // 
+            // chessPlot1
+            // 
+            this.chessPlot1.Location = new System.Drawing.Point(746, 29);
+            this.chessPlot1.Name = "chessPlot1";
+            this.chessPlot1.Size = new System.Drawing.Size(318, 211);
+            this.chessPlot1.TabIndex = 43;
+            // 
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.label22);
@@ -419,7 +426,7 @@
             this.groupBox3.Controls.Add(this.label18);
             this.groupBox3.Controls.Add(this.label17);
             this.groupBox3.Controls.Add(this.label15);
-            this.groupBox3.Controls.Add(this.button3);
+            this.groupBox3.Controls.Add(this.epdStart);
             this.groupBox3.Controls.Add(this.button4);
             this.groupBox3.Location = new System.Drawing.Point(352, 24);
             this.groupBox3.Name = "groupBox3";
@@ -498,16 +505,17 @@
             this.label15.TabIndex = 48;
             this.label15.Text = "progress";
             // 
-            // button3
+            // epdStart
             // 
-            this.button3.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.button3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button3.Location = new System.Drawing.Point(258, 178);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(64, 32);
-            this.button3.TabIndex = 40;
-            this.button3.Text = "Start";
-            this.button3.UseVisualStyleBackColor = true;
+            this.epdStart.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.epdStart.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.epdStart.Location = new System.Drawing.Point(258, 178);
+            this.epdStart.Name = "epdStart";
+            this.epdStart.Size = new System.Drawing.Size(64, 32);
+            this.epdStart.TabIndex = 40;
+            this.epdStart.Text = "Start";
+            this.epdStart.UseVisualStyleBackColor = true;
+            this.epdStart.Click += new System.EventHandler(this.epdStart_Click);
             // 
             // button4
             // 
@@ -733,13 +741,6 @@
             this.epdTabDisplay.Size = new System.Drawing.Size(1072, 246);
             this.epdTabDisplay.TabIndex = 7;
             // 
-            // chessPlot1
-            // 
-            this.chessPlot1.Location = new System.Drawing.Point(746, 29);
-            this.chessPlot1.Name = "chessPlot1";
-            this.chessPlot1.Size = new System.Drawing.Size(318, 211);
-            this.chessPlot1.TabIndex = 43;
-            // 
             // mainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -818,7 +819,7 @@
         private System.Windows.Forms.TabPage tabPage5;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button epdStart;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.Label label19;

@@ -18,6 +18,7 @@ namespace epdTester
         List<EpdFile> tests = new List<EpdFile>();
         public Engine ActiveEngine = null;
         List<string> epd_filenames = new List<string>(); // for epd test selection
+
         public mainWindow()
         {
             InitializeComponent();
@@ -207,7 +208,7 @@ namespace epdTester
 
             }
         }
-        public void SendEngineCommand(object sender, string s)
+        public void CommandFromEPDThread(object sender, string s)
         {
             if (ActiveEngine == null)
             {
@@ -215,6 +216,23 @@ namespace epdTester
                 return;
             }
             ActiveEngine.Command(s); // multiple lines ok?
+        }
+        delegate void EpdBestMoveParsedFunc(object sender, EventArgs e);
+        public void onEPDtestBestMoveParsed(object sender, EventArgs e)
+        {
+            if(InvokeRequired)
+            {
+                BeginInvoke(new EpdBestMoveParsedFunc(onEPDtestBestMoveParsed), new object[] { sender, e });
+                //return;
+            }
+            Thread.Sleep(100);
+            epdTabDisplay.SelectedTest.Grade(ActiveEngine.Parser);
+            epdTabDisplay.SelectedTest.BestMoveEvent.Set();
+        }        
+        private void epdStart_Click(object sender, EventArgs e)
+        {
+            ActiveEngine.SetBestMoveCallback(onEPDtestBestMoveParsed);
+            epdTabDisplay.SelectedTest.startTest();
         }
     }
 }

@@ -56,6 +56,7 @@
             this.tabControl.SelectedIndex = 0;
             this.tabControl.Size = new System.Drawing.Size(599, 222);
             this.tabControl.TabIndex = 7;
+            this.tabControl.SelectedIndexChanged += new System.EventHandler(this.SelectedTabChanged);
             // 
             // EpdTabDisplay
             // 

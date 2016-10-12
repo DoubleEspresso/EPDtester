@@ -31,7 +31,7 @@ namespace epdTester
         private StreamWriter logWriter = null;
         public enum Type { UCI, WINBOARD, UNKNOWN }
         public Type EngineProtocol = Type.UCI;
-        ChessParser Parser = null;
+        public ChessParser Parser = new UCIParser();
 
         public Engine() { }
         public bool canOpen()
@@ -95,9 +95,13 @@ namespace epdTester
             return true;
 
         }
-        public void Command(string cmd)
+        public void Command(string cmd, string waitToken = null)
         {
             if (!Running || !Loaded || eprocess == null || engineWriter == null) return;
+            if (cmd.Contains("go"))
+            {
+                Parser.NewSearch(waitToken); // uci specific.
+            }
             engineWriter.WriteLine(cmd);
             Thread.Sleep(20);
         }
@@ -147,11 +151,21 @@ namespace epdTester
             Running = false;
         }
         object LogLock = new object();
+        string stopOnToken = "";
+        public void SetBestMoveCallback(EventHandler cb, string stopToken = "")
+        {
+            Parser.CallbackOnBestmove = null;
+            Parser.CallbackOnBestmove += cb;
+            stopOnToken = (stopToken == "" ? "bestmove" : stopToken);
+        }
         public void WriteLine(string str)
         {
             lock (LogLock)
             {
                 logWriter.Write(string.Format("{0}", str));
+                Parser.ParseLine(str);
+                if (str.Contains(stopOnToken) && Parser.CallbackOnBestmove != null)
+                    Parser.CallbackOnBestmove(null, null);
                 logWriter.Flush();
             }
         }
