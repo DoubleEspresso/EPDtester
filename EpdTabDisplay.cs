@@ -95,6 +95,13 @@ namespace epdTester
             EpdFile epdfile = null;
             public string DisplayName = null;
             bool loaded = false;
+            Position position = null;
+            uint searchTime = 1000;
+            public int totalTests;
+            public int activeTestIdx;
+            //public float nodesPerPosition;
+            public int correct;
+
             public EpdTestTab()
             {
                 Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
@@ -109,9 +116,16 @@ namespace epdTester
                 Columns.Add("position", 256);
                 Columns.Add("best move", 16);
                 Columns.Add("test-id", 256);
+                Columns.Add("Engine move", 256);
 
                 Click += EpdTestTab_Click;
                 MouseDown += new MouseEventHandler(ItemMouseDown);
+                epdWorkerThread = new BackgroundWorker();
+                epdWorkerThread.WorkerSupportsCancellation = true;
+                epdWorkerThread.DoWork += new DoWorkEventHandler(epdWorker_doWork);
+                //epdWorkerThread.ProgressChanged += new ProgressChangedEventHandler(epdWorker_ProgressChanged);
+                epdWorkerThread.RunWorkerCompleted += new RunWorkerCompletedEventHandler(epdWorker_RunWorkerCompleted);
+                epdWorkerThread.WorkerReportsProgress = false;
             }
             private void EpdTestTab_Click(object sender, EventArgs e)
             {
@@ -167,59 +181,91 @@ namespace epdTester
                     if (!loaded) Load();
                 }
             }
-
+            bool movesEqual(string emove, string testMove)
+            {
+                string[] testmoves = testMove.Split(' ');
+                foreach (string testmove in testmoves)
+                {
+                    if (testmove.Replace(" ", "").ToLower() == emove.ToLower()) return true;
+                }
+                return false;
+            }
+            
             // epd test worker
+            delegate void GradeFunc(ChessParser cp);
             public void Grade(ChessParser cp)
             {
-                if (cp == null) return;
-                string bestmove = cp.SearchBestMove();
-                if (bestmove == activeTest.SubItems[1].Text)
+                try
                 {
-                    Log.WriteLine("..found bestmove!");
+                    if (cp == null) return;
+                    string bestmove = position.toSan(cp.SearchBestMove());
+                    if (movesEqual(bestmove.ToLower(), activeTest.SubItems[1].Text))
+                    {
+                        activeTest.BackColor = Color.LawnGreen;
+                        correct += 1;
+                    }
+                    else
+                    {
+                        activeTest.BackColor = Color.PaleVioletRed;
+                    }
+                    activeTest.SubItems.Add( new ListViewItem.ListViewSubItem(activeTest, bestmove));
                 }
-
+                catch (Exception e) { Log.WriteLine("..[epd-test] exception parsing bestmove : {0}", e.Message);  }
             }
 
-            public void startTest()
+            public void startTest(uint timePerPosition)
             {
-                epdWorkerThread = new BackgroundWorker();
-                epdWorkerThread.WorkerSupportsCancellation = true;
-                epdWorkerThread.DoWork += new DoWorkEventHandler(epdWorker_doWork);
-                //epdWorkerThread.ProgressChanged += new ProgressChangedEventHandler(epdWorker_ProgressChanged);
-                epdWorkerThread.RunWorkerCompleted += new RunWorkerCompletedEventHandler(epdWorker_RunWorkerCompleted);
-                epdWorkerThread.WorkerReportsProgress = false;
-                
-                epdWorkerThread.RunWorkerAsync();
+                totalTests = Items.Count;
+                correct = 0;
+                searchTime = timePerPosition;
+                if (epdWorkerThread != null) epdWorkerThread.RunWorkerAsync();
             }
             private void epdWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
             {
+                try
+                {
+                    string command = "stop\n";
+                    if (EpdEngineCommand != null) EpdEngineCommand(this, command);
+                    if (e.Cancelled) MessageBox.Show("EPD test cancelled\n");
+                }
+                catch { };
+
             }
             private void epdWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
             {
             }
             public AutoResetEvent BestMoveEvent = new AutoResetEvent(false);
-            private delegate void WorkerFunc(object sender, DoWorkEventArgs e);
-            ListViewItem activeTest = null;
-            private void epdWorker_doWork(object sender, DoWorkEventArgs e)
+            private delegate void SelectTestFunc(int i);
+            void SelectNextTest(int i)
             {
                 if (InvokeRequired)
                 {
-                    Invoke(new WorkerFunc(epdWorker_doWork), new object[] { sender, e });
+                    Invoke(new SelectTestFunc(SelectNextTest), i);
                     return;
                 }
+                Items[0].Selected = true;
+                activeTest = Items[i];
+                activeTest.BackColor = Color.LightGray;
+            }
+            ListViewItem activeTest = null;
+            private void epdWorker_doWork(object sender, DoWorkEventArgs e)
+            {
                 for (int i=0; i<Items.Count; ++i)
                 {
-                    Items[0].Selected = true;
-                    Select();
-                    activeTest = Items[i];
-                    activeTest.BackColor = Color.LightGray;
+                    activeTestIdx = i + 1;
+                    if (epdWorkerThread.CancellationPending) break;
+                    SelectNextTest(i);
                     string fen = activeTest.Text;
-                    string command = "position fen " + fen + "\ngo movetime 1500";
+                    string command = "position fen " + fen + "\ngo movetime " + Convert.ToString(searchTime);
+                    position = new Position(fen);
                     if (EpdEngineCommand != null) EpdEngineCommand(this, command);
                     BestMoveEvent.WaitOne();
                     Log.WriteLine("...on to next puzzle");
                 }
-
+            }
+            public void CancelTest()
+            {
+                epdWorkerThread.CancelAsync();
             }
         }
     }

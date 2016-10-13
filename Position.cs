@@ -18,9 +18,7 @@ namespace epdTester
         private int[] pieceOn = null;
         private int[] kingSqs = null;
         private int[] pieceDiffs = null;
-
-        private int sq;
-        private int p;
+        bool gameFinished = false; // for mate/draw global flag
         public int W_KS = 1;
         public int W_QS = 2;
         public int B_KS = 4;
@@ -33,7 +31,6 @@ namespace epdTester
         public int EP_SQ = 0;
         public int Move50 = 0;
         public int HalfMvs = 0;
-        private bool gameFinished = false; // for mate/draw global flag
         public int capturedPiece = -1;
         private int promotedPiece = -1;
         private bool moveIsEP = false;
@@ -43,7 +40,6 @@ namespace epdTester
         private bool moveIsCastle = false;
         private int displayedMove = 0;
         public static String StartFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
         public static String[] SanSquares =
             { "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
               "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
@@ -75,18 +71,18 @@ namespace epdTester
         {
             PAWN = 0, KNIGHT = 1, BISHOP = 2, ROOK = 3, QUEEN = 4, KING = 5, PIECE_NONE = 6
         };
-        public Position() { clear(); }
-        public bool isPromotion() { return (moveIsPromotion); }
-        public bool isCapture() { return (moveIsCapture || moveIsEP); }
+        public Position() { Clear(); }
         public Position(String fen)
         {
             if (!Load(fen)) Log.WriteLine("..[position] Warning failed to load position {0}", fen);
         }
+        public bool isPromotion() { return (moveIsPromotion); }
+        public bool isCapture() { return (moveIsCapture || moveIsEP); }
         public static int[] FromTo(String move)
         {
             int ifrom = -1; int ito = -1;
             String from = move.Substring(0, 2);
-            String to = move.Substring(2, 4);
+            String to = move.Substring(2, 2);
             for (int j = 0; j < SanSquares.Length; ++j)
             {
                 if (from == SanSquares[j]) ifrom = j;
@@ -131,7 +127,7 @@ namespace epdTester
             String epSq = "";
             if (EP_SQ != 0)
             {
-                epSq += SanCols[colOf(EP_SQ)] + Convert.ToString(rowOf(EP_SQ) + 1);
+                epSq += SanCols[ColOf(EP_SQ)] + Convert.ToString(RowOf(EP_SQ) + 1);
             }
             fen += (epSq == "" ? " -" : " " + epSq);
             // move50
@@ -141,7 +137,7 @@ namespace epdTester
         public bool Load(String fen)
         {
             Log.WriteLine("..[position] loading fen {0} ", fen);
-            clear();
+            Clear();
             int s = (int)Squares.A8;
             String[] split_fen = fen.Split(' ');
             if (split_fen.Length <= 0)
@@ -161,7 +157,7 @@ namespace epdTester
                             s -= 16;
                             break;
                         default:
-                            set_piece(c, s);
+                            SetPiece(c, s);
                             ++s;
                             break;
                     }
@@ -212,14 +208,14 @@ namespace epdTester
         return true;
     else
     {
-        Move50 = (int)Convert.ToInt32(split_fen[4]);
+        if (!String.IsNullOrWhiteSpace(split_fen[4])) Move50 = (int)Convert.ToInt32(split_fen[4]);
     }
     // the move counter
     if (split_fen.Length <= 5) return true;
     else HalfMvs = (int)Convert.ToInt32(split_fen[5]);
     return true;
 }
-        public void clear()
+        public void Clear()
         {
             stm = WHITE;
             crights = 0;
@@ -263,15 +259,15 @@ namespace epdTester
                 FenPositions.Clear();
             }
         }
-        public bool hasPiece(int s)
+        public bool isEmpty(int s)
         {
-            return pieceOn[s] != (int)(int)Piece.PIECE_NONE;
+            return pieceOn[s] == (int)(int)Piece.PIECE_NONE;
         }
-        public List<int> getPieceSquares(int c, int p)
+        public List<int> PieceSquares(int c, int p)
         {
             return (c == WHITE ? wPieceSquares[p] : bPieceSquares[p]);
         }
-        public int getPiece(int s)
+        public int PieceOn(int s)
         {
             return pieceOn[s];
         }
@@ -280,7 +276,7 @@ namespace epdTester
             if (!onBoard(s)) return (int)(int)Piece.PIECE_NONE;
             return colorOn[s];
         }
-        private void set_piece(char c, int s)
+        private void SetPiece(char c, int s)
         {
             for (int p = (int)Pieces.W_PAWN; p <= (int)Pieces.B_KING; ++p)
             {
@@ -392,6 +388,98 @@ namespace epdTester
             displayedMove = idx;
             return true;
         }
+        public string toSan(string move)
+        {
+            clearMoveData(); 
+            int[] fromto = FromTo(move);
+            int f = fromto[0]; int t = fromto[1];
+            int p = PieceOn(f);
+            bool isCapture = PieceOn(t) != (int)Piece.PIECE_NONE;
+            if (p == (int)Piece.PIECE_NONE) return "";
+            string sanMove = ""; string sanFrom = SanSquares[f]; string sanTo = SanSquares[t];
+            List<int> toSquares = new List<int>();
+            List<int> pieces = PieceSquares(stm, p); // more than one ?
+            sanMove += (p == (int) Piece.PAWN ? "" : Convert.ToString(SanPiece[p]));
+            List<int> legalFromSqs = new List<int>();
+            string promotionPiece = "";
+            
+            // special cases (castle moves, promotions)
+            if (isCastle(f, t, p, stm))
+            {
+                int left = (stm == WHITE ? (int)Squares.C1 : (int)Squares.C8);
+                int right = (stm == WHITE ? (int)Squares.G1 : (int)Squares.G8);
+                if (t == right) return "O-O";
+                else if (t == left) return "O-O-O";
+                else return "";
+            }
+            else if (p == (int)Piece.PAWN && isPseudoLegal(f, t, p, stm) && (moveIsPromotion || moveIsPromotionCapture))
+            {
+                promotionPiece = move.Substring(5, 6);
+                if (String.IsNullOrWhiteSpace(promotionPiece)) return "";
+            }
+            else if (moveIsEP)
+            {
+                sanMove += SanCols[ColOf(f)];
+                isCapture = true;
+            }
+
+            foreach (int fromsq in pieces)
+            {
+                switch (p)
+                {
+                    case (int)Piece.PAWN: if (PawnMoves(fromsq, stm).Contains(t)) legalFromSqs.Add(fromsq); break;
+                    case (int)Piece.KNIGHT: if (KnightMoves(fromsq, stm).Contains(t)) legalFromSqs.Add(fromsq); break;
+                    case (int)Piece.BISHOP: if (BishopMoves(fromsq, stm).Contains(t)) legalFromSqs.Add(fromsq); break;
+                    case (int)Piece.ROOK: if (RookMoves(fromsq, stm).Contains(t)) legalFromSqs.Add(fromsq); break;
+                    case (int)Piece.QUEEN: if (QueenMoves(fromsq, stm).Contains(t)) legalFromSqs.Add(fromsq); break;
+                    case (int)Piece.KING: if (KingMoves(fromsq, stm).Contains(t)) legalFromSqs.Add(fromsq); break;
+                    default: return "";
+                }
+            }
+            if (legalFromSqs.Count <= 0) return "";
+            else if (legalFromSqs.Count == 2)
+            {
+                if (RowOf(legalFromSqs[0]) == RowOf(legalFromSqs[1])) sanMove += SanCols[ColOf(f)];
+                else if (ColOf(legalFromSqs[0]) == ColOf(legalFromSqs[1])) sanMove += Convert.ToString(RowOf(f));
+            }
+            if (isCapture || moveIsPromotionCapture)
+            {
+                if (p == (int)Piece.PAWN) sanMove += SanCols[ColOf(f)];
+                sanMove += "x";
+            }
+            sanMove += SanSquares[t];
+            if (moveIsPromotion || moveIsPromotionCapture) sanMove += promotionPiece;
+
+            // does it mate the enemy king
+            bool ismate = isMate(f, t, p, (stm == WHITE ? BLACK : WHITE));
+            if (ismate) { sanMove += "#"; return sanMove; }
+
+            // does it check the king?
+            clearMoveData();
+            doMove(f, t, p, stm);
+            int tmp_capturedPiece = capturedPiece;
+            int tmp_promotedPiece = promotedPiece;
+            bool tmp_moveIsCapture = moveIsCapture;
+            bool tmp_moveIsPromotion = moveIsPromotion;
+            bool tmp_moveIsPromotionCapture = moveIsPromotionCapture;
+            bool tmp_moveIsCastle = moveIsCastle;
+            bool tmp_moveIsEP = moveIsEP;
+
+            bool givesCheck = kingInCheck(stm);
+            // restore move state
+            capturedPiece = tmp_capturedPiece;
+            promotedPiece = tmp_promotedPiece;
+            moveIsCapture = tmp_moveIsCapture;
+            moveIsPromotion = tmp_moveIsPromotion;
+            moveIsPromotionCapture = tmp_moveIsPromotionCapture;
+            moveIsCastle = tmp_moveIsCastle;
+            moveIsEP = tmp_moveIsEP;
+
+            undoMove(t, f, p, stm==WHITE?BLACK:WHITE);
+            if (givesCheck) sanMove += "+";
+
+            return sanMove;
+        }
         public void clearMoveData()
         {
             capturedPiece = -1;
@@ -425,7 +513,7 @@ namespace epdTester
         public bool isCastle(int from, int to, int piece, int color)
         {
             if (piece != (int)(int)Piece.KING) return false;
-            if (getPiece(from) != (int)(int)Piece.KING) return false;
+            if (PieceOn(from) != (int)(int)Piece.KING) return false;
             if (from != (color == WHITE ? (int)Squares.E1 : (int)Squares.E8)) return false;
             if (color == WHITE)
             {
@@ -488,11 +576,11 @@ namespace epdTester
             crights = (crights & (~side));
             //Log.WriteLine("all cr after: " + crights);
         }
-        int rowOf(int from)
+        int RowOf(int from)
         {
             return (from >> 3);
         }
-        int colOf(int from)
+        int ColOf(int from)
         {
             return (from & 7);
         }
@@ -500,21 +588,17 @@ namespace epdTester
         {
             return (to >= 0 && to <= 63);
         }
-        bool isEmpty(int s)
-        {
-            return pieceOn[s] == (int)Piece.PIECE_NONE;
-        }
         bool enemyOn(int s, int color)
         {
             return (colorOn[s] == color && pieceOn[s] != (int)Piece.PIECE_NONE);
         }
         int colDiff(int s1, int s2)
         {
-            return Math.Abs(colOf(s1) - colOf(s2));
+            return Math.Abs(ColOf(s1) - ColOf(s2));
         }
         int rowDiff(int s1, int s2)
         {
-            return Math.Abs(rowOf(s1) - rowOf(s2));
+            return Math.Abs(RowOf(s1) - RowOf(s2));
         }
         bool onCol(int s1, int s2)
         {
@@ -535,9 +619,9 @@ namespace epdTester
             int forward2 = (color == WHITE ? 16 : -16);
             int capRight = (color == WHITE ? 7 : -7);
             int capLeft = (color == WHITE ? 9 : -9);
-            bool on4 = (color == WHITE ? (rowOf(from) == 4) : (rowOf(from) == 3));
-            bool on7 = (color == WHITE ? (rowOf(from) == 6) : (rowOf(from) == 1));
-            bool on2 = (color == WHITE ? (rowOf(from) == 1) : (rowOf(from) == 6));
+            bool on4 = (color == WHITE ? (RowOf(from) == 4) : (RowOf(from) == 3));
+            bool on7 = (color == WHITE ? (RowOf(from) == 6) : (RowOf(from) == 1));
+            bool on2 = (color == WHITE ? (RowOf(from) == 1) : (RowOf(from) == 6));
 
             if (on2)
             {
@@ -706,7 +790,7 @@ namespace epdTester
             }
             return false;
         }
-        private List<int> getPawnMoves(int from, int color)
+        private List<int> PawnMoves(int from, int color)
         {
             List<int> to_sqs = new List<int>();
             int enemy = (color == WHITE ? BLACK : WHITE);
@@ -715,8 +799,8 @@ namespace epdTester
             int capRight = (color == WHITE ? 7 : -7);
             int capLeft = (color == WHITE ? 9 : -9);
             int to = -1;
-            bool on4 = (color == WHITE ? (rowOf(from) == 4) : (rowOf(from) == 3));
-            bool on2 = (color == WHITE ? (rowOf(from) == 1) : (rowOf(from) == 6));
+            bool on4 = (color == WHITE ? (RowOf(from) == 4) : (RowOf(from) == 3));
+            bool on2 = (color == WHITE ? (RowOf(from) == 1) : (RowOf(from) == 6));
 
             if (on2)
             {
@@ -755,7 +839,7 @@ namespace epdTester
             }
             return to_sqs;
         }
-        private List<int> getKnightMoves(int from, int color)
+        private List<int> KnightMoves(int from, int color)
         {
             List<int> to_sqs = new List<int>();
             int[] deltas = { 16 - 1, 16 + 1, 2 + 8, 2 - 8, -16 + 1, -16 - 1, -2 - 8, -2 + 8 };
@@ -771,7 +855,7 @@ namespace epdTester
             }
             return to_sqs;
         }
-        private List<int> getBishopMoves(int from, int color)
+        private List<int> BishopMoves(int from, int color)
         {
             List<int> to_sqs = new List<int>();
             int[] deltas = { 7, 9, -7, -9 };
@@ -799,7 +883,7 @@ namespace epdTester
             }
             return to_sqs;
         }
-        private List<int> getRookMoves(int from, int color)
+        private List<int> RookMoves(int from, int color)
         {
             List<int> to_sqs = new List<int>();
             int[] deltas = { 1, -1, 8, -8 };
@@ -827,18 +911,18 @@ namespace epdTester
             }
             return to_sqs;
         }
-        private List<int> getQueenMoves(int from, int color)
+        private List<int> QueenMoves(int from, int color)
         {
             List<int> to_sqs_b = new List<int>();
             List<int> to_sqs_r = new List<int>();
             List<int> to_sqs_q = new List<int>();
-            to_sqs_b = getBishopMoves(from, color);
-            to_sqs_r = getRookMoves(from, color);
+            to_sqs_b = BishopMoves(from, color);
+            to_sqs_r = RookMoves(from, color);
             for (int j = 0; j < to_sqs_b.Count; ++j) to_sqs_q.Add(to_sqs_b[j]);
             for (int j = 0; j < to_sqs_r.Count; ++j) to_sqs_q.Add(to_sqs_r[j]);
             return to_sqs_q;
         }
-        private List<int> getKingMoves(int from, int color)
+        private List<int> KingMoves(int from, int color)
         {
             List<int> to_sqs = new List<int>();
             int[] deltas = { 1, -1, 7, 9, 8, -8, -7, -9 };
@@ -856,7 +940,7 @@ namespace epdTester
         {
             if (color == WHITE)
             {
-                List<int> wsquares = getPieceSquares(WHITE, getPiece(from));
+                List<int> wsquares = PieceSquares(WHITE, PieceOn(from));
                 for (int j = 0; j < wsquares.Count; ++j)
                     if (from == wsquares[j])
                     {
@@ -866,7 +950,7 @@ namespace epdTester
             }
             else
             {
-                List<int> bsquares = getPieceSquares(BLACK, getPiece(from));
+                List<int> bsquares = PieceSquares(BLACK, PieceOn(from));
                 for (int j = 0; j < bsquares.Count; ++j)
                     if (from == bsquares[j])
                     {
@@ -879,7 +963,7 @@ namespace epdTester
                 capturedPiece = pieceOn[to];
                 if (color == WHITE) // remove black piece
                 {
-                    List<int> bsquares = getPieceSquares(BLACK, getPiece(to));
+                    List<int> bsquares = PieceSquares(BLACK, PieceOn(to));
                     for (int j = 0; j < bsquares.Count; ++j)
                         if (to == bsquares[j])
                         {
@@ -888,7 +972,7 @@ namespace epdTester
                 }
                 else
                 {
-                    List<int> wsquares = getPieceSquares(WHITE, getPiece(to));
+                    List<int> wsquares = PieceSquares(WHITE, PieceOn(to));
                     for (int j = 0; j < wsquares.Count; ++j)
                     {
                         if (to == wsquares[j])
@@ -904,7 +988,7 @@ namespace epdTester
                 capturedPiece = pieceOn[epTo];
                 if (color == WHITE) // remove black piece
                 {
-                    List<int> bsquares = getPieceSquares(BLACK, getPiece(epTo));
+                    List<int> bsquares = PieceSquares(BLACK, PieceOn(epTo));
                     for (int j = 0; j < bsquares.Count; ++j)
                         if (epTo == bsquares[j])
                         {
@@ -913,7 +997,7 @@ namespace epdTester
                 }
                 else
                 {
-                    List<int> wsquares = getPieceSquares(WHITE, getPiece(epTo));
+                    List<int> wsquares = PieceSquares(WHITE, PieceOn(epTo));
                     for (int j = 0; j < wsquares.Count; ++j)
                         if (epTo == wsquares[j])
                         {
@@ -929,7 +1013,7 @@ namespace epdTester
                 {
                     int rookFrom = (to == (int)Squares.G1 ? (int)Squares.H1 : (int)Squares.A1);
                     int rookto = (to == (int)Squares.G1 ? (int)Squares.F1 : (int)Squares.D1);
-                    List<int> wsquares = getPieceSquares(WHITE, getPiece(rookFrom));
+                    List<int> wsquares = PieceSquares(WHITE, PieceOn(rookFrom));
                     for (int j = 0; j < wsquares.Count; ++j)
                         if (rookFrom == wsquares[j])
                         {
@@ -945,7 +1029,7 @@ namespace epdTester
                 {
                     int rookFrom = (to == (int)Squares.G8 ? (int)Squares.H8 : (int)Squares.A8);
                     int rookto = (to == (int)Squares.G8 ? (int)Squares.F8 : (int)Squares.D8);
-                    List<int> bsquares = getPieceSquares(BLACK, getPiece(rookFrom));
+                    List<int> bsquares = PieceSquares(BLACK, PieceOn(rookFrom));
                     for (int j = 0; j < bsquares.Count; ++j)
                         if (rookFrom == bsquares[j])
                         {
@@ -980,7 +1064,7 @@ namespace epdTester
         {
             if (color == WHITE)
             {
-                List<int> wsquares = getPieceSquares(WHITE, getPiece(to));
+                List<int> wsquares = PieceSquares(WHITE, PieceOn(to));
                 for (int j = 0; j < wsquares.Count; ++j)
                     if (to == wsquares[j])
                     {
@@ -990,7 +1074,7 @@ namespace epdTester
             }
             else
             {
-                List<int> bsquares = getPieceSquares(BLACK, getPiece(to));
+                List<int> bsquares = PieceSquares(BLACK, PieceOn(to));
                 for (int j = 0; j < bsquares.Count; ++j)
                     if (to == bsquares[j])
                     {
@@ -1018,7 +1102,7 @@ namespace epdTester
         {
             if (color == WHITE)
             {
-                List<int> wsquares = getPieceSquares(WHITE, getPiece(from));
+                List<int> wsquares = PieceSquares(WHITE, PieceOn(from));
                 for (int j = 0; j < wsquares.Count(); ++j)
                     if (from == wsquares[j])
                     {
@@ -1028,7 +1112,7 @@ namespace epdTester
             }
             else
             {
-                List<int> bsquares = getPieceSquares(BLACK, getPiece(from));
+                List<int> bsquares = PieceSquares(BLACK, PieceOn(from));
                 for (int j = 0; j < bsquares.Count; ++j)
                     if (from == bsquares[j])
                     {
@@ -1055,7 +1139,7 @@ namespace epdTester
                 {
                     int rookFrom = (from == (int)Squares.G1 ? (int)Squares.F1 : (int)Squares.D1);
                     int rookto = (from == (int)Squares.F1 ? (int)Squares.H1 : (int)Squares.A1);
-                    List<int> wsquares = getPieceSquares(WHITE, getPiece(rookFrom));
+                    List<int> wsquares = PieceSquares(WHITE, PieceOn(rookFrom));
                     for (int j = 0; j < wsquares.Count; ++j)
                         if (rookFrom == wsquares[j])
                         {
@@ -1071,7 +1155,7 @@ namespace epdTester
                 {
                     int rookFrom = (to == (int)Squares.G8 ? (int)Squares.F8 : (int)Squares.D8);
                     int rookto = (to == (int)Squares.F8 ? (int)Squares.H8 : (int)Squares.A8);
-                    List<int> bsquares = getPieceSquares(BLACK, getPiece(rookFrom));
+                    List<int> bsquares = PieceSquares(BLACK, PieceOn(rookFrom));
                     for (int j = 0; j < bsquares.Count; ++j)
                         if (rookFrom == bsquares[j])
                         {
@@ -1098,11 +1182,11 @@ namespace epdTester
         // to check if white's king is in check (so c == white).
         public bool kingInCheck(int c)
         {
-            int ks = getPieceSquares(c, (int)Piece.KING)[0];
+            int ks = PieceSquares(c, (int)Piece.KING)[0];
             int enemy = (c == WHITE ? BLACK : WHITE);
 
             // pawn checks
-            List<int> psquares = getPieceSquares(enemy, (int)Piece.PAWN);
+            List<int> psquares = PieceSquares(enemy, (int)Piece.PAWN);
             for (int j = 0; j < psquares.Count; ++j)
             {
                 int to = psquares[j];
@@ -1113,7 +1197,7 @@ namespace epdTester
             }
 
             // knight checks
-            List<int> nsquares = getPieceSquares(enemy, (int)Piece.KNIGHT);
+            List<int> nsquares = PieceSquares(enemy, (int)Piece.KNIGHT);
             for (int j = 0; j < nsquares.Count; ++j)
             {
                 int to = nsquares[j];
@@ -1125,7 +1209,7 @@ namespace epdTester
 
             // bishop checks .. return a list of "to" squares being the enemy
             // bishops
-            List<int> bsquares = getPieceSquares(enemy, (int)Piece.BISHOP);
+            List<int> bsquares = PieceSquares(enemy, (int)Piece.BISHOP);
             for (int j = 0; j < bsquares.Count; ++j)
             {
                 int to = bsquares[j];
@@ -1136,7 +1220,7 @@ namespace epdTester
             }
 
             // rook checks
-            List<int> rsquares = getPieceSquares(enemy, (int)Piece.ROOK);
+            List<int> rsquares = PieceSquares(enemy, (int)Piece.ROOK);
             for (int j = 0; j < rsquares.Count; ++j)
             {
                 int to = rsquares[j];
@@ -1146,7 +1230,7 @@ namespace epdTester
                 }
             }
             // queen checks
-            List<int> qsquares = getPieceSquares(enemy, (int)Piece.QUEEN);
+            List<int> qsquares = PieceSquares(enemy, (int)Piece.QUEEN);
             for (int j = 0; j < qsquares.Count; ++j)
             {
                 int to = qsquares[j];
@@ -1163,7 +1247,7 @@ namespace epdTester
             if (onRow(s1, s2))
             {
                 int delta = 1;
-                int from = (colOf(s1) < colOf(s2)) ? s1 : s2;
+                int from = (ColOf(s1) < ColOf(s2)) ? s1 : s2;
                 int to = (from == s1) ? s2 : s1;
                 int s = from + delta;
                 while (s < to)
@@ -1175,7 +1259,7 @@ namespace epdTester
             else if (onCol(s1, s2))
             {
                 int delta = 8;
-                int from = (rowOf(s1) < rowOf(s2)) ? s1 : s2;
+                int from = (RowOf(s1) < RowOf(s2)) ? s1 : s2;
                 int to = (from == s1) ? s2 : s1;
                 int s = from + delta;
                 while (s < to)
@@ -1187,14 +1271,14 @@ namespace epdTester
             {
 
                 int delta = 0; int from = s1; int to = s2;
-                if (rowOf(from) < rowOf(to))
+                if (RowOf(from) < RowOf(to))
                 {
-                    if (colOf(from) < colOf(to)) delta = 9;
+                    if (ColOf(from) < ColOf(to)) delta = 9;
                     else delta = 7;
                 }
                 else
                 {
-                    if (colOf(from) < colOf(to)) delta = -7;
+                    if (ColOf(from) < ColOf(to)) delta = -7;
                     else delta = -9;
                 }
                 int s = from + delta;
@@ -1209,7 +1293,7 @@ namespace epdTester
         public bool isMate(int from, int to, int piece, int enemy)
         {
             clearMoveData();
-            int ks = getPieceSquares(stm, (int)Piece.KING)[0];
+            int ks = PieceSquares(stm, (int)Piece.KING)[0];
             if (!isAttacked(ks, stm))
             {
                 clearMoveData();
@@ -1286,11 +1370,11 @@ namespace epdTester
         {
             //Log.WriteLine("----------------start stalemate routine------------------------");
             // king moves
-            List<int> ksquares = getPieceSquares(stm, (int)Piece.KING);
+            List<int> ksquares = PieceSquares(stm, (int)Piece.KING);
             for (int j = 0; j < ksquares.Count; ++j)
             {
                 int from = ksquares[j];
-                List<int> to_sqs = getKingMoves(from, stm); // no move data was updated
+                List<int> to_sqs = KingMoves(from, stm); // no move data was updated
                 for (int k = 0; k < to_sqs.Count; ++k)
                 {
 
@@ -1307,11 +1391,11 @@ namespace epdTester
             }
 
             // pawn moves 
-            List<int> psquares = getPieceSquares(stm, (int)Piece.PAWN);
+            List<int> psquares = PieceSquares(stm, (int)Piece.PAWN);
             for (int j = 0; j < psquares.Count; ++j)
             {
                 int from = psquares[j];
-                List<int> to_sqs = getPawnMoves(from, stm); // no move data was updated
+                List<int> to_sqs = PawnMoves(from, stm); // no move data was updated
                 for (int k = 0; k < to_sqs.Count; ++k)
                 {
                     int to = to_sqs[k];
@@ -1325,11 +1409,11 @@ namespace epdTester
             }
 
             // knight moves 
-            List<int> nsquares = getPieceSquares(stm, (int)Piece.KNIGHT);
+            List<int> nsquares = PieceSquares(stm, (int)Piece.KNIGHT);
             for (int j = 0; j < nsquares.Count; ++j)
             {
                 int from = nsquares[j];
-                List<int> to_sqs = getKnightMoves(from, stm); // no move data was updated
+                List<int> to_sqs = KnightMoves(from, stm); // no move data was updated
                 for (int k = 0; k < to_sqs.Count; ++k)
                 {
                     int to = to_sqs[k];
@@ -1343,11 +1427,11 @@ namespace epdTester
             }
 
             // bishop moves 
-            List<int> bsquares = getPieceSquares(stm, (int)Piece.BISHOP);
+            List<int> bsquares = PieceSquares(stm, (int)Piece.BISHOP);
             for (int j = 0; j < bsquares.Count; ++j)
             {
                 int from = bsquares[j];
-                List<int> to_sqs = getBishopMoves(from, stm); // no move data was updated
+                List<int> to_sqs = BishopMoves(from, stm); // no move data was updated
                 for (int k = 0; k < to_sqs.Count; ++k)
                 {
                     int to = to_sqs[k];
@@ -1360,11 +1444,11 @@ namespace epdTester
                 }
             }
             // rook moves
-            List<int> rsquares = getPieceSquares(stm, (int)Piece.ROOK);
+            List<int> rsquares = PieceSquares(stm, (int)Piece.ROOK);
             for (int j = 0; j < rsquares.Count; ++j)
             {
                 int from = rsquares[j];
-                List<int> to_sqs = getRookMoves(from, stm); // no move data was updated
+                List<int> to_sqs = RookMoves(from, stm); // no move data was updated
                 for (int k = 0; k < to_sqs.Count; ++k)
                 {
                     int to = to_sqs[k];
@@ -1378,11 +1462,11 @@ namespace epdTester
             }
 
             // queen moves
-            List<int> qsquares = getPieceSquares(stm, (int)Piece.QUEEN);
+            List<int> qsquares = PieceSquares(stm, (int)Piece.QUEEN);
             for (int j = 0; j < qsquares.Count; ++j)
             {
                 int from = qsquares[j];
-                List<int> to_sqs = getQueenMoves(from, stm); // no move data was updated
+                List<int> to_sqs = QueenMoves(from, stm); // no move data was updated
                 for (int k = 0; k < to_sqs.Count; ++k)
                 {
                     int to = to_sqs[k];
@@ -1403,7 +1487,7 @@ namespace epdTester
 
             // bishop checks .. return a list of "to" squares being the enemy
             // bishops
-            List<int> bsquares = getPieceSquares(enemy, (int)Piece.BISHOP); //Log.WriteLine(bsquares);
+            List<int> bsquares = PieceSquares(enemy, (int)Piece.BISHOP); //Log.WriteLine(bsquares);
             for (int j = 0; j < bsquares.Count; ++j)
             {
                 int from = bsquares[j];
@@ -1412,7 +1496,7 @@ namespace epdTester
             }
 
             // rook checks
-            List<int> rsquares = getPieceSquares(enemy, (int)Piece.ROOK); //Log.WriteLine(rsquares);
+            List<int> rsquares = PieceSquares(enemy, (int)Piece.ROOK); //Log.WriteLine(rsquares);
             for (int j = 0; j < rsquares.Count; ++j)
             {
                 int from = rsquares[j];
@@ -1421,7 +1505,7 @@ namespace epdTester
             }
 
             // queen checks
-            List<int> qsquares = getPieceSquares(enemy, (int)Piece.QUEEN); //Log.WriteLine(qsquares);
+            List<int> qsquares = PieceSquares(enemy, (int)Piece.QUEEN); //Log.WriteLine(qsquares);
             for (int j = 0; j < qsquares.Count; ++j)
             {
                 int from = qsquares[j];
@@ -1451,7 +1535,7 @@ namespace epdTester
             }
 
             // pawn attacks 
-            List<int> psquares = getPieceSquares(stm, (int)Piece.PAWN);
+            List<int> psquares = PieceSquares(stm, (int)Piece.PAWN);
             for (int j = 0; j < psquares.Count; ++j)
             {
                 int from = psquares[j];
@@ -1461,7 +1545,7 @@ namespace epdTester
             }
 
             // knight attacks
-            List<int> nsquares = getPieceSquares(stm, (int)Piece.KNIGHT);
+            List<int> nsquares = PieceSquares(stm, (int)Piece.KNIGHT);
             for (int j = 0; j < nsquares.Count; ++j)
             {
                 int from = nsquares[j];
@@ -1470,7 +1554,7 @@ namespace epdTester
             }
 
             // knight attacks
-            List<int> bsquares = getPieceSquares(stm, (int)Piece.BISHOP);
+            List<int> bsquares = PieceSquares(stm, (int)Piece.BISHOP);
             for (int j = 0; j < bsquares.Count; ++j)
             {
                 int from = bsquares[j];
@@ -1479,7 +1563,7 @@ namespace epdTester
             }
 
             // rook attacks
-            List<int> rsquares = getPieceSquares(stm, (int)Piece.ROOK);
+            List<int> rsquares = PieceSquares(stm, (int)Piece.ROOK);
             for (int j = 0; j < rsquares.Count; ++j)
             {
                 int from = rsquares[j];
@@ -1488,7 +1572,7 @@ namespace epdTester
             }
 
             // queen attacks
-            List<int> qsquares = getPieceSquares(stm, (int)Piece.QUEEN);
+            List<int> qsquares = PieceSquares(stm, (int)Piece.QUEEN);
             for (int j = 0; j < qsquares.Count; ++j)
             {
                 int from = qsquares[j];
@@ -1503,7 +1587,7 @@ namespace epdTester
             int enemy = (c == WHITE ? BLACK : WHITE);
 
             // pawn checks
-            List<int> psquares = getPieceSquares(enemy, (int)Piece.PAWN);
+            List<int> psquares = PieceSquares(enemy, (int)Piece.PAWN);
             for (int j = 0; j < psquares.Count; ++j)
             {
                 int to = psquares[j];
@@ -1512,7 +1596,7 @@ namespace epdTester
             }
 
             // knight checks
-            List<int> nsquares = getPieceSquares(enemy, (int)Piece.KNIGHT);
+            List<int> nsquares = PieceSquares(enemy, (int)Piece.KNIGHT);
             for (int j = 0; j < nsquares.Count; ++j)
             {
                 int to = nsquares[j];
@@ -1522,7 +1606,7 @@ namespace epdTester
 
             // bishop checks .. return a list of "to" squares being the enemy
             // bishops
-            List<int> bsquares = getPieceSquares(enemy, (int)Piece.BISHOP);
+            List<int> bsquares = PieceSquares(enemy, (int)Piece.BISHOP);
             for (int j = 0; j < bsquares.Count; ++j)
             {
                 int to = bsquares[j];
@@ -1531,7 +1615,7 @@ namespace epdTester
             }
 
             // rook checks
-            List<int> rsquares = getPieceSquares(enemy, (int)Piece.ROOK);
+            List<int> rsquares = PieceSquares(enemy, (int)Piece.ROOK);
             for (int j = 0; j < rsquares.Count; ++j)
             {
                 int to = rsquares[j];
@@ -1540,7 +1624,7 @@ namespace epdTester
             }
 
             // queen checks
-            List<int> qsquares = getPieceSquares(enemy, (int)Piece.QUEEN);
+            List<int> qsquares = PieceSquares(enemy, (int)Piece.QUEEN);
             for (int j = 0; j < qsquares.Count; ++j)
             {
                 int to = qsquares[j];

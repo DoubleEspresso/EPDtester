@@ -24,6 +24,9 @@ namespace epdTester
             InitializeComponent();
             LoadEnginesFromSettings();
             LoadEPDSettings();
+            EPDTestProgress_label.Text = "";
+            EPDTestCorrect_label.Text = "";
+            label7.Text = "";
         }
         /*EPD file management*/
         private void LoadEPDSettings()
@@ -220,19 +223,41 @@ namespace epdTester
         delegate void EpdBestMoveParsedFunc(object sender, EventArgs e);
         public void onEPDtestBestMoveParsed(object sender, EventArgs e)
         {
-            if(InvokeRequired)
+            if (InvokeRequired)
             {
-                BeginInvoke(new EpdBestMoveParsedFunc(onEPDtestBestMoveParsed), new object[] { sender, e });
-                //return;
+                Invoke(new EpdBestMoveParsedFunc(onEPDtestBestMoveParsed), new object[] { sender, e });
+                return;
             }
             Thread.Sleep(100);
             epdTabDisplay.SelectedTest.Grade(ActiveEngine.Parser);
+            string progress = Convert.ToString(epdTabDisplay.SelectedTest.activeTestIdx);
+            string nbCorrect = Convert.ToString(epdTabDisplay.SelectedTest.correct);
+            string totalTests = Convert.ToString(epdTabDisplay.SelectedTest.totalTests);
+            label7.Text = "solved correctly ..";
+            EPDTestProgress_label.Text = "..searching " + progress + " / " + totalTests + " positions";
+            EPDTestCorrect_label.Text = nbCorrect + " / " + totalTests;
             epdTabDisplay.SelectedTest.BestMoveEvent.Set();
+            Log.WriteLine("...set betsmove event");
         }        
         private void epdStart_Click(object sender, EventArgs e)
         {
             ActiveEngine.SetBestMoveCallback(onEPDtestBestMoveParsed);
-            epdTabDisplay.SelectedTest.startTest();
+            epdTabDisplay.SelectedTest.startTest(timePerPosition);
+        }
+
+        uint timePerPosition = 1000;
+        private void epdFixedTimePosition_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                timePerPosition = (uint)Convert.ToInt32(epdFixedTimePosition.Text);
+            }
+            catch { }
+        }
+
+        private void stopEpdTest_Click(object sender, EventArgs e)
+        {
+            epdTabDisplay.SelectedTest.CancelTest();
         }
     }
 }

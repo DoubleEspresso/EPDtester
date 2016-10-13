@@ -126,26 +126,32 @@ namespace epdTester
         public override bool ParseLine(string line)
         {
             if (History == null) History = new List<Data>();
-            string[] tokens = line.Split(' ');
             try
             {
-                int skipped = 0; Data d = new Data();
-                for (int j = 0; j < tokens.Length-1; ++j)
+                string[] delimits = new string[] { "\r\n" };
+                string[] bufferedLines = line.Split(delimits, StringSplitOptions.None);
+                for (int i = 0; i < bufferedLines.Length; ++i)
                 {
-                    string token = tokens[j]; 
-                    switch (token)
+                    string[] tokens = bufferedLines[i].Split(' ');
+                    int skipped = 0; Data d = new Data();
+                    for (int j = 0; j < tokens.Length - 1; ++j)
                     {
-                        case "cp": d.eval = Convert.ToUInt32(tokens[++j]); break;
-                        case "depth": d.depth = Convert.ToUInt32(tokens[++j]); break;
-                        case "nodes": d.nodes = Convert.ToUInt32(tokens[++j]); break;
-                        case "tbhits": d.hashhits = Convert.ToUInt32(tokens[++j]); break;
-                        case "nps": d.nps = Convert.ToUInt32(tokens[++j]); break;
-                        case "bestmove": d.bestmove = tokens[++j]; break;
-                        default: ++skipped; break;
-                    }   
+                        string token = tokens[j];
+                        switch (token)
+                        {
+                            case "cp": d.eval = Convert.ToUInt32(tokens[++j]); break;
+                            case "depth": d.depth = Convert.ToUInt32(tokens[++j]); break;
+                            case "nodes": d.nodes = Convert.ToUInt32(tokens[++j]); break;
+                            case "tbhits": d.hashhits = Convert.ToUInt32(tokens[++j]); break;
+                            case "nps": d.nps = Convert.ToUInt32(tokens[++j]); break;
+                            case "bestmove": d.bestmove = tokens[++j]; break;
+                            default: ++skipped; break;
+                        }
+                    }
+                    if (skipped != tokens.Length - 1) History.Add(d);
                 }
-                if (skipped != tokens.Length-1) History.Add(d);
                 return true;
+
             }
             catch (Exception e)
             {
