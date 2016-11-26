@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Drawing.Imaging;
+using System.Security;
 
 namespace epdTester
 {
@@ -16,11 +17,19 @@ namespace epdTester
     {
         public GL()
         {
+            PreDrawGL = DefaultPreDraw;
             InitializeComponent();
+            gl_inited = false;
         }
+        public delegate void PaintGLFunc();
+        public PaintGLFunc PreDrawGL = null;
+        public PaintGLFunc PaintGL = null;
+        public PaintGLFunc PostDrawGL = null;
+
         private const string OPENGL = "opengl32.dll";
         private const string GLU = "glu32.dll";
         private const string USER32 = "user32.dll";
+        private const string GDI32 = "GDI32.Dll";
 
         public const int POINTS = 0x0;
         public const int LINES = 0x1;
@@ -49,6 +58,11 @@ namespace epdTester
         public const int CLAMP = 0x2900;
         public const int CLAMP_TO_BORDER = 0x812D;
         public const int CLAMP_TO_EDGE = 0x812F;
+
+        public const int PROJECTION = 0x1701;
+        public const int MODELVIEW = 0x1700;
+        public const int DEPTH_BUFFER_BIT = 0x100;
+        public const int COLOR_BUFFER_BIT = 0x4000;
 
         /*data types*/
         public const int BYTE = 0x1400;
@@ -153,6 +167,8 @@ namespace epdTester
         public static extern void Vertex3f(float x, float y, float z);
         [DllImport(OPENGL, EntryPoint = "glViewport")]
         public static extern void Viewport(int x, int y, int width, int height);
+        [DllImport(OPENGL, EntryPoint = "glOrtho")]
+        public static extern void Ortho(double left, double right, double bottom, double top, double zNear, double zFar);
         [DllImport(OPENGL, EntryPoint = "glMatrixMode")]
         public static extern void MatrixMode(uint mode);
         [DllImport(OPENGL, EntryPoint = "glPopMatrix")]
@@ -192,6 +208,11 @@ namespace epdTester
         [DllImport(OPENGL, EntryPoint = "glGetError")]
         public static extern int GetError();
 
+        [DllImport(USER32), SuppressUnmanagedCodeSecurity]
+        public static extern IntPtr GetDC(IntPtr hwnd);
+        [DllImport(USER32), SuppressUnmanagedCodeSecurity]
+        public static extern void ReleaseDC(IntPtr hwnd, IntPtr hdc);
+
         [DllImport(OPENGL, EntryPoint = "wglGetCurrentContext")]
         public static extern IntPtr GetCurrentContext();
         [DllImport(OPENGL, EntryPoint = "wglGetCurrentDC")]
@@ -203,6 +224,347 @@ namespace epdTester
         [DllImport(OPENGL, EntryPoint = "wglGetProcAddress")]
         internal static extern IntPtr GetProcAddress(string s);
 
+        [DllImport(OPENGL, EntryPoint = "wglMakeCurrent")]
+        public static extern bool MakeCurrent(IntPtr glDC, IntPtr glRC);
+        [DllImport(OPENGL, EntryPoint = "wglDeleteContext")]
+        public static extern bool DeleteContext(IntPtr glRC);
+        [DllImport(OPENGL, EntryPoint = "wglCreateContext")]
+        public static extern IntPtr CreateContext(IntPtr glDC);
+        [DllImport(OPENGL, EntryPoint = "wglShareLists")]
+        public static extern int ShareLists(IntPtr glDC0, IntPtr glDC1);
+        public static void ShareRenderingContext(GL old, GL @new)
+        {
+            if (ShareLists(old.glhdc, @new.glhdc) == 0)
+            {
+                Log.WriteLine("Failed to share rendering contexts");
+            }
+        }
+
+        [DllImport(GDI32)]
+        public static extern unsafe int ChoosePixelFormat(IntPtr hDC, PIXELFORMATDESCRIPTOR* ppfd);
+        [DllImport(GDI32)]
+        public static extern unsafe uint SetPixelFormat(IntPtr hDC, int iPixelFormat, PIXELFORMATDESCRIPTOR* ppfd);
+
+        // pixel format types/definitions
+        public const uint PFD_TYPE_RGBA = 0;
+        public const uint PFD_TYPE_COLORINDEX = 1;
+        public const uint PFD_MAIN_PLANE = 0;
+        public const uint PFD_OVERLAY_PLANE = 1;
+        public const uint PFD_UNDERLAY_PLANE = 0xff; // (-1)
+        public const uint PFD_DOUBLEBUFFER = 0x00000001;
+        public const uint PFD_STEREO = 0x00000002;
+        public const uint PFD_DRAW_TO_WINDOW = 0x00000004;
+        public const uint PFD_DRAW_TO_BITMAP = 0x00000008;
+        public const uint PFD_SUPPORT_GDI = 0x00000010;
+        public const uint PFD_SUPPORT_OPENGL = 0x00000020;
+        public const uint PFD_GENERIC_FORMAT = 0x00000040;
+        public const uint PFD_NEED_PALETTE = 0x00000080;
+        public const uint PFD_NEED_SYSTEM_PALETTE = 0x00000100;
+        public const uint PFD_SWAP_EXCHANGE = 0x00000200;
+        public const uint PFD_SWAP_COPY = 0x00000400;
+        public const uint PFD_SWAP_LAYER_BUFFERS = 0x00000800;
+        public const uint PFD_GENERIC_ACCELERATED = 0x00001000;
+        public const uint PFD_SUPPORT_DIRECTDRAW = 0x00002000;
+        public const uint PFD_DEPTH_DONTCARE = 0x20000000;
+        public const uint PFD_DOUBLEBUFFER_DONTCARE = 0x40000000;
+        public const uint PFD_STEREO_DONTCARE = 0x80000000;
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct PIXELFORMATDESCRIPTOR
+        {
+            public ushort nSize;
+            public ushort nVersion;
+            public uint dwFlags;
+            public byte iPixelType;
+            public byte cColorBits;
+            public byte cRedBits;
+            public byte cRedShift;
+            public byte cGreenBits;
+            public byte cGreenShift;
+            public byte cBlueBits;
+            public byte cBlueShift;
+            public byte cAlphaBits;
+            public byte cAlphaShift;
+            public byte cAccumBits;
+            public byte cAccumRedBits;
+            public byte cAccumGreenBits;
+            public byte cAccumBlueBits;
+            public byte cAccumAlphaBits;
+            public byte cDepthBits;
+            public byte cStencilBits;
+            public byte cAuxBuffers;
+            public byte iLayerType;
+            public byte bReserved;
+            public uint dwLayerMask;
+            public uint dwVisibleMask;
+            public uint dwDamageMask;
+        }
+
+        // GL context variables
+        protected IntPtr hdc = IntPtr.Zero;
+        public IntPtr DeviceContextHandle { get { return hdc; } }
+        protected IntPtr glhdc = IntPtr.Zero;
+        public IntPtr glContext { get { return glhdc; } }
+        protected bool gl_inited = false;
+        protected bool gl_disposing = false;
+        // initialization
+        private unsafe bool InitPixelFormat()
+        {
+            PIXELFORMATDESCRIPTOR pfd = new PIXELFORMATDESCRIPTOR();
+            pfd.nSize = 40; // (ushort)sizeof(PIXELFORMATDESCRIPTOR);
+            pfd.nVersion = 1;
+            pfd.dwFlags = (uint)(PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER);// | PFD_DRAW_TO_BITMAP);
+            pfd.dwLayerMask = PFD_MAIN_PLANE;
+            pfd.iPixelType = (byte)PFD_TYPE_RGBA;
+            pfd.cColorBits = 8; // nColorBits;
+            pfd.cDepthBits = 16; // nDepthBits;
+            pfd.cStencilBits = 1;// nStencilBits;
+            pfd.cAccumBits = 1;// nAccumBits;
+
+            int iPixelformat = ChoosePixelFormat(hdc, &pfd);
+            if (iPixelformat == 0) return false;
+            if (SetPixelFormat(hdc, iPixelformat, &pfd) == 0) return false;
+            return true;
+        }
+        unsafe bool CreateGLContext()
+        {
+            hdc = GetDC(this.Handle);
+
+            if (!InitPixelFormat()) return false;
+            glhdc = CreateContext(hdc);
+            if (glhdc == IntPtr.Zero) return false;
+            if (MakeCurrent(hdc, glhdc) == false)
+            {
+                hdc = IntPtr.Zero; glhdc = IntPtr.Zero;
+                return false;
+            }
+            //LoadExtensions();
+            return true;
+        }
+        public bool MakeCurrent()
+        {
+            if (!gl_inited) return false;
+            MakeCurrent(hdc, glhdc);
+            IntPtr nhdc = GetCurrentDC();
+            IntPtr nglhdc = GetCurrentContext();
+            if (!Disposing && ((hdc != nhdc) || (glhdc != nglhdc)))
+            {
+                Log.WriteLine("Failed to make rendering device current (hdc={0}, glhdc={1})", hdc, glhdc);
+                return false;
+            }
+            return true;
+        }
+        public void SwapBuffers()
+        {
+            if (gl_inited) SwapBuffers(hdc);
+        }
+        public const int NO_ERROR = 0;
+        public const int INVALID_ENUM = 0x0500;
+        public const int INVALID_VALUE = 0x0501;
+        public const int INVALID_OPERATION = 0x0502;
+        public const int STACK_OVERFLOW = 0x0503;
+        public const int STACK_UNDERFLOW = 0x0504;
+        public const int OUT_OF_MEMORY = 0x0505;
+        public const int TABLE_TOO_LARGE = 0x8031;
+        public void CheckGLError()
+        {
+            IntPtr curr_glhdc = GetCurrentContext();
+            //if (curr_glhdc != glhdc) { Log.WriteLine("*** GL ERROR (wrong context was [{0}] instead of [{1}]!)", curr_glhdc, glhdc); MakeCurrent(); }
+            int err = GetError();
+            if ((err == NO_ERROR) || Disposing) return;
+            string err_str = null;
+            switch (err)
+            {
+                case INVALID_ENUM: err_str = "INVALID_ENUM"; break;
+                case INVALID_VALUE: err_str = "INVALID_VALUE"; break;
+                case INVALID_OPERATION: err_str = "INVALID_OPERATION"; break;
+                case STACK_OVERFLOW: err_str = "STACK_OVERFLOW"; break;
+                case STACK_UNDERFLOW: err_str = "STACK_UNDERFLOW"; break;
+                case OUT_OF_MEMORY: err_str = "OUT_OF_MEMORY"; break;
+                case TABLE_TOO_LARGE: err_str = "TABLE_TOO_LARGE"; break;
+                default: err_str = "unknown error"; break;
+            }
+            Log.WriteLine("*** GL ERROR (hdc={0}, glhdc={1}): {2}", this.hdc, this.glhdc, err_str);
+        }
+        // Basic Wire from Forms Update to virtual exposed funcs
+        protected override void OnLoad(EventArgs e)
+        {
+            if (gl_disposing) return; // weird bug!
+            base.OnLoad(e);
+            if (!DesignMode && !gl_inited)
+            {
+                InitializeComponent();
+                if (CreateGLContext())
+                {
+                    if (Disposing) return; //weird bug
+                    InitGLpriv();
+                    //ChangeFont(Font, ForeColor);
+                    gl_inited = true;
+                }
+            }
+        }
+        virtual protected void InitGLpriv()
+        {
+            MakeCurrent();
+            ClearColor(1f, 1f, 1f, 1f);
+        }
+        public void DefaultPreDraw()
+        {
+            //DrawBuffer(BACK);
+            //CheckGLError();
+            //if (bgMode == 0)
+            //{
+            //    Clear(COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT);
+            //    if (bgImageName == null) return;
+            //    // else : draw the bgImage(s)
+            //    DepthMask(false);
+            //    GL.MatrixMode(GL.PROJECTION);
+            //    GL.LoadIdentity();
+            //    GL.Ortho(0, 1, 1, 0, -1, 1);
+            //    GL.MatrixMode(GL.MODELVIEW);
+            //    GL.LoadIdentity();
+            //    GL.Disable(LIGHTING);
+            //}
+            //else
+            //{
+            //    // else: we will need to draw a (textured??) quad ...
+            //    // only clear Z values ...
+            //    Clear(DEPTH_BUFFER_BIT);
+            //    DepthMask(false);
+
+            //    // do not clear the color buffer ... draw a quad instead ..
+            //    GL.MatrixMode(GL.PROJECTION);
+            //    GL.LoadIdentity();
+            //    GL.Ortho(0, 1, 1, 0, -1, 1);
+            //    GL.MatrixMode(GL.MODELVIEW);
+            //    GL.LoadIdentity();
+            //    GL.Disable(LIGHTING);
+
+            //    // draw colors
+            //    Begin(QUADS);
+            //    GL.Color(bgColor);
+
+            //    Vertex2d(0, 0);
+            //    Vertex2d(1, 0);
+
+            //    GL.Color(bgColorBottom);
+            //    //if (tex1d_colorRamp != null)
+            //    //{
+            //    //    ActiveTexture(TEXTURE1);
+            //    //    TexCoord1f(1);
+            //    //}
+            //    Vertex2d(1, 1);
+            //    Vertex2d(0, 1);
+            //    End();
+            //    CheckGLError();
+
+            //} // bgMode ...
+            
+            //if (bgImageName != null)
+            //{
+            //    //draw a transparent textured quad over it
+            //    Enable(BLEND);
+            //    BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+            //    GLTexture.env(REPLACE);
+            //    tex_bgImage.DrawXYQuad(0, 0, 1, 1);
+            //    CheckGLError();
+            //    Disable(BLEND);
+            //}
+            //else if (tex_bgImage != null)
+            //{
+            //    tex_bgImage.free();
+            //    tex_bgImage = null;
+            //}
+            //CheckGLError();
+
+            //DepthMask(true);
+            //GL.DepthFunc(GL.LESS);
+            //GL.Enable(LIGHTING);
+        }
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            if (!gl_inited) return;
+            MakeCurrent();
+            Viewport(0, 0, ClientSize.Width, ClientSize.Height);
+            SafeInvalidate(true);
+        }
+        protected virtual void glDispose()
+        {
+            if (!gl_inited) return;
+            if (gl_disposing) return;
+
+            if (!MakeCurrent())
+            {
+                Log.WriteLine("Could not switch GL context, not disposing...");
+                return;
+            }
+            gl_disposing = true;
+            gl_inited = false;
+            ReleaseDC(this.Handle, hdc);
+            hdc = IntPtr.Zero;
+            DeleteContext(glhdc);
+            Log.WriteLine("GL context [{0}] released.", glhdc);
+            glhdc = IntPtr.Zero;
+        }
+        delegate void InvalidateCallback(bool b);
+        public new void Invalidate(bool b)
+        {
+            SafeInvalidate(b);
+        }
+        protected int invalidate_request_nb = 0;
+        public void SafeInvalidate(bool b)
+        {
+            if (InvokeRequired)
+            {
+                if (gl_inited)
+                {
+                    if (System.Threading.Interlocked.Increment(ref invalidate_request_nb) > 1) return;
+                    try
+                    {
+                        Invoke(new InvalidateCallback(SafeInvalidate), new object[] { b });
+                    }
+                    catch (Exception)
+                    {
+                        // silently ignore!
+                    }
+                }
+                return; // at worst .. miss 1 invalidate.
+            }
+            // from the same thread!
+            base.Invalidate(b);
+            System.Threading.Interlocked.Exchange(ref invalidate_request_nb, 0);
+        }
+        int paint_request_nb = 0;
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            if (System.Threading.Interlocked.Increment(ref paint_request_nb) > 1) return;
+            try
+            {
+                if (DesignMode) return;
+                if (gl_inited)
+                {
+                    if (!MakeCurrent())
+                    {
+                        CheckGLError();
+                        return;
+                    }
+                    if (PreDrawGL != null) { PreDrawGL(); CheckGLError(); }
+                    if (PaintGL != null) { PaintGL(); CheckGLError(); }
+                    if (PostDrawGL != null) { PostDrawGL(); CheckGLError(); }
+                    SwapBuffers();
+                }
+                else { base.OnPaint(e); }
+            }
+            catch (Exception ex)
+            {
+                Log.WriteLine("..[GL] paint exception: {0}", ex.Message);
+            }
+            finally
+            {
+                System.Threading.Interlocked.Exchange(ref paint_request_nb, 0);
+            }
+        }
         public class Texture
         {
             private Bitmap image = null;
@@ -229,10 +591,9 @@ namespace epdTester
                 TexParameteri(TEXTURE_2D, TEXTURE_MAG_FILTER, LINEAR);
                 TexImage2D(TEXTURE_2D, 0, RGBA, image.Width, image.Height, 0, RGBA, UNSIGNED_BYTE, buffer);
             }
-            public int Width { get { return (inited && image != null ? image.Width : 0); } }
-            public int Height { get { return (inited && image != null ? image.Height : 0); } }
-            public int TexID { get { return (inited && image != null ? texture_id : -1); } }
-            
+            public int Width { get { return (image != null ? image.Width : 0); } }
+            public int Height { get { return (image != null ? image.Height : 0); } }
+            public int TexID { get { return (image != null ? texture_id : -1); } }
 
             private bool Load(String fname)
             {
@@ -240,9 +601,9 @@ namespace epdTester
                 {
                     image = new Bitmap(Image.FromFile(fname));
                     BitmapData bd = image.LockBits(new Rectangle(0, 0, Width, Height), ImageLockMode.ReadWrite, image.PixelFormat);
-                    IntPtr ptr = bd.Scan0; int size = bd.Stride * Height;
+                    IntPtr ptr = bd.Scan0; int size = bd.Stride * Height * 4; // rgba components
                     buffer = new byte[size];
-                    Marshal.Copy(ptr, buffer, 0, size);
+                    for (int h=0; h< Height; ++h) Marshal.Copy(new IntPtr((int)ptr + bd.Stride * h), buffer, bd.Stride * h, bd.Stride);
                     image.UnlockBits(bd); // is that mangled?
 
                     //image.getRGB(0, 0, image.Width, image.Height, pixelData, 0, image.Width);

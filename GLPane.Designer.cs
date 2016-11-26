@@ -30,12 +30,11 @@
         {
             this.SuspendLayout();
             // 
-            // GLPane
+            // GL
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Name = "GLPane";
-            this.Size = new System.Drawing.Size(272, 241);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
+            this.Name = "GL";
+            this.Size = new System.Drawing.Size(543, 326);
             this.ResumeLayout(false);
 
         }

@@ -61,6 +61,8 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -88,6 +90,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="About.cs" />
+    <Compile Include="ChessBoard.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChessBoard.Designer.cs">
+      <DependentUpon>ChessBoard.cs</DependentUpon>
+    </Compile>
     <Compile Include="ChessParser.cs" />
     <Compile Include="ChessPlot.cs">
       <SubType>UserControl</SubType>
@@ -132,6 +140,9 @@
     <Compile Include="Settings.cs" />
     <Compile Include="StringUtils.cs" />
     <Compile Include="Vec2.cs" />
+    <EmbeddedResource Include="ChessBoard.resx">
+      <DependentUpon>ChessBoard.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ChessPlot.resx">
       <DependentUpon>ChessPlot.cs</DependentUpon>
     </EmbeddedResource>

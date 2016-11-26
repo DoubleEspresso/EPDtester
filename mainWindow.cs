@@ -260,5 +260,12 @@ namespace epdTester
         {
             epdTabDisplay.SelectedTest.CancelTest();
         }
+
+        private void chessBoard_Click(object sender, EventArgs e)
+        {
+            ChessBoard b = new ChessBoard();
+            b.Show();
+            b.BringToFront();
+        }
     }
 }
