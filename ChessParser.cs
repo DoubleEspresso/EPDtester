@@ -153,7 +153,7 @@ namespace epdTester
                 return true;
 
             }
-            catch (Exception e)
+            catch (Exception e) // todo: ignore these
             {
                 Log.WriteLine("..[Parser] exception parsing UCI line : {0}", e.Message);
                 return false;

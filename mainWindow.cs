@@ -107,6 +107,7 @@ namespace epdTester
             }
             // textbox update
             engineList.Items.Add(e.Name);
+            engineList.SelectedIndex = engineList.Items.Count - 1; // so one is selected by default.
             updateDisplay(e);
         }
         void updateDisplay(Engine e)
