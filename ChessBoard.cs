@@ -12,8 +12,8 @@ namespace epdTester
 {
     public partial class ChessBoard : Form
     {
-    //    List<List<GL.Texture>> w_pieces = null;
-    //    List<List<GL.Texture>> b_pieces = null;
+        //    List<List<GL.Texture>> w_pieces = null;
+        //    List<List<GL.Texture>> b_pieces = null;
         List<GL.Texture> squares = null;
 
         public ChessBoard()
@@ -29,6 +29,7 @@ namespace epdTester
             if (squares == null) squares = new List<GL.Texture>();
             squares.Add(new GL.Texture("A:\\code\\chess\\testing\\epd\\vs2012\\epdTester\\epdTester\\graphics\\boards\\light.gif"));
             squares.Add(new GL.Texture("A:\\code\\chess\\testing\\epd\\vs2012\\epdTester\\epdTester\\graphics\\boards\\dark.gif"));
+            SetAspectRatio(Width, Height);
         }
 
         void Render()
@@ -41,9 +42,11 @@ namespace epdTester
             GL.Clear(GL.DEPTH_BUFFER_BIT | GL.COLOR_BUFFER_BIT);
             GL.LoadIdentity();
             GL.ClearColor(0f, 0f, 0f, 1f);
-
-            //SetAspectRatio(Width, Height);
             RenderBoard();
+        }
+        private void ResizeFinished(object sender, EventArgs e)
+        {
+            SetAspectRatio(Width, Height);
         }
 
         private void SetAspectRatio(int w, int h)
@@ -64,7 +67,6 @@ namespace epdTester
             GL.Texture t;
             GL.Enable(GL.TEXTURE_2D);
             
-            // 0,0 defined in upper left corner and y increases going downward 
             for (int r = 0; r < 8; ++r)
             {
                 for (int c = 0; c < 8; ++c) // starts with A1 square

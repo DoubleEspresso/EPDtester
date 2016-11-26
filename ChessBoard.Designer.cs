@@ -40,18 +40,19 @@
             this.boardPane.Dock = System.Windows.Forms.DockStyle.Fill;
             this.boardPane.Location = new System.Drawing.Point(0, 0);
             this.boardPane.Name = "boardPane";
-            this.boardPane.Size = new System.Drawing.Size(515, 476);
+            this.boardPane.Size = new System.Drawing.Size(649, 470);
             this.boardPane.TabIndex = 0;
             // 
             // ChessBoard
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(515, 476);
+            this.ClientSize = new System.Drawing.Size(649, 470);
             this.Controls.Add(this.boardPane);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ChessBoard";
             this.Text = "ChessBoard";
+            this.ResizeEnd += new System.EventHandler(this.ResizeFinished);
             this.ResumeLayout(false);
             this.PerformLayout();
 
