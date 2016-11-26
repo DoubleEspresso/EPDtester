@@ -1,6 +1,6 @@
 ﻿namespace epdTester
 {
-    partial class GLPane
+    partial class GL
     {
         /// <summary> 
         /// Required designer variable.
