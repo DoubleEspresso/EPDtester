@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Drawing.Imaging;
 
 namespace epdTester
 {
@@ -32,7 +33,55 @@ namespace epdTester
         public const int QUAD_STRIP = 0x8;
         public const int POLYGON = 0x9;
 
+        public const int TEXTURE_1D = 0x0DE0;
+        public const int TEXTURE_2D = 0x0DE1;
+        public const int TEXTURE_3D = 0x806F;
+
+        public const int TEXTURE_MAG_FILTER = 0x2800;
+        public const int TEXTURE_MIN_FILTER = 0x2801;
+
+        public const int NEAREST = 0x2600;
+        public const int LINEAR = 0x2601;
+
+        public const int TEXTURE_WRAP_R = 0x8072;
+        public const int TEXTURE_WRAP_S = 0x2802;
+        public const int TEXTURE_WRAP_T = 0x2803;
+        public const int CLAMP = 0x2900;
+        public const int CLAMP_TO_BORDER = 0x812D;
+        public const int CLAMP_TO_EDGE = 0x812F;
+
+        /*data types*/
+        public const int BYTE = 0x1400;
+        public const int UNSIGNED_BYTE = 0x1401;
+        public const int SHORT = 0x1402;
+        public const int UNSIGNED_SHORT = 0x1403;
+        public const int FLOAT = 0x1406;
+        public const int FIXED = 0x140C;
+
+        // format of pixel data
+        public const int COLOR_INDEX = 0x1900;
+        public const int RED = 0x1903;
+        public const int GREEN = 0x1904;
+        public const int BLUE = 0x1905;
+        public const int ALPHA = 0x1906;
+        public const int RGB = 0x1907;
+        public const int RGBA = 0x1908;
+        public const int BGR = 0x80E0;
+        public const int BGRA = 0x80E1;
+        public const int LUMINANCE = 0x1909;
+        public const int LUMINANCE_ALPHA = 0x190A;
+
+        public const int FALSE = 0;
+        public const int TRUE = 1;
+
+        public const int FRONT = 0x404;
+        public const int BACK = 0x405;
+        public const int FRONT_AND_BACK = 0x0408;
+
+
         /*DLL import definitions*/
+        [DllImport(OPENGL, EntryPoint = "glTexParameteri")]
+        public static extern void TexParameteri(int target, int pname, int param);
         [DllImport(OPENGL, EntryPoint = "glTexImage1D")]
         public static extern void TexImage1D(int target, int level, int internalformat, int width, int border, int format, int type, byte[] pixels);
         [DllImport(OPENGL, EntryPoint = "glTexImage2D")]
@@ -139,5 +188,89 @@ namespace epdTester
         public static extern void Begin(uint mode);
         [DllImport(OPENGL, EntryPoint = "glEnd")]
         public static extern void End();
+
+        [DllImport(OPENGL, EntryPoint = "glGetError")]
+        public static extern int GetError();
+
+        [DllImport(OPENGL, EntryPoint = "wglGetCurrentContext")]
+        public static extern IntPtr GetCurrentContext();
+        [DllImport(OPENGL, EntryPoint = "wglGetCurrentDC")]
+        public static extern IntPtr GetCurrentDC();
+        [DllImport(OPENGL, EntryPoint = "glDrawBuffer")]
+        public static extern void DrawBuffer(int mode);
+        [DllImport(OPENGL, EntryPoint = "wglSwapBuffers")]
+        public static extern uint SwapBuffers(IntPtr hdc);
+        [DllImport(OPENGL, EntryPoint = "wglGetProcAddress")]
+        internal static extern IntPtr GetProcAddress(string s);
+
+        public class Texture
+        {
+            private Bitmap image = null;
+            private int texture_id;
+            private byte[] buffer = null;
+            private bool inited = false;
+            
+            public Texture(String filename)
+            {
+                inited = Load(filename);
+            }
+
+            public void Bind()
+            {
+                if (!inited)
+                {
+                    Log.WriteLine("..[Texture] internal error, glBind() called before texture load, abort.");
+                    return;
+                }
+                BindTexture(TEXTURE_2D, texture_id);
+                TexParameteri(TEXTURE_2D, TEXTURE_WRAP_S, CLAMP_TO_EDGE);
+                TexParameteri(TEXTURE_2D, TEXTURE_WRAP_T, CLAMP_TO_EDGE);
+                TexParameteri(TEXTURE_2D, TEXTURE_MIN_FILTER, LINEAR);
+                TexParameteri(TEXTURE_2D, TEXTURE_MAG_FILTER, LINEAR);
+                TexImage2D(TEXTURE_2D, 0, RGBA, image.Width, image.Height, 0, RGBA, UNSIGNED_BYTE, buffer);
+            }
+            public int Width { get { return (inited && image != null ? image.Width : 0); } }
+            public int Height { get { return (inited && image != null ? image.Height : 0); } }
+            public int TexID { get { return (inited && image != null ? texture_id : -1); } }
+            
+
+            private bool Load(String fname)
+            {
+                try
+                {
+                    image = new Bitmap(Image.FromFile(fname));
+                    BitmapData bd = image.LockBits(new Rectangle(0, 0, Width, Height), ImageLockMode.ReadWrite, image.PixelFormat);
+                    IntPtr ptr = bd.Scan0; int size = bd.Stride * Height;
+                    buffer = new byte[size];
+                    Marshal.Copy(ptr, buffer, 0, size);
+                    image.UnlockBits(bd); // is that mangled?
+
+                    //image.getRGB(0, 0, image.Width, image.Height, pixelData, 0, image.Width);
+                    //buffer = BufferUtils.createByteBuffer(image.Width * image.Height * 4); //4 for RGBA, 3 for RGB
+                    /*
+                    for (int j = 0, idx = 0; j < Height; ++j)
+                    {
+                        for (int i = 0; i < Width; ++i, ++idx)
+                        {
+                            int p = pdata[idx];
+                            //buffer.put((byte)((pixel >> 16) & 0xFF));     // Red component
+                            //buffer.put((byte)((pixel >> 8) & 0xFF));      // Green component
+                            //buffer.put((byte)(pixel & 0xFF));             // Blue component
+                            //buffer.put((byte)((pixel >> 24) & 0xFF));     // Alpha component. Only for RGBA
+                        }
+                    }
+                    */
+                    //buffer.flip();
+                    int[] texture = new int[1] { 0 };
+                    GenTextures(1, texture); texture_id = texture[0];
+                    return true;
+                }
+                catch (Exception any)
+                {
+                    Log.WriteLine("..[Texture] Load exception: {0}", any.Message);
+                    return false;
+                }
+            }
+        }
     }
 }
