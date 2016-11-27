@@ -568,12 +568,10 @@ namespace epdTester
             private int texture_id;
             private byte[] buffer = null;
             private bool inited = false;
-
             public Texture(String filename)
             {
                 inited = Load(filename);
             }
-
             public void Bind()
             {
                 if (!inited)
@@ -591,7 +589,6 @@ namespace epdTester
             public int Width { get { return (image != null ? image.Width : 0); } }
             public int Height { get { return (image != null ? image.Height : 0); } }
             public int TexID { get { return (image != null ? texture_id : -1); } }
-
             private bool Load(String fname)
             {
                 try
@@ -602,11 +599,9 @@ namespace epdTester
                     buffer = new byte[size];
                     for (int h = 0; h < Height; ++h) Marshal.Copy(new IntPtr((long)(ptr + bd.Stride * h)), buffer, bd.Stride * h, bd.Stride);
                     image.UnlockBits(bd);
-
                     int[] texture = new int[1] { 0 };
                     GenTextures(1, texture);
                     texture_id = texture[0];
-
                     return true;
                 }
                 catch (Exception any)

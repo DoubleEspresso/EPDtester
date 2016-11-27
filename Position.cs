@@ -363,11 +363,10 @@ namespace epdTester
             }
             if (update && !moveIsPromotion) // handle promotion moves separately
             {
-                // save fen state
-                ++displayedMove;
                 FenPositions.Add(new List<String>());
                 FenPositions[displayedMove].Add(toFen());
                 Log.WriteLine("..[position] fen ({0})", FenPositions[displayedMove]);
+                displayedMove++;
             }
             undoMove(to, from, piece, color);
             return true;
@@ -938,14 +937,16 @@ namespace epdTester
         }
         public bool doMove(int from, int to, int piece, int color)
         {
+            // todo : refactor to not call remove/add during iteration 
             if (color == WHITE)
             {
                 List<int> wsquares = PieceSquares(WHITE, PieceOn(from));
                 for (int j = 0; j < wsquares.Count; ++j)
                     if (from == wsquares[j])
                     {
-                        wPieceSquares[piece].Remove(j);
+                        wPieceSquares[piece].RemoveAt(j);
                         wPieceSquares[piece].Add(to);
+                        break;
                     }
             }
             else
@@ -954,8 +955,9 @@ namespace epdTester
                 for (int j = 0; j < bsquares.Count; ++j)
                     if (from == bsquares[j])
                     {
-                        bPieceSquares[piece].Remove(j);
+                        bPieceSquares[piece].RemoveAt(j);
                         bPieceSquares[piece].Add(to);
+                        break;
                     }
             }
             if (moveIsCapture)
@@ -967,7 +969,8 @@ namespace epdTester
                     for (int j = 0; j < bsquares.Count; ++j)
                         if (to == bsquares[j])
                         {
-                            bPieceSquares[capturedPiece].Remove(j); // remove piece @ to sq
+                            bPieceSquares[capturedPiece].RemoveAt(j); // remove piece @ to sq
+                            break;
                         }
                 }
                 else
@@ -977,7 +980,8 @@ namespace epdTester
                     {
                         if (to == wsquares[j])
                         {
-                            wPieceSquares[capturedPiece].Remove(j); // remove piece @ to sq
+                            wPieceSquares[capturedPiece].RemoveAt(j); // remove piece @ to sq
+                            break;
                         }
                     }
                 }
@@ -992,7 +996,8 @@ namespace epdTester
                     for (int j = 0; j < bsquares.Count; ++j)
                         if (epTo == bsquares[j])
                         {
-                            bPieceSquares[capturedPiece].Remove(j); // remove piece @ to sq
+                            bPieceSquares[capturedPiece].RemoveAt(j); // remove piece @ to sq
+                            break;
                         }
                 }
                 else
@@ -1001,7 +1006,8 @@ namespace epdTester
                     for (int j = 0; j < wsquares.Count; ++j)
                         if (epTo == wsquares[j])
                         {
-                            wPieceSquares[capturedPiece].Remove(j); // remove piece @ to sq
+                            wPieceSquares[capturedPiece].RemoveAt(j); // remove piece @ to sq
+                            break;
                         }
                 }
                 pieceOn[epTo] = (int)(int)Piece.PIECE_NONE;
@@ -1017,8 +1023,9 @@ namespace epdTester
                     for (int j = 0; j < wsquares.Count; ++j)
                         if (rookFrom == wsquares[j])
                         {
-                            wPieceSquares[(int)(int)Piece.ROOK].Remove(j); // remove from sq
+                            wPieceSquares[(int)(int)Piece.ROOK].RemoveAt(j); // remove from sq
                             wPieceSquares[(int)(int)Piece.ROOK].Add(rookto); // add to sq
+                            break;
                         }
                     pieceOn[rookFrom] = (int)(int)Piece.PIECE_NONE;
                     pieceOn[rookto] = (int)(int)Piece.ROOK;
@@ -1033,8 +1040,9 @@ namespace epdTester
                     for (int j = 0; j < bsquares.Count; ++j)
                         if (rookFrom == bsquares[j])
                         {
-                            bPieceSquares[(int)(int)Piece.ROOK].Remove(j); // remove from sq
+                            bPieceSquares[(int)(int)Piece.ROOK].RemoveAt(j); // remove from sq
                             bPieceSquares[(int)(int)Piece.ROOK].Add(rookto); // add to sq
+                            break;
                         }
                     pieceOn[rookFrom] = (int)(int)Piece.PIECE_NONE;
                     pieceOn[rookto] = (int)(int)Piece.ROOK;
@@ -1051,9 +1059,9 @@ namespace epdTester
             stm = (stm == WHITE ? BLACK : WHITE);
             if (moveIsCastle)
             {
-                ++displayedMove;
                 FenPositions.Add(new List<string>());
                 FenPositions[displayedMove].Add(toFen());
+                ++displayedMove;
             }
             return true;
         }
@@ -1068,8 +1076,9 @@ namespace epdTester
                 for (int j = 0; j < wsquares.Count; ++j)
                     if (to == wsquares[j])
                     {
-                        wPieceSquares[(int)(int)Piece.PAWN].Remove(j); // remove from sq
+                        wPieceSquares[(int)(int)Piece.PAWN].RemoveAt(j); // remove from sq
                         wPieceSquares[promotedPiece].Add(to); // add to sq
+                        break;
                     }
             }
             else
@@ -1078,8 +1087,9 @@ namespace epdTester
                 for (int j = 0; j < bsquares.Count; ++j)
                     if (to == bsquares[j])
                     {
-                        bPieceSquares[(int)(int)Piece.PAWN].Remove(j);
+                        bPieceSquares[(int)(int)Piece.PAWN].RemoveAt(j);
                         bPieceSquares[promotedPiece].Add(to);
+                        break;
                         //BoardWindow.addTexture(promotedPiece, to, BLACK);
                     }
             }
@@ -1106,8 +1116,9 @@ namespace epdTester
                 for (int j = 0; j < wsquares.Count(); ++j)
                     if (from == wsquares[j])
                     {
-                        wPieceSquares[piece].Remove(j);
+                        wPieceSquares[piece].RemoveAt(j);
                         wPieceSquares[piece].Add(to);
+                        break;
                     }
             }
             else
@@ -1116,8 +1127,9 @@ namespace epdTester
                 for (int j = 0; j < bsquares.Count; ++j)
                     if (from == bsquares[j])
                     {
-                        bPieceSquares[piece].Remove(j);
+                        bPieceSquares[piece].RemoveAt(j);
                         bPieceSquares[piece].Add(to);
+                        break;
                     }
             }
             if (moveIsCapture)
@@ -1143,8 +1155,9 @@ namespace epdTester
                     for (int j = 0; j < wsquares.Count; ++j)
                         if (rookFrom == wsquares[j])
                         {
-                            wPieceSquares[(int)(int)Piece.ROOK].Remove(j); // remove from sq
+                            wPieceSquares[(int)(int)Piece.ROOK].RemoveAt(j); // remove from sq
                             wPieceSquares[(int)(int)Piece.ROOK].Add(rookto); // add to sq
+                            break;
                         }
                     pieceOn[rookFrom] = (int)(int)Piece.PIECE_NONE;
                     pieceOn[rookto] = (int)(int)Piece.ROOK;
@@ -1159,8 +1172,9 @@ namespace epdTester
                     for (int j = 0; j < bsquares.Count; ++j)
                         if (rookFrom == bsquares[j])
                         {
-                            bPieceSquares[(int)(int)Piece.ROOK].Remove(j); // remove from sq
+                            bPieceSquares[(int)(int)Piece.ROOK].RemoveAt(j); // remove from sq
                             bPieceSquares[(int)(int)Piece.ROOK].Add(rookto); // add to sq
+                            break;
                         }
                     pieceOn[rookFrom] = (int)(int)Piece.PIECE_NONE;
                     pieceOn[rookto] = (int)(int)Piece.ROOK;

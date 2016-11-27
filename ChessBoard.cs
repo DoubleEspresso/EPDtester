@@ -13,12 +13,31 @@ namespace epdTester
 {
     public partial class ChessBoard : Form
     {
+        public class InteractionData
+        {
+            // moving piece variables
+            public int from = -1;
+            public int color = -1;
+            public int piecetype = -1;
+            public GL.Texture ActivePiece = null;
+            public void reset()
+            {
+                from = -1; color = -1; piecetype = -1;
+                ActivePiece = null;
+            }
+            public bool valid()
+            {
+                return ((from >= 0 && from < 64) &&
+                       (color == 0 || color == 1) &&
+                       (piecetype >= 0 && piecetype < 6) &&
+                       ActivePiece != null);
+            }
+        }
+        InteractionData id = new InteractionData();
         List<List<List<GL.Texture>>> PieceTextures = null;
         List<GL.Texture> squares = null;
         Position pos = null;
-        int FromSquare = -1;
         Point MousePos = new Point(0, 0);
-        private GL.Texture ActivePiece = null;
         public ChessBoard()
         {
             InitializeComponent();
@@ -171,7 +190,7 @@ namespace epdTester
                 List<int> sqs = pos.PieceSquares(color, p);
                 for (int j = 0; j < sqs.Count; ++j) if (s == sqs[j]) { t = PieceTextures[color][p][j]; break; }
 
-                if (t != null)
+                if (t != null && t != id.ActivePiece)
                 {
                     r = 7 - r; // flip rows when rendering
                     t.Bind();
@@ -189,8 +208,8 @@ namespace epdTester
         }
         private void renderDraggingPiece(double x, double y)
         {
-            if (ActivePiece == null) return;
-            ActivePiece.Bind();
+            if (!id.valid()) return;
+            id.ActivePiece.Bind();
             GL.Enable(GL.BLEND); // blend to remove ugly piece background
             GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
             GL.Begin(GL.QUADS);
@@ -219,20 +238,60 @@ namespace epdTester
             switch (e.Button)
             {
                 case MouseButtons.Right:
-                    ActivePiece = null;
+                    id.reset();
                     break;
                 case MouseButtons.Left:
                     int s = SquareFromMouseLoc(e.Location);
-                    if (pos.isEmpty(s)) return;
-                    FromSquare = s;
-                    int c = pos.colorOn(s); int p = pos.PieceOn(s);
-                    List<int> sqs = pos.PieceSquares(c, p);
-                    for (int j = 0; j < sqs.Count; ++j) if (s == sqs[j]) { ActivePiece = PieceTextures[c][p][j]; break; }
+                    if (pos.isEmpty(s)) { id.reset(); return; }
+                    id.from = s; id.color = pos.colorOn(s); id.piecetype = pos.PieceOn(s);
+                    List<int> sqs = pos.PieceSquares(id.color, id.piecetype);
+                    for (int j = 0; j < sqs.Count; ++j) if (s == sqs[j]) { id.ActivePiece = PieceTextures[id.color][id.piecetype][j]; break; }
                     break;
                 default:
-                    ActivePiece = null;
+                    id.reset();
                     break;
             }
+        }
+        private void OnMouse_Up(object sender, MouseEventArgs e)
+        {
+            if (!id.valid()) return; // we aren't dragging any piece (but could be coloring the board).
+            int s = SquareFromMouseLoc(e.Location);
+            if (pos.isLegal(id.from, s, id.piecetype, id.color, true))
+            {
+                // drop piece..handle all special move types
+                pos.doMove(id.from, s, id.piecetype, id.color);
+                if (pos.isPromotion()) // TODO: fixme
+                {
+                    //popupPromotionWindow(fromSq, toSq, movingPiece, movingColor);
+                    //fromSq = -1;
+                    //toSq = -1;
+                    //movingColor = -1;
+                    //movingPiece = -1;
+                    //draggingPiece = false;
+                    //ActivePiece = null;
+                    return;
+                }
+                // check mate/stalemate
+                string game_over = "";
+                if (pos.isMate(id.from, s, id.piecetype, id.color)) game_over += "mate";
+                else if (pos.isStaleMate()) game_over += "stalemate";
+                else if (pos.isRepetitionDraw()) game_over += "3-fold repetition";
+
+                if (!String.IsNullOrWhiteSpace(game_over))
+                {
+                    Log.WriteLine("..game finished, {0}", game_over);
+                    return;
+                }
+                // send move data to engine
+                String fen = pos.getPosition(pos.maxDisplayedMoveIdx(), 0);
+                //engineMonitor.sendCommand("position fen " + fen);
+                //engineMonitor.sendCommand("go wtime 8000 btime 8000");
+                //engine.UCI_CMD("position fen " + fen);
+                //engine.UCI_CMD("go wtime 8000 btime 8000");
+                //engine.startListening("bestmove");
+            }
+            pos.clearMoveData();
+            id.reset();
         }
         private void OnMouse_move(object sender, MouseEventArgs e)
         {
