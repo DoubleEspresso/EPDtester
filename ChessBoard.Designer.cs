@@ -53,9 +53,11 @@
             this.ClientSize = new System.Drawing.Size(649, 470);
             this.Controls.Add(this.boardPane);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.KeyPreview = true;
             this.Name = "ChessBoard";
             this.Text = "ChessBoard";
             this.ResizeEnd += new System.EventHandler(this.ResizeFinished);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OnKey_Down);
             this.ResumeLayout(false);
             this.PerformLayout();
 

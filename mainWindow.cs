@@ -245,7 +245,6 @@ namespace epdTester
             ActiveEngine.SetBestMoveCallback(onEPDtestBestMoveParsed);
             epdTabDisplay.SelectedTest.startTest(timePerPosition);
         }
-
         uint timePerPosition = 1000;
         private void epdFixedTimePosition_TextChanged(object sender, EventArgs e)
         {
@@ -255,12 +254,10 @@ namespace epdTester
             }
             catch { }
         }
-
         private void stopEpdTest_Click(object sender, EventArgs e)
         {
             epdTabDisplay.SelectedTest.CancelTest();
         }
-
         private void chessBoard_Click(object sender, EventArgs e)
         {
             ChessBoard b = new ChessBoard();

@@ -33,6 +33,7 @@ namespace epdTester
                        ActivePiece != null);
             }
         }
+        GameInfo gi = null;
         InteractionData id = new InteractionData();
         List<List<List<GL.Texture>>> PieceTextures = null;
         List<GL.Texture> squares = null;
@@ -296,6 +297,16 @@ namespace epdTester
         private void OnMouse_move(object sender, MouseEventArgs e)
         {
             MousePos = e.Location; // member variable even needed?
+        }
+        /* Key input on chess board*/
+        private void OnKey_Down(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.G)
+            {
+                if (gi == null) gi = new GameInfo();
+                gi.Show();
+                gi.BringToFront();
+            }
         }
     }
 }

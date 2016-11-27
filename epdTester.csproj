@@ -107,6 +107,12 @@
     <Compile Include="Clock.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="ClockUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ClockUI.Designer.cs">
+      <DependentUpon>ClockUI.cs</DependentUpon>
+    </Compile>
     <Compile Include="Engine.cs" />
     <Compile Include="EpdFile.cs" />
     <Compile Include="EpdTabDisplay.cs">
@@ -114,6 +120,12 @@
     </Compile>
     <Compile Include="EpdTabDisplay.Designer.cs">
       <DependentUpon>EpdTabDisplay.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GameInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GameInfo.Designer.cs">
+      <DependentUpon>GameInfo.cs</DependentUpon>
     </Compile>
     <Compile Include="GLPane.cs">
       <SubType>UserControl</SubType>
@@ -147,8 +159,14 @@
     <EmbeddedResource Include="ChessPlot.resx">
       <DependentUpon>ChessPlot.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="ClockUI.resx">
+      <DependentUpon>ClockUI.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="EpdTabDisplay.resx">
       <DependentUpon>EpdTabDisplay.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GameInfo.resx">
+      <DependentUpon>GameInfo.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GLPane.resx">
       <DependentUpon>GLPane.cs</DependentUpon>
