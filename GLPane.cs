@@ -63,6 +63,31 @@ namespace epdTester
         public const int MODELVIEW = 0x1700;
         public const int DEPTH_BUFFER_BIT = 0x100;
         public const int COLOR_BUFFER_BIT = 0x4000;
+        public const int RGBA8 = 0x8058;
+
+        public const int ALL_ATTRIB_BITS = unchecked((Int32)0xFFFFFFFF);
+        public const int SRC_COLOR = 0x0300;
+        public const int ONE_MINUS_SRC_COLOR = 0x0301;
+        public const int SRC_ALPHA = 0x0302;
+        public const int ONE_MINUS_SRC_ALPHA = 0x0303;
+        public const int DST_ALPHA = 0x0304;
+        public const int ONE_MINUS_DST_ALPHA = 0x0305;
+        public const int DST_COLOR = 0x0306;
+        public const int ONE_MINUS_DST_COLOR = 0x0307;
+        public const int ONE = 1;
+        public const int ZERO = 0;
+        public const int BLEND = 0x0BE2;
+        public const int CONSTANT_ALPHA = 0x8003;
+
+        public const int LIGHT0 = 0x4000;
+        public const int LIGHT1 = 0x4001;
+        public const int LIGHT2 = 0x4002;
+        public const int LIGHT3 = 0x4003;
+        public const int LIGHT4 = 0x4004;
+        public const int LIGHTING = 0x0B50;
+        public const int POSITION = 0x1203;
+        public const int LIGHT_MODEL_TWO_SIDE = 0xb52;
+        public const int LIGHT_MODEL_LOCAL_VIEWER = 0xb51;
 
         /*data types*/
         public const int BYTE = 0x1400;
@@ -84,6 +109,8 @@ namespace epdTester
         public const int BGRA = 0x80E1;
         public const int LUMINANCE = 0x1909;
         public const int LUMINANCE_ALPHA = 0x190A;
+        public const int PIXEL_UNPACK_BUFFER = 0x88EC;
+        public const int PACK_ALIGNMENT = 0x0D05;
 
         public const int FALSE = 0;
         public const int TRUE = 1;
@@ -173,6 +200,8 @@ namespace epdTester
         public static extern void MatrixMode(uint mode);
         [DllImport(OPENGL, EntryPoint = "glPopMatrix")]
         public static extern void PopMatrix();
+        [DllImport(OPENGL, EntryPoint = "glPixelStorei")]
+        public static extern void PixelStorei(int param, int value);
         [DllImport(OPENGL, EntryPoint = "glLoadIdentity")]
         public static extern void LoadIdentity();
         [DllImport(OPENGL, EntryPoint = "glPushMatrix")]
@@ -589,7 +618,7 @@ namespace epdTester
                 TexParameteri(TEXTURE_2D, TEXTURE_WRAP_T, CLAMP_TO_EDGE);
                 TexParameteri(TEXTURE_2D, TEXTURE_MIN_FILTER, LINEAR);
                 TexParameteri(TEXTURE_2D, TEXTURE_MAG_FILTER, LINEAR);
-                TexImage2D(TEXTURE_2D, 0, RGBA, image.Width, image.Height, 0, RGBA, UNSIGNED_BYTE, buffer);
+                TexImage2D(TEXTURE_2D, 0, RGBA, image.Width, image.Height, 0, BGRA, UNSIGNED_BYTE, buffer);
             }
             public int Width { get { return (image != null ? image.Width : 0); } }
             public int Height { get { return (image != null ? image.Height : 0); } }
@@ -604,26 +633,12 @@ namespace epdTester
                     IntPtr ptr = bd.Scan0; int size = bd.Stride * Height * 4; // rgba components
                     buffer = new byte[size];
                     for (int h=0; h< Height; ++h) Marshal.Copy(new IntPtr((int)ptr + bd.Stride * h), buffer, bd.Stride * h, bd.Stride);
-                    image.UnlockBits(bd); // is that mangled?
+                    image.UnlockBits(bd); 
 
-                    //image.getRGB(0, 0, image.Width, image.Height, pixelData, 0, image.Width);
-                    //buffer = BufferUtils.createByteBuffer(image.Width * image.Height * 4); //4 for RGBA, 3 for RGB
-                    /*
-                    for (int j = 0, idx = 0; j < Height; ++j)
-                    {
-                        for (int i = 0; i < Width; ++i, ++idx)
-                        {
-                            int p = pdata[idx];
-                            //buffer.put((byte)((pixel >> 16) & 0xFF));     // Red component
-                            //buffer.put((byte)((pixel >> 8) & 0xFF));      // Green component
-                            //buffer.put((byte)(pixel & 0xFF));             // Blue component
-                            //buffer.put((byte)((pixel >> 24) & 0xFF));     // Alpha component. Only for RGBA
-                        }
-                    }
-                    */
-                    //buffer.flip();
                     int[] texture = new int[1] { 0 };
-                    GenTextures(1, texture); texture_id = texture[0];
+                    GenTextures(1, texture);
+                    texture_id = texture[0];
+
                     return true;
                 }
                 catch (Exception any)
