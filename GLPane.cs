@@ -118,7 +118,7 @@ namespace epdTester
         public const int FRONT = 0x404;
         public const int BACK = 0x405;
         public const int FRONT_AND_BACK = 0x0408;
-
+        public const int LESS = 0x0201;
 
         /*DLL import definitions*/
         [DllImport(OPENGL, EntryPoint = "glTexParameteri")]
@@ -252,6 +252,10 @@ namespace epdTester
         public static extern uint SwapBuffers(IntPtr hdc);
         [DllImport(OPENGL, EntryPoint = "wglGetProcAddress")]
         internal static extern IntPtr GetProcAddress(string s);
+        [DllImport(OPENGL, EntryPoint = "glDepthMask")]
+        public static extern void DepthMask(bool writeDepth);
+        [DllImport(OPENGL, EntryPoint = "glDepthFunc")]
+        public static extern void DepthFunc(uint func);
 
         [DllImport(OPENGL, EntryPoint = "wglMakeCurrent")]
         public static extern bool MakeCurrent(IntPtr glDC, IntPtr glRC);
@@ -345,14 +349,15 @@ namespace epdTester
             pfd.dwFlags = (uint)(PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER);// | PFD_DRAW_TO_BITMAP);
             pfd.dwLayerMask = PFD_MAIN_PLANE;
             pfd.iPixelType = (byte)PFD_TYPE_RGBA;
-            pfd.cColorBits = 8; // nColorBits;
-            pfd.cDepthBits = 16; // nDepthBits;
-            pfd.cStencilBits = 1;// nStencilBits;
-            pfd.cAccumBits = 1;// nAccumBits;
+            pfd.cColorBits = 32;
+            pfd.cDepthBits = 32; 
+            pfd.cStencilBits = 8;
+            pfd.cAccumBits = 0;
 
             int iPixelformat = ChoosePixelFormat(hdc, &pfd);
             if (iPixelformat == 0) return false;
             if (SetPixelFormat(hdc, iPixelformat, &pfd) == 0) return false;
+            if ((pfd.dwFlags & PFD_DOUBLEBUFFER) != PFD_DOUBLEBUFFER) Log.WriteLine("!!WARNING : Opengl double buffering failed to initialize");
             return true;
         }
         unsafe bool CreateGLContext()
@@ -432,83 +437,41 @@ namespace epdTester
                 }
             }
         }
+        public delegate void InitGLFunc();
+        public InitGLFunc InitGL = null;
         virtual protected void InitGLpriv()
         {
             MakeCurrent();
+            CheckGLError();
             ClearColor(1f, 1f, 1f, 1f);
+            if (InitGL != null) InitGL();
+            CheckGLError();
         }
         public void DefaultPreDraw()
         {
-            //DrawBuffer(BACK);
-            //CheckGLError();
-            //if (bgMode == 0)
-            //{
-            //    Clear(COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT);
-            //    if (bgImageName == null) return;
-            //    // else : draw the bgImage(s)
-            //    DepthMask(false);
-            //    GL.MatrixMode(GL.PROJECTION);
-            //    GL.LoadIdentity();
-            //    GL.Ortho(0, 1, 1, 0, -1, 1);
-            //    GL.MatrixMode(GL.MODELVIEW);
-            //    GL.LoadIdentity();
-            //    GL.Disable(LIGHTING);
-            //}
-            //else
-            //{
-            //    // else: we will need to draw a (textured??) quad ...
-            //    // only clear Z values ...
-            //    Clear(DEPTH_BUFFER_BIT);
-            //    DepthMask(false);
-
-            //    // do not clear the color buffer ... draw a quad instead ..
-            //    GL.MatrixMode(GL.PROJECTION);
-            //    GL.LoadIdentity();
-            //    GL.Ortho(0, 1, 1, 0, -1, 1);
-            //    GL.MatrixMode(GL.MODELVIEW);
-            //    GL.LoadIdentity();
-            //    GL.Disable(LIGHTING);
-
-            //    // draw colors
-            //    Begin(QUADS);
-            //    GL.Color(bgColor);
-
-            //    Vertex2d(0, 0);
-            //    Vertex2d(1, 0);
-
-            //    GL.Color(bgColorBottom);
-            //    //if (tex1d_colorRamp != null)
-            //    //{
-            //    //    ActiveTexture(TEXTURE1);
-            //    //    TexCoord1f(1);
-            //    //}
-            //    Vertex2d(1, 1);
-            //    Vertex2d(0, 1);
-            //    End();
-            //    CheckGLError();
-
-            //} // bgMode ...
-
-            //if (bgImageName != null)
-            //{
-            //    //draw a transparent textured quad over it
-            //    Enable(BLEND);
-            //    BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
-            //    GLTexture.env(REPLACE);
-            //    tex_bgImage.DrawXYQuad(0, 0, 1, 1);
-            //    CheckGLError();
-            //    Disable(BLEND);
-            //}
-            //else if (tex_bgImage != null)
-            //{
-            //    tex_bgImage.free();
-            //    tex_bgImage = null;
-            //}
-            //CheckGLError();
-
-            //DepthMask(true);
-            //GL.DepthFunc(GL.LESS);
-            //GL.Enable(LIGHTING);
+            DrawBuffer(BACK);
+            Clear(COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT);
+            GL.Disable(LIGHTING);
+            DepthMask(false);
+            End();
+        }
+        bool dragging = false;
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            base.OnMouseDown(e);
+            dragging = true;
+            SafeInvalidate(true);
+        }
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+            if (dragging) SafeInvalidate(true);
+        }
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            base.OnMouseUp(e);
+            dragging = false;
+            SafeInvalidate(true);
         }
         protected override void OnResize(EventArgs e)
         {
@@ -575,12 +538,12 @@ namespace epdTester
                 {
                     if (!MakeCurrent())
                     {
-                        CheckGLError();
+                        //CheckGLError();
                         return;
                     }
-                    if (PreDrawGL != null) { PreDrawGL(); CheckGLError(); }
-                    if (PaintGL != null) { PaintGL(); CheckGLError(); }
-                    if (PostDrawGL != null) { PostDrawGL(); CheckGLError(); }
+                    if (PreDrawGL != null) { PreDrawGL(); } //CheckGLError(); }
+                    if (PaintGL != null) { PaintGL(); } //CheckGLError(); }
+                    if (PostDrawGL != null) { PostDrawGL(); }// CheckGLError(); }
                     SwapBuffers();
                 }
                 else { base.OnPaint(e); }
@@ -593,6 +556,11 @@ namespace epdTester
             {
                 System.Threading.Interlocked.Exchange(ref paint_request_nb, 0);
             }
+        }
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            // no paint on bg
+            if (DesignMode) base.OnPaintBackground(e);
         }
         public class Texture
         {

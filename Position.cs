@@ -14,7 +14,7 @@ namespace epdTester
         private List<List<String>> FenPositions = null;
         public String SanPiece = "PNBRQKpnbrqk";
         public String SanCols = "abcdefgh";
-        private int[] colorOn = null;
+        private int[] priv_colorOn = null;
         private int[] pieceOn = null;
         private int[] kingSqs = null;
         private int[] pieceDiffs = null;
@@ -105,7 +105,7 @@ namespace epdTester
                     {
                         fen += empties; empties = 0;
                     }
-                    fen += SanPiece[(colorOn[s] == BLACK ? pieceOn[s] + 6 : pieceOn[s])];
+                    fen += SanPiece[(priv_colorOn[s] == BLACK ? pieceOn[s] + 6 : pieceOn[s])];
                 }
                 if (empties > 0)
                 {
@@ -241,8 +241,8 @@ namespace epdTester
             bPieceSquares.Clear();
             for (int i = 0; i < 6; ++i) bPieceSquares.Add(new List<int>()); // pawn, knight, bishop, roo queen, king
 
-            if (colorOn == null) colorOn = new int[64];
-            for (int i = 0; i < 64; ++i) colorOn[i] = COLOR_NONE;
+            if (priv_colorOn == null) priv_colorOn = new int[64];
+            for (int i = 0; i < 64; ++i) priv_colorOn[i] = COLOR_NONE;
 
             if (pieceOn == null) pieceOn = new int[64];
             for (int i = 0; i < 64; ++i) pieceOn[i] = (int)(int)Piece.PIECE_NONE;
@@ -271,10 +271,10 @@ namespace epdTester
         {
             return pieceOn[s];
         }
-        public int pieceColorAt(int s)
+        public int colorOn(int s)
         {
             if (!onBoard(s)) return (int)(int)Piece.PIECE_NONE;
-            return colorOn[s];
+            return priv_colorOn[s];
         }
         private void SetPiece(char c, int s)
         {
@@ -288,7 +288,7 @@ namespace epdTester
                     if (color == WHITE) wPieceSquares[piece].Add(s);
                     else bPieceSquares[piece].Add(s);
 
-                    colorOn[s] = color;
+                    priv_colorOn[s] = color;
                     pieceOn[s] = piece;
                     if (p == (int)Pieces.W_KING || p == (int)Pieces.B_KING) kingSqs[color] = s;
                     else
@@ -492,7 +492,7 @@ namespace epdTester
         }
         public bool isPseudoLegal(int from, int to, int piece, int color)
         {
-            if (pieceColorAt(to) == color) return false;
+            if (colorOn(to) == color) return false;
             switch (piece)
             {
                 case 0: // pawn
@@ -590,7 +590,7 @@ namespace epdTester
         }
         bool enemyOn(int s, int color)
         {
-            return (colorOn[s] == color && pieceOn[s] != (int)Piece.PIECE_NONE);
+            return (priv_colorOn[s] == color && pieceOn[s] != (int)Piece.PIECE_NONE);
         }
         int colDiff(int s1, int s2)
         {
@@ -1005,7 +1005,7 @@ namespace epdTester
                         }
                 }
                 pieceOn[epTo] = (int)(int)Piece.PIECE_NONE;
-                colorOn[epTo] = COLOR_NONE;
+                priv_colorOn[epTo] = COLOR_NONE;
             }
             else if (moveIsCastle)
             {
@@ -1022,8 +1022,8 @@ namespace epdTester
                         }
                     pieceOn[rookFrom] = (int)(int)Piece.PIECE_NONE;
                     pieceOn[rookto] = (int)(int)Piece.ROOK;
-                    colorOn[rookFrom] = COLOR_NONE;
-                    colorOn[rookto] = color;
+                    priv_colorOn[rookFrom] = COLOR_NONE;
+                    priv_colorOn[rookto] = color;
                 }
                 else
                 {
@@ -1038,15 +1038,15 @@ namespace epdTester
                         }
                     pieceOn[rookFrom] = (int)(int)Piece.PIECE_NONE;
                     pieceOn[rookto] = (int)(int)Piece.ROOK;
-                    colorOn[rookFrom] = COLOR_NONE;
-                    colorOn[rookto] = color;
+                    priv_colorOn[rookFrom] = COLOR_NONE;
+                    priv_colorOn[rookto] = color;
                 }
             }
             pieceOn[from] = (int)(int)Piece.PIECE_NONE;
             pieceOn[to] = piece;
 
-            colorOn[from] = COLOR_NONE;
-            colorOn[to] = color;
+            priv_colorOn[from] = COLOR_NONE;
+            priv_colorOn[to] = color;
 
             stm = (stm == WHITE ? BLACK : WHITE);
             if (moveIsCastle)
@@ -1086,8 +1086,8 @@ namespace epdTester
             pieceOn[from] = (int)(int)Piece.PIECE_NONE;
             pieceOn[to] = promotedPiece;
 
-            colorOn[from] = COLOR_NONE;
-            colorOn[to] = color;
+            priv_colorOn[from] = COLOR_NONE;
+            priv_colorOn[to] = color;
 
             ++displayedMove;
             FenPositions.Add(new List<string>());
@@ -1131,7 +1131,7 @@ namespace epdTester
                 if (color == WHITE) bPieceSquares[capturedPiece].Add(epTo);
                 else wPieceSquares[capturedPiece].Add(epTo);
                 pieceOn[epTo] = (int)(int)Piece.PAWN;
-                colorOn[epTo] = (color == WHITE ? BLACK : WHITE);
+                priv_colorOn[epTo] = (color == WHITE ? BLACK : WHITE);
             }
             else if (moveIsCastle)
             {
@@ -1148,8 +1148,8 @@ namespace epdTester
                         }
                     pieceOn[rookFrom] = (int)(int)Piece.PIECE_NONE;
                     pieceOn[rookto] = (int)(int)Piece.ROOK;
-                    colorOn[rookFrom] = COLOR_NONE;
-                    colorOn[rookto] = color;
+                    priv_colorOn[rookFrom] = COLOR_NONE;
+                    priv_colorOn[rookto] = color;
                 }
                 else
                 {
@@ -1164,14 +1164,14 @@ namespace epdTester
                         }
                     pieceOn[rookFrom] = (int)(int)Piece.PIECE_NONE;
                     pieceOn[rookto] = (int)(int)Piece.ROOK;
-                    colorOn[rookFrom] = COLOR_NONE;
-                    colorOn[rookto] = color;
+                    priv_colorOn[rookFrom] = COLOR_NONE;
+                    priv_colorOn[rookto] = color;
                 }
             }
             pieceOn[from] = (moveIsCapture ? capturedPiece : (int)Piece.PIECE_NONE);
             pieceOn[to] = piece;
-            colorOn[from] = (moveIsCapture ? stm : COLOR_NONE);
-            colorOn[to] = color;
+            priv_colorOn[from] = (moveIsCapture ? stm : COLOR_NONE);
+            priv_colorOn[to] = color;
             stm = (stm == WHITE ? BLACK : WHITE);
             return true;
         }

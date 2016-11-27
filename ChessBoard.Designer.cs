@@ -42,6 +42,8 @@
             this.boardPane.Name = "boardPane";
             this.boardPane.Size = new System.Drawing.Size(649, 470);
             this.boardPane.TabIndex = 0;
+            this.boardPane.MouseDown += new System.Windows.Forms.MouseEventHandler(this.OnMouse_click);
+            this.boardPane.MouseMove += new System.Windows.Forms.MouseEventHandler(this.OnMouse_move);
             // 
             // ChessBoard
             // 

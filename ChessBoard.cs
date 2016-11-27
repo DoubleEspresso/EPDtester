@@ -16,6 +16,9 @@ namespace epdTester
         List<List<List<GL.Texture>>> PieceTextures = null;
         List<GL.Texture> squares = null;
         Position pos = null;
+        int FromSquare = -1;
+        Point MousePos = new Point(0, 0);
+        private GL.Texture ActivePiece = null;
         public ChessBoard()
         {
             InitializeComponent();
@@ -24,6 +27,7 @@ namespace epdTester
         }
         void Initialize()
         {
+            // todo : handle other extensions for pieces/squares (only gif/png are supported now).
             string squaredir = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\graphics\boards"));
             string piecedir = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\graphics\pieces"));
             string[,] texpiece = new string[2, 6]
@@ -131,7 +135,6 @@ namespace epdTester
                 }
             }
 
-
             //GLGraphics.renderPreviousArrows();
             //if (mouseRightClick)
             //{
@@ -152,9 +155,8 @@ namespace epdTester
             //    }
 
             //}
-
-            //renderDraggingPiece(dX, dY); // render dragging piece last, so it render *over* all other textures.
-
+            // render dragging piece last, so it renders *over* all other textures.
+            renderDraggingPiece(dX, dY);
         }
         private void renderPiece(double x, double y, int r, int c)
         {
@@ -165,7 +167,7 @@ namespace epdTester
             if (!pos.isEmpty(s))
             {
                 GL.Texture t = null;
-                int color = pos.pieceColorAt(s); int p = pos.PieceOn(s);
+                int color = pos.colorOn(s); int p = pos.PieceOn(s);
                 List<int> sqs = pos.PieceSquares(color, p);
                 for (int j = 0; j < sqs.Count; ++j) if (s == sqs[j]) { t = PieceTextures[color][p][j]; break; }
 
@@ -184,6 +186,57 @@ namespace epdTester
                     GL.End();
                 }
             }
+        }
+        private void renderDraggingPiece(double x, double y)
+        {
+            if (ActivePiece == null) return;
+            ActivePiece.Bind();
+            GL.Enable(GL.BLEND); // blend to remove ugly piece background
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+            GL.Begin(GL.QUADS);
+            GL.TexCoord2f(0, 0); GL.Vertex2d(MousePos.X - 0.5 * x, MousePos.Y - 0.5 * y);
+            GL.TexCoord2f(1, 0); GL.Vertex2d(MousePos.X + 0.5 * x, MousePos.Y - 0.5 * y);
+            GL.TexCoord2f(1, 1); GL.Vertex2d(MousePos.X + 0.5 * x, MousePos.Y + 0.5 * y);
+            GL.TexCoord2f(0, 1); GL.Vertex2d(MousePos.X - 0.5 * x, MousePos.Y + 0.5 * y);
+            GL.Disable(GL.BLEND);
+            GL.End();
+        }
+        /* Mouse interactions - utilities */
+        public int SquareFromMouseLoc(Point v)
+        {
+            float oX = 0; // (float)((getClientArea().width - BoardDims.x) / 2f);
+            float oY = 0; // (float)((getClientArea().height - BoardDims.y) / 2f);
+            float dX = (float)(boardPane.Width / 8f);//(float) r.width / 8f;
+            float dY = (float)(boardPane.Height / 8f);//(float) r.height / 8f;
+            int row = (int)Math.Floor((float)(v.Y - oY) / dY);
+            int col = (int)Math.Floor((float)(v.X - oX) / dX);
+            // flip row for display
+            row = 7 - row;
+            return (int)(8 * row + col);
+        }
+        private void OnMouse_click(object sender, MouseEventArgs e)
+        {
+            switch (e.Button)
+            {
+                case MouseButtons.Right:
+                    ActivePiece = null;
+                    break;
+                case MouseButtons.Left:
+                    int s = SquareFromMouseLoc(e.Location);
+                    if (pos.isEmpty(s)) return;
+                    FromSquare = s;
+                    int c = pos.colorOn(s); int p = pos.PieceOn(s);
+                    List<int> sqs = pos.PieceSquares(c, p);
+                    for (int j = 0; j < sqs.Count; ++j) if (s == sqs[j]) { ActivePiece = PieceTextures[c][p][j]; break; }
+                    break;
+                default:
+                    ActivePiece = null;
+                    break;
+            }
+        }
+        private void OnMouse_move(object sender, MouseEventArgs e)
+        {
+            MousePos = e.Location; // member variable even needed?
         }
     }
 }
