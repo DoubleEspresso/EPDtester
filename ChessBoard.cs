@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,10 +13,9 @@ namespace epdTester
 {
     public partial class ChessBoard : Form
     {
-        List<List<GL.Texture>> w_pieces = null;
-        //    List<List<GL.Texture>> b_pieces = null;
+        List<List<List<GL.Texture>>> PieceTextures = null;
         List<GL.Texture> squares = null;
-        Position position = null;
+        Position pos = null;
         public ChessBoard()
         {
             InitializeComponent();
@@ -24,44 +24,35 @@ namespace epdTester
         }
         void Initialize()
         {
-            // todo : fail if textures fail to load.
+            string squaredir = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\graphics\boards"));
+            string piecedir = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\graphics\pieces"));
+            string[,] texpiece = new string[2, 6]
+            {
+                { "wp.png", "wn.png", "wb.png", "wr.png", "wq.png", "wk.png" },
+                { "bp.png", "bn.png", "bb.png", "br.png", "bq.png", "bk.png" }
+            };
+            string[] texsquare = new string[2] { "light.gif", "dark.gif" };
+
+            // square textures
             if (squares == null) squares = new List<GL.Texture>();
-            squares.Add(new GL.Texture("A:\\code\\chess\\testing\\epd\\vs2012\\epdTester\\epdTester\\graphics\\boards\\light.gif"));
-            squares.Add(new GL.Texture("A:\\code\\chess\\testing\\epd\\vs2012\\epdTester\\epdTester\\graphics\\boards\\dark.gif"));
-
-            // pawns
-            w_pieces = new List<List<GL.Texture>>();
-            List<GL.Texture> pawns = new List<GL.Texture>();
-            for (int i = 0; i < 8; ++i) pawns.Add(new GL.Texture("A:\\code\\chess\\testing\\epd\\vs2012\\epdTester\\epdTester\\graphics\\pieces\\wp.png"));
-            w_pieces.Add(pawns);
-
-            // knights
-            List<GL.Texture> knights = new List<GL.Texture>();
-            for (int i = 0; i < 8; ++i) knights.Add(new GL.Texture("A:\\code\\chess\\testing\\epd\\vs2012\\epdTester\\epdTester\\graphics\\pieces\\wn.png"));
-            w_pieces.Add(knights);
-
-            // bishops
-            List<GL.Texture> bishops = new List<GL.Texture>();
-            for (int i = 0; i < 8; ++i) bishops.Add(new GL.Texture("A:\\code\\chess\\testing\\epd\\vs2012\\epdTester\\epdTester\\graphics\\pieces\\wb.png"));
-            w_pieces.Add(bishops);
-
-            // rooks
-            List<GL.Texture> rooks = new List<GL.Texture>();
-            for (int i = 0; i < 8; ++i) rooks.Add(new GL.Texture("A:\\code\\chess\\testing\\epd\\vs2012\\epdTester\\epdTester\\graphics\\pieces\\wr.png"));
-            w_pieces.Add(rooks);
-
-            // queens
-            List<GL.Texture> queens = new List<GL.Texture>();
-            for (int i = 0; i < 8; ++i) queens.Add(new GL.Texture("A:\\code\\chess\\testing\\epd\\vs2012\\epdTester\\epdTester\\graphics\\pieces\\wq.png"));
-            w_pieces.Add(queens);
-
-            // king
-            List<GL.Texture> king = new List<GL.Texture>();
-            king.Add(new GL.Texture("A:\\code\\chess\\testing\\epd\\vs2012\\epdTester\\epdTester\\graphics\\pieces\\wk.png"));
-            w_pieces.Add(king);
+            squares.Add(new GL.Texture(Path.Combine(squaredir, texsquare[0])));
+            squares.Add(new GL.Texture(Path.Combine(squaredir, texsquare[1])));
+            // piece textures
+            PieceTextures = new List<List<List<GL.Texture>>>(); // [color][piece][idx]
+            PieceTextures.Add(new List<List<GL.Texture>>()); // white textures
+            PieceTextures.Add(new List<List<GL.Texture>>()); // black textures
+            for (int c = 0; c < 2; ++c)
+            {
+                for (int p = 0; p < 6; ++p)
+                {
+                    List<GL.Texture> textures = new List<GL.Texture>();
+                    for (int i = 0; i < 8; ++i) textures.Add(new GL.Texture(Path.Combine(piecedir, texpiece[c, p])));
+                    PieceTextures[c].Add(textures);
+                }
+            }
 
             // the chess position (default is starting position)
-            if (position == null) position = new Position(Position.StartFen);
+            if (pos == null) pos = new Position(Position.StartFen);
 
             SetAspectRatio(Width, Height);
         }
@@ -171,24 +162,17 @@ namespace epdTester
             float oX = 0;// (float)((Width - 8 * x) / 2f);
             float oY = 0; // (float)((Height - 8 * y) / 2f);
 
-            if (!position.isEmpty(s))
+            if (!pos.isEmpty(s))
             {
                 GL.Texture t = null;
-                if (position.pieceColorAt(s) == Position.WHITE)
-                {
-                    List<int> wsquares = position.PieceSquares(Position.WHITE, position.PieceOn(s));
-                    for (int j = 0; j < wsquares.Count; ++j)  if (s == wsquares[j]) t = w_pieces[position.PieceOn(s)][j];
-                    if (t != null) t.Bind();
-                }
-                else if (position.pieceColorAt(s) == Position.BLACK)
-                {
-                    //List<int> bsquares = position.PieceSquares(Position.BLACK, position.PieceOn(s));
-                    //for (int j = 0; j < bsquares.Count; ++j) if (s == bsquares[j]) t = b_pieces[position.PieceOn(s)][j];
-                    //if (t != null) t.Bind();
-                }
+                int color = pos.pieceColorAt(s); int p = pos.PieceOn(s);
+                List<int> sqs = pos.PieceSquares(color, p);
+                for (int j = 0; j < sqs.Count; ++j) if (s == sqs[j]) { t = PieceTextures[color][p][j]; break; }
+
                 if (t != null)
                 {
                     r = 7 - r; // flip rows when rendering
+                    t.Bind();
                     GL.Enable(GL.BLEND); // blend to remove ugly piece background
                     GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
                     GL.Begin(GL.QUADS);

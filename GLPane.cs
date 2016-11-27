@@ -488,7 +488,7 @@ namespace epdTester
             //    CheckGLError();
 
             //} // bgMode ...
-            
+
             //if (bgImageName != null)
             //{
             //    //draw a transparent textured quad over it
@@ -600,7 +600,7 @@ namespace epdTester
             private int texture_id;
             private byte[] buffer = null;
             private bool inited = false;
-            
+
             public Texture(String filename)
             {
                 inited = Load(filename);
@@ -629,11 +629,11 @@ namespace epdTester
                 try
                 {
                     image = new Bitmap(Image.FromFile(fname));
-                    BitmapData bd = image.LockBits(new Rectangle(0, 0, Width, Height), ImageLockMode.ReadWrite, image.PixelFormat);
+                    BitmapData bd = image.LockBits(new Rectangle(0, 0, Width, Height), ImageLockMode.ReadOnly, image.PixelFormat);
                     IntPtr ptr = bd.Scan0; int size = bd.Stride * Height * 4; // rgba components
                     buffer = new byte[size];
-                    for (int h=0; h< Height; ++h) Marshal.Copy(new IntPtr((int)ptr + bd.Stride * h), buffer, bd.Stride * h, bd.Stride);
-                    image.UnlockBits(bd); 
+                    for (int h = 0; h < Height; ++h) Marshal.Copy(new IntPtr((long)(ptr + bd.Stride * h)), buffer, bd.Stride * h, bd.Stride);
+                    image.UnlockBits(bd);
 
                     int[] texture = new int[1] { 0 };
                     GenTextures(1, texture);
