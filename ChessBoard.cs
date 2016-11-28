@@ -43,6 +43,7 @@ namespace epdTester
         {
             InitializeComponent();
             Initialize();
+            if (gi == null) gi = new GameInfo(pos);
             boardPane.PaintGL += Render;
             this.MouseWheel += new MouseEventHandler(OnMouse_scroll);
         }

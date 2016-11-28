@@ -18,6 +18,12 @@ namespace epdTester
             InitializeComponent();
             this.pos = pos;
         }
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            e.Cancel = true;
+            this.Hide();
+            base.OnFormClosing(e);
+        }
         public bool displayMove(string m, int c, int idx)
         {
             return mvList.appendMove(m, c, idx); // just pass to child control

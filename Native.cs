@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace epdTester
 {
-    
+    // note : basic importing from cpp dll (idea would be for data compression/searching opening books?)
     public class Native
     {
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
