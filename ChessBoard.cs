@@ -260,6 +260,12 @@ namespace epdTester
             int s = SquareFromMouseLoc(e.Location);
             if (pos.isLegal(id.from, s, id.piecetype, id.color, true))
             {
+                // transmit the move to the move history textbox (info only)
+                // note: the way things are articulated now, the move must be parsed before
+                // a do-move call (else the piece on from/to squares returns piece-none)
+                string san_mv = pos.toSan(Position.SanSquares[id.from] + Position.SanSquares[s]);
+                gi.displayMove(san_mv, id.color, pos.displayedMoveIdx());
+
                 // drop piece..handle all special move types
                 pos.doMove(id.from, s, id.piecetype, id.color);
                 if (pos.isPromotion()) // TODO: fixme
@@ -285,7 +291,7 @@ namespace epdTester
                     return;
                 }
                 // send move data to engine
-                String fen = pos.getPosition(pos.maxDisplayedMoveIdx(), 0);
+                //String fen = pos.getPosition(pos.maxDisplayedMoveIdx(), 0);
                 //engineMonitor.sendCommand("position fen " + fen);
                 //engineMonitor.sendCommand("go wtime 8000 btime 8000");
                 //engine.UCI_CMD("position fen " + fen);
@@ -309,7 +315,7 @@ namespace epdTester
         {
             if (e.Control && e.KeyCode == Keys.G)
             {
-                if (gi == null) gi = new GameInfo();
+                if (gi == null) gi = new GameInfo(pos);
                 gi.Show();
                 gi.BringToFront();
             }

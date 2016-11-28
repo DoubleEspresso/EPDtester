@@ -12,9 +12,15 @@ namespace epdTester
 {
     public partial class GameInfo : Form
     {
-        public GameInfo()
+        Position pos = null;
+        public GameInfo(Position pos)
         {
             InitializeComponent();
+            this.pos = pos;
+        }
+        public bool displayMove(string m, int c, int idx)
+        {
+            return mvList.appendMove(m, c, idx); // just pass to child control
         }
     }
 }

@@ -39,7 +39,6 @@ namespace epdTester
             if (string.IsNullOrWhiteSpace(result)) return null;
             return result;
         }
-
         private void checkNewLogs(List<Engine> engines)
         {
             List<string> log_files = new List<string>(Directory.GetFiles(Log.DirectoryName, string.Format("{0}*.log", Log.LogName))); // main log
@@ -96,7 +95,6 @@ namespace epdTester
                 Invalidate(true);
             }
         }
-
         List<string> CommandHistory = new List<string>();
         int lastCommandIdx = -1;
         void textChanged(object sender, KeyEventArgs e)

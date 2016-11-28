@@ -41,6 +41,7 @@
             this.engineAnalysisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.databaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Clock = new epdTester.ClockUI();
+            this.mvList = new epdTester.MoveList();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -51,7 +52,7 @@
             this.viewToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(483, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(488, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -132,11 +133,21 @@
             this.Clock.Size = new System.Drawing.Size(465, 91);
             this.Clock.TabIndex = 1;
             // 
+            // mvList
+            // 
+            this.mvList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.mvList.Location = new System.Drawing.Point(12, 121);
+            this.mvList.Name = "mvList";
+            this.mvList.Size = new System.Drawing.Size(464, 177);
+            this.mvList.TabIndex = 2;
+            // 
             // GameInfo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(483, 342);
+            this.ClientSize = new System.Drawing.Size(488, 316);
+            this.Controls.Add(this.mvList);
             this.Controls.Add(this.Clock);
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -164,5 +175,6 @@
         private System.Windows.Forms.ToolStripMenuItem engineAnalysisToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem databaseToolStripMenuItem;
         private ClockUI Clock;
+        private MoveList mvList;
     }
 }

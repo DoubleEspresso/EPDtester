@@ -104,9 +104,6 @@
     <Compile Include="ChessPlot.Designer.cs">
       <DependentUpon>ChessPlot.cs</DependentUpon>
     </Compile>
-    <Compile Include="Clock.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="ClockUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -146,6 +143,12 @@
     <Compile Include="mainWindow.Designer.cs">
       <DependentUpon>mainWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="MoveList.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MoveList.Designer.cs">
+      <DependentUpon>MoveList.cs</DependentUpon>
+    </Compile>
     <Compile Include="Native.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Program.cs" />
@@ -176,6 +179,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="mainWindow.resx">
       <DependentUpon>mainWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MoveList.resx">
+      <DependentUpon>MoveList.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
