@@ -44,6 +44,7 @@ namespace epdTester
             InitializeComponent();
             Initialize();
             boardPane.PaintGL += Render;
+            this.MouseWheel += new MouseEventHandler(OnMouse_scroll);
         }
         void Initialize()
         {
@@ -298,6 +299,11 @@ namespace epdTester
         {
             MousePos = e.Location; // member variable even needed?
         }
+        private void OnMouse_scroll(object sender, MouseEventArgs e)
+        {
+            if (e.Delta > 0) setPreviousBoard();
+            else setFutureBoard();
+        }
         /* Key input on chess board*/
         private void OnKey_Down(object sender, KeyEventArgs e)
         {
@@ -307,6 +313,29 @@ namespace epdTester
                 gi.Show();
                 gi.BringToFront();
             }
+        }
+        // for those keys not handled by key-down events (navigation/tab/enter)
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Down) { setPreviousBoard(3); return true; }
+            else if (keyData == Keys.Up) { setFutureBoard(3); return true; }
+            else if (keyData == Keys.Right) { setFutureBoard(); return true; }
+            else if (keyData == Keys.Left) { setPreviousBoard(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+        private void setPreviousBoard(int nb_moves = 1)
+        {
+            int idx = pos.displayedMoveIdx();
+            if ((idx - nb_moves) < 0) return;
+            pos.setPositionFromFenStrings(idx - nb_moves, 0);
+            boardPane.SafeInvalidate(true);
+        }
+        private void setFutureBoard(int nb_moves = 1)
+        {
+            int idx = pos.displayedMoveIdx();
+            if ((idx + nb_moves) > pos.maxDisplayedMoveIdx()) return;
+            pos.setPositionFromFenStrings(idx + nb_moves, 0);
+            boardPane.SafeInvalidate(true);
         }
     }
 }

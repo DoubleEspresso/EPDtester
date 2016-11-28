@@ -64,7 +64,7 @@ namespace epdTester
         {
             W_PAWN = 0, W_KNIGHT = 1, W_BISHOP = 2,
             W_ROOK = 3, W_QUEEN = 4, W_KING = 5,
-            B_PAWN = 6, B_KNIGHT = 7, B_BISHOP =8,
+            B_PAWN = 6, B_KNIGHT = 7, B_BISHOP = 8,
             B_ROOK = 9, B_QUEEN = 10, B_KING = 11
         };
         public enum Piece
@@ -166,9 +166,9 @@ namespace epdTester
             // side to move
             if (split_fen.Length <= 1) return true;
             else stm = (split_fen[1][0] == 'w' ? WHITE : BLACK);
-            
+
             // castle rights
-            if (split_fen.Length <= 2)  return true;
+            if (split_fen.Length <= 2) return true;
             else
             {
                 for (int i = 0; i < split_fen[2].Length; ++i)
@@ -201,20 +201,28 @@ namespace epdTester
                     EP_SQ = 8 * row + col;
                 }
                 else
-            EP_SQ = 0;
-    }
-    // the half-moves since last pawn move/capture
-    if (split_fen.Length <= 4)
-        return true;
-    else
-    {
-        if (!String.IsNullOrWhiteSpace(split_fen[4])) Move50 = (int)Convert.ToInt32(split_fen[4]);
-    }
-    // the move counter
-    if (split_fen.Length <= 5) return true;
-    else HalfMvs = (int)Convert.ToInt32(split_fen[5]);
-    return true;
-}
+                    EP_SQ = 0;
+            }
+            // the half-moves since last pawn move/capture
+            if (split_fen.Length <= 4)
+                return true;
+            else
+            {
+                if (!String.IsNullOrWhiteSpace(split_fen[4])) Move50 = (int)Convert.ToInt32(split_fen[4]);
+            }
+            // the move counter
+            if (split_fen.Length <= 5) return true;
+            else HalfMvs = (int)Convert.ToInt32(split_fen[5]);
+
+            // add this position to the position tracking
+            if (FenPositions == null) FenPositions = new List<List<string>>();
+            FenPositions.Add(new List<String>());
+            int idx = FenPositions.Count - 1;
+            FenPositions[idx].Add(toFen());
+            setDisplayedMoveIdx(idx);
+
+            return true;
+        }
         public void Clear()
         {
             stm = WHITE;
@@ -222,7 +230,7 @@ namespace epdTester
             EP_SQ = 0;
             Move50 = 0;
             HalfMvs = 0;
-            displayedMove = 0; // needed?
+            displayedMove = 0;
             gameFinished = false; // for mate/draw global flag
             capturedPiece = -1;
             promotedPiece = -1;
@@ -364,9 +372,9 @@ namespace epdTester
             if (update && !moveIsPromotion) // handle promotion moves separately
             {
                 FenPositions.Add(new List<String>());
-                FenPositions[displayedMove].Add(toFen());
-                Log.WriteLine("..[position] fen ({0})", FenPositions[displayedMove]);
-                displayedMove++;
+                int idx = FenPositions.Count - 1;
+                FenPositions[idx].Add(toFen());
+                setDisplayedMoveIdx(idx);
             }
             undoMove(to, from, piece, color);
             return true;
@@ -376,7 +384,7 @@ namespace epdTester
             if (idx < 0 || idx > FenPositions.Count - 1) return "";
             return FenPositions[idx][mvidx];
         }
-        public int getDisplayedMoveIdx() { return displayedMove; }
+        public int displayedMoveIdx() { return displayedMove; }
         public void setDisplayedMoveIdx(int idx) { displayedMove = idx; }
         public int maxDisplayedMoveIdx() { return FenPositions.Count - 1; }
         public bool setPositionFromFenStrings(int idx, int mvidx)
@@ -389,7 +397,7 @@ namespace epdTester
         }
         public string toSan(string move)
         {
-            clearMoveData(); 
+            clearMoveData();
             int[] fromto = FromTo(move);
             int f = fromto[0]; int t = fromto[1];
             int p = PieceOn(f);
@@ -398,10 +406,10 @@ namespace epdTester
             string sanMove = ""; string sanFrom = SanSquares[f]; string sanTo = SanSquares[t];
             List<int> toSquares = new List<int>();
             List<int> pieces = PieceSquares(stm, p); // more than one ?
-            sanMove += (p == (int) Piece.PAWN ? "" : Convert.ToString(SanPiece[p]));
+            sanMove += (p == (int)Piece.PAWN ? "" : Convert.ToString(SanPiece[p]));
             List<int> legalFromSqs = new List<int>();
             string promotionPiece = "";
-            
+
             // special cases (castle moves, promotions)
             if (isCastle(f, t, p, stm))
             {
@@ -474,7 +482,7 @@ namespace epdTester
             moveIsCastle = tmp_moveIsCastle;
             moveIsEP = tmp_moveIsEP;
 
-            undoMove(t, f, p, stm==WHITE?BLACK:WHITE);
+            undoMove(t, f, p, stm == WHITE ? BLACK : WHITE);
             if (givesCheck) sanMove += "+";
 
             return sanMove;
@@ -762,7 +770,7 @@ namespace epdTester
         private bool pseudoLegalQueenMove(int from, int to, int color)
         {
             if (onDiag(from, to)) return pseudoLegalBishopMove(from, to, color);
-            else if (onRow(from, to) || onCol(from, to))  return pseudoLegalRookMove(from, to, color);
+            else if (onRow(from, to) || onCol(from, to)) return pseudoLegalRookMove(from, to, color);
             return false;
         }
         private bool pseudoLegalKingMove(int from, int to, int color)
@@ -1059,9 +1067,10 @@ namespace epdTester
             stm = (stm == WHITE ? BLACK : WHITE);
             if (moveIsCastle)
             {
-                FenPositions.Add(new List<string>());
-                FenPositions[displayedMove].Add(toFen());
-                ++displayedMove;
+                FenPositions.Add(new List<String>());
+                int idx = FenPositions.Count - 1;
+                FenPositions[idx].Add(toFen());
+                setDisplayedMoveIdx(idx);
             }
             return true;
         }
