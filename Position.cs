@@ -310,7 +310,7 @@ namespace epdTester
         public bool isLegal(int from, int to, int piece, int color, bool update)
         {
             if (color != stm) return false;
-
+            if (PieceOn(from) == (int) Piece.PIECE_NONE) return false;
             if (isCastle(from, to, piece, color))
             {
                 if (!isLegalCastle(from, to, piece, color)) return false;

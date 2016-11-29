@@ -24,8 +24,14 @@ namespace epdTester
             this.Hide();
             base.OnFormClosing(e);
         }
+        private delegate bool DisplayMoveFunc(string m, int c, int idx);
         public bool displayMove(string m, int c, int idx)
         {
+            if (InvokeRequired)
+            {
+                Invoke(new DisplayMoveFunc(displayMove), new object[] { m, c, idx });
+                return true;
+            }
             return mvList.appendMove(m, c, idx); // just pass to child control
         }
     }
