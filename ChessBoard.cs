@@ -86,6 +86,12 @@ namespace epdTester
 
             SetAspectRatio(Width, Height);
         }
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            e.Cancel = true;
+            this.Hide();
+            base.OnFormClosing(e);
+        }
         void Render()
         {
             GL.MatrixMode(GL.PROJECTION);

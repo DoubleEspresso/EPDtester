@@ -397,7 +397,7 @@ namespace epdTester
         }
         public string toSan(string move)
         {
-            clearMoveData();
+            //clearMoveData();
             int[] fromto = FromTo(move);
             int f = fromto[0]; int t = fromto[1];
             int p = PieceOn(f);
@@ -954,7 +954,7 @@ namespace epdTester
                     {
                         wPieceSquares[piece].RemoveAt(j);
                         wPieceSquares[piece].Add(to);
-                        break;
+                        break; 
                     }
             }
             else
@@ -965,7 +965,7 @@ namespace epdTester
                     {
                         bPieceSquares[piece].RemoveAt(j);
                         bPieceSquares[piece].Add(to);
-                        break;
+                        break; 
                     }
             }
             if (moveIsCapture)
@@ -1023,7 +1023,7 @@ namespace epdTester
             }
             else if (moveIsCastle)
             {
-                if (color == WHITE) // remove black piece
+                if (color == WHITE) 
                 {
                     int rookFrom = (to == (int)Squares.G1 ? (int)Squares.H1 : (int)Squares.A1);
                     int rookto = (to == (int)Squares.G1 ? (int)Squares.F1 : (int)Squares.D1);
