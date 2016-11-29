@@ -42,7 +42,6 @@ namespace epdTester
                 if (node.bestmove != null && node.bestmove != "") bestmove = node.bestmove;
             }
             return bestmove == null ? "" : bestmove;
-
         }
         public float BranchingFactor()
         {

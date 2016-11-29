@@ -271,25 +271,26 @@ namespace epdTester
             int s = SquareFromMouseLoc(e.Location);
             if (pos.isLegal(id.from, s, id.piecetype, id.color, true))
             {
-                // transmit the move to the move history textbox (info only)
-                // note: the way things are articulated now, the move must be parsed before
+                // note: handle promotion moves first (so we know the promoted piece) and can 
+                // make a san-string move to update the movelist
+                // .. the way things are articulated now, the move must be parsed before
                 // a do-move call (else the piece on from/to squares returns piece-none)
-                string san_mv = pos.toSan(Position.SanSquares[id.from] + Position.SanSquares[s]);
-                gi.displayMove(san_mv, id.color, pos.displayedMoveIdx());
-
-                // drop piece..handle all special move types
-                pos.doMove(id.from, s, id.piecetype, id.color);
-                if (pos.isPromotion()) // TODO: fixme
+                string san_mv = "";
+                if (pos.isPromotion())
                 {
-                    //popupPromotionWindow(fromSq, toSq, movingPiece, movingColor);
-                    //fromSq = -1;
-                    //toSq = -1;
-                    //movingColor = -1;
-                    //movingPiece = -1;
-                    //draggingPiece = false;
-                    //ActivePiece = null;
-                    return;
+                    // todo .. allow user selection, for now auto-promote to queen always.
+                    //PromotionWindow(); // blocking (?)
+                    pos.doMove(id.from, s, id.piecetype, id.color); // required to "do move" before promotion (?)
+                    pos.doPromotionMove(id.from, s, (int)Position.Piece.QUEEN, id.color);
+                    san_mv = Position.SanSquares[s] + "=Q"; // fixme : needs unique san-move parser now - since toSan() expects non-updated from-to
                 }
+                else
+                {
+                    san_mv += pos.toSan(Position.SanSquares[id.from] + Position.SanSquares[s]);
+                    pos.doMove(id.from, s, id.piecetype, id.color); // all moves which are not promotions
+                }
+                gi.displayMove(san_mv, id.color, pos.displayedMoveIdx());
+                
                 // check mate/stalemate
                 string game_over = "";
                 if (pos.isMate(id.from, s, id.piecetype, id.color)) game_over += "mate";
@@ -309,11 +310,6 @@ namespace epdTester
                     fcp.Command("position fen " + fen);
                     fcp.Command("go wtime 3000 btime 3000");
                 }
-                //engineMonitor.sendCommand("position fen " + fen);
-                //engineMonitor.sendCommand("go wtime 8000 btime 8000");
-                //engine.UCI_CMD("position fen " + fen);
-                //engine.UCI_CMD("go wtime 8000 btime 8000");
-                //engine.startListening("bestmove");
             }
             pos.clearMoveData();
             id.reset();
@@ -330,25 +326,22 @@ namespace epdTester
             int piecetype = pos.PieceOn(from); int color = pos.colorOn(from);
             if (pos.isLegal(from, to, piecetype, color, true))
             {
-                // transmit the move to the move history textbox (info only)
-                // note: the way things are articulated now, the move must be parsed before
-                // a do-move call (else the piece on from/to squares returns piece-none)
-                string san_mv = pos.toSan(Position.SanSquares[from] + Position.SanSquares[to]);
-                gi.displayMove(san_mv, color, pos.displayedMoveIdx());
-
-                // drop piece..handle all special move types
-                pos.doMove(from, to, piecetype, color);
-                if (pos.isPromotion()) // TODO: fixme
+                // note: follows order of operations for mouseUp event - convoluted now becuase of the 
+                // way things are articulated in Position.cs
+                string san_mv = "";
+                if (pos.isPromotion())
                 {
-                    //popupPromotionWindow(fromSq, toSq, movingPiece, movingColor);
-                    //fromSq = -1;
-                    //toSq = -1;
-                    //movingColor = -1;
-                    //movingPiece = -1;
-                    //draggingPiece = false;
-                    //ActivePiece = null;
-                    return;
+                    pos.doMove(from, to, piecetype, color); // required to "do move" before promotion (?)
+                    pos.doPromotionMove(from, to, (int)Position.Piece.QUEEN, color); // fixme : parsing promoted piece stuff.
+                    san_mv = Position.SanSquares[to] + "=Q"; // fixme : needs unique san-move parser now - since toSan() expects non-updated from-to
                 }
+                else
+                {
+                    san_mv += pos.toSan(Position.SanSquares[from] + Position.SanSquares[to]);
+                    pos.doMove(from, to, piecetype, color);
+                }
+                gi.displayMove(san_mv, id.color, pos.displayedMoveIdx()); 
+
                 // check mate/stalemate
                 string game_over = "";
                 if (pos.isMate(from, to, piecetype, color)) game_over += "mate";
@@ -358,12 +351,22 @@ namespace epdTester
                 if (!String.IsNullOrWhiteSpace(game_over))
                 {
                     Log.WriteLine("..game finished, {0}", game_over);
+                    // todo : engame callback
                     return;
                 }
+            }
+            else
+            {
+                Log.WriteLine("!!WARNING parsed illegal move from engine from:{0} to:{1}", from, to);
             }
             pos.clearMoveData();
             id.reset();
             boardPane.SafeInvalidate(true); // move the piece (?)
+        }
+        // promotion handling
+        private void PromotionWindow()
+        {
+
         }
         private void OnMouse_move(object sender, MouseEventArgs e)
         {

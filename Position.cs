@@ -72,17 +72,17 @@ namespace epdTester
             PAWN = 0, KNIGHT = 1, BISHOP = 2, ROOK = 3, QUEEN = 4, KING = 5, PIECE_NONE = 6
         };
         public Position() { Clear(); }
-        public Position(String fen)
+        public Position(string fen)
         {
             if (!Load(fen)) Log.WriteLine("..[position] Warning failed to load position {0}", fen);
         }
         public bool isPromotion() { return (moveIsPromotion); }
         public bool isCapture() { return (moveIsCapture || moveIsEP); }
-        public static int[] FromTo(String move)
+        public static int[] FromTo(string move)
         {
             int ifrom = -1; int ito = -1;
-            String from = move.Substring(0, 2);
-            String to = move.Substring(2, 2);
+            string from = move.Substring(0, 2);
+            string to = move.Substring(2, 2);
             for (int j = 0; j < SanSquares.Length; ++j)
             {
                 if (from == SanSquares[j]) ifrom = j;
@@ -90,7 +90,7 @@ namespace epdTester
             }
             return new int[] { ifrom, ito };
         }
-        public String toFen()
+        public string toFen()
         {
             String fen = "";
             for (int r = 7; r >= 0; --r)
@@ -134,7 +134,7 @@ namespace epdTester
             // half-mvs
             return fen;
         }
-        public bool Load(String fen)
+        public bool Load(string fen)
         {
             Log.WriteLine("..[position] loading fen {0} ", fen);
             Clear();
@@ -309,8 +309,8 @@ namespace epdTester
         }
         public bool isLegal(int from, int to, int piece, int color, bool update)
         {
-            if (color != stm) return false;
-            if (PieceOn(from) == (int) Piece.PIECE_NONE) return false;
+            if (color != stm || !onBoard(from) || !onBoard(to)) return false;
+            if (PieceOn(from) == (int)Piece.PIECE_NONE) return false;
             if (isCastle(from, to, piece, color))
             {
                 if (!isLegalCastle(from, to, piece, color)) return false;
@@ -379,7 +379,7 @@ namespace epdTester
             undoMove(to, from, piece, color);
             return true;
         }
-        public String getPosition(int idx, int mvidx)
+        public string getPosition(int idx, int mvidx)
         {
             if (idx < 0 || idx > FenPositions.Count - 1) return "";
             return FenPositions[idx][mvidx];
@@ -421,7 +421,7 @@ namespace epdTester
             }
             else if (p == (int)Piece.PAWN && isPseudoLegal(f, t, p, stm) && (moveIsPromotion || moveIsPromotionCapture))
             {
-                promotionPiece = move.Substring(5, 6);
+                promotionPiece = move.Substring(5, 1);
                 if (String.IsNullOrWhiteSpace(promotionPiece)) return "";
             }
             else if (moveIsEP)
@@ -668,12 +668,14 @@ namespace epdTester
                 }
                 else if ((from + capRight) == to && enemyOn(to, enemy) && colDiff(from, to) == 1 && onBoard(to))
                 {
-                    moveIsCapture = true; moveIsPromotion = true;
+                    moveIsPromotionCapture = true;
+                    //moveIsCapture = true; moveIsPromotion = true;
                     return true;
                 }
                 else if ((from + capLeft) == to && enemyOn(to, enemy) && colDiff(from, to) == 1 && onBoard(to))
                 {
-                    moveIsCapture = true; moveIsPromotion = true;
+                    moveIsPromotionCapture = true;
+                    //moveIsCapture = true; moveIsPromotion = true;
                     return true;
                 }
             }
@@ -954,7 +956,7 @@ namespace epdTester
                     {
                         wPieceSquares[piece].RemoveAt(j);
                         wPieceSquares[piece].Add(to);
-                        break; 
+                        break;
                     }
             }
             else
@@ -965,7 +967,7 @@ namespace epdTester
                     {
                         bPieceSquares[piece].RemoveAt(j);
                         bPieceSquares[piece].Add(to);
-                        break; 
+                        break;
                     }
             }
             if (moveIsCapture)
@@ -1023,7 +1025,7 @@ namespace epdTester
             }
             else if (moveIsCastle)
             {
-                if (color == WHITE) 
+                if (color == WHITE)
                 {
                     int rookFrom = (to == (int)Squares.G1 ? (int)Squares.H1 : (int)Squares.A1);
                     int rookto = (to == (int)Squares.G1 ? (int)Squares.F1 : (int)Squares.D1);
@@ -1108,14 +1110,15 @@ namespace epdTester
             priv_colorOn[from] = COLOR_NONE;
             priv_colorOn[to] = color;
 
-            ++displayedMove;
-            FenPositions.Add(new List<string>());
-            FenPositions[displayedMove].Add(toFen());
+            FenPositions.Add(new List<String>());
+            int idx = FenPositions.Count - 1;
+            FenPositions[idx].Add(toFen());
+            setDisplayedMoveIdx(idx);
 
             // check mate/stalemate
-            if (isMate(from, to, promotedPiece, color)) Log.WriteLine("..game over, mate");
-            else if (isStaleMate()) Log.WriteLine("..game over, stalemate");
-            else if (isRepetitionDraw()) Log.WriteLine("..game over, 3-fold repetition");
+            //if (isMate(from, to, promotedPiece, color)) Log.WriteLine("..game over, mate");
+            //else if (isStaleMate()) Log.WriteLine("..game over, stalemate");
+            //else if (isRepetitionDraw()) Log.WriteLine("..game over, 3-fold repetition");
         }
         public bool undoMove(int from, int to, int piece, int color)
         {
