@@ -14,7 +14,7 @@ namespace epdTester
 {
     public partial class mainWindow : Form
     {
-        List<Engine> engines = new List<Engine>();
+        static List<Engine> engines = new List<Engine>(); // static so we can delete them on application exit.
         List<EpdFile> tests = new List<EpdFile>();
         public Engine ActiveEngine = null;
         public ChessBoard board = null;
@@ -264,6 +264,14 @@ namespace epdTester
             if (board == null) board = new ChessBoard(engines);
             board.Show();
             board.BringToFront();
+        }
+        public static void CloseEngineInstances()
+        {
+            foreach (Engine e in engines)
+            {
+                e.Close();
+            }
+            Log.WriteLine("..all running engines closed");
         }
     }
 }

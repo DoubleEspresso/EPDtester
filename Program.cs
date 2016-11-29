@@ -25,6 +25,7 @@ namespace epdTester
         static void OnProcessExit(object sender, EventArgs e)
         {
             Settings.save();
+            mainWindow.CloseEngineInstances();
         }
 
         internal static string appname()

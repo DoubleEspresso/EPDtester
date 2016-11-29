@@ -196,10 +196,13 @@ namespace epdTester
             if (!Running || !Loaded || eprocess == null) return;
             try
             {
-                eprocess.Close();
-                Log.WriteLine("..[engine] closed engine {0} successfully", Name);
+                eprocess.Kill();
+                Log.WriteLine("..[engine] closed engine {0} successfully", Name != null ? Name : "(unknown-name)");
             }
-            catch { }
+            catch (Exception any)
+            {
+                Log.WriteLine("!!Warning: exception closing engine {0} : {1}", Name != null ? Name : "(unknown-name)", any.Message);
+            }
             Running = false;
         }
     }
