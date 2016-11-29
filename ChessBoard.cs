@@ -34,16 +34,20 @@ namespace epdTester
             }
         }
         GameInfo gi = null;
+        List<Engine> engines = null;
         InteractionData id = new InteractionData();
         List<List<List<GL.Texture>>> PieceTextures = null;
         List<GL.Texture> squares = null;
         Position pos = null;
         Point MousePos = new Point(0, 0);
-        public ChessBoard()
+        public ChessBoard(List<Engine> e)
         {
             InitializeComponent();
             Initialize();
+            engines = e;
+            if (engines[0] != null) engines[0].SetBestMoveCallback(onEngineBestMoveParsed);
             if (gi == null) gi = new GameInfo(pos);
+            gi.Show(); gi.BringToFront(); // by defualt
             boardPane.PaintGL += Render;
             this.MouseWheel += new MouseEventHandler(OnMouse_scroll);
         }
@@ -292,7 +296,13 @@ namespace epdTester
                     return;
                 }
                 // send move data to engine
-                //String fen = pos.getPosition(pos.maxDisplayedMoveIdx(), 0);
+                Engine fcp = (engines != null && engines.Count > 0 ? engines[0] : null);
+                if (fcp != null)
+                {
+                    string fen = pos.getPosition(pos.maxDisplayedMoveIdx(), 0);
+                    fcp.Command("position fen " + fen);
+                    fcp.Command("go wtime 3000 btime 3000");
+                }
                 //engineMonitor.sendCommand("position fen " + fen);
                 //engineMonitor.sendCommand("go wtime 8000 btime 8000");
                 //engine.UCI_CMD("position fen " + fen);
@@ -301,6 +311,53 @@ namespace epdTester
             }
             pos.clearMoveData();
             id.reset();
+        }
+        // todo : refactor piece move to a single function
+        public void onEngineBestMoveParsed(object sender, EventArgs e)
+        {
+            Engine fcp = (engines != null && engines.Count > 0 ? engines[0] : null);
+            if (fcp == null) return;
+            ChessParser cp = fcp.Parser;
+            if (cp == null) return;
+            int[] fromto = Position.FromTo(cp.SearchBestMove());
+            int from = fromto[0]; int to = fromto[1];
+            int piecetype = pos.PieceOn(from); int color = pos.colorOn(from);
+            if (pos.isLegal(from, to, piecetype, color, true))
+            {
+                // transmit the move to the move history textbox (info only)
+                // note: the way things are articulated now, the move must be parsed before
+                // a do-move call (else the piece on from/to squares returns piece-none)
+                string san_mv = pos.toSan(Position.SanSquares[from] + Position.SanSquares[to]);
+                gi.displayMove(san_mv, color, pos.displayedMoveIdx());
+
+                // drop piece..handle all special move types
+                pos.doMove(from, to, piecetype, color);
+                if (pos.isPromotion()) // TODO: fixme
+                {
+                    //popupPromotionWindow(fromSq, toSq, movingPiece, movingColor);
+                    //fromSq = -1;
+                    //toSq = -1;
+                    //movingColor = -1;
+                    //movingPiece = -1;
+                    //draggingPiece = false;
+                    //ActivePiece = null;
+                    return;
+                }
+                // check mate/stalemate
+                string game_over = "";
+                if (pos.isMate(from, to, piecetype, color)) game_over += "mate";
+                else if (pos.isStaleMate()) game_over += "stalemate";
+                else if (pos.isRepetitionDraw()) game_over += "3-fold repetition";
+
+                if (!String.IsNullOrWhiteSpace(game_over))
+                {
+                    Log.WriteLine("..game finished, {0}", game_over);
+                    return;
+                }
+            }
+            pos.clearMoveData();
+            id.reset();
+            boardPane.SafeInvalidate(true); // move the piece (?)
         }
         private void OnMouse_move(object sender, MouseEventArgs e)
         {

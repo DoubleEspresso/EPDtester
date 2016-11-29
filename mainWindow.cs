@@ -17,6 +17,7 @@ namespace epdTester
         List<Engine> engines = new List<Engine>();
         List<EpdFile> tests = new List<EpdFile>();
         public Engine ActiveEngine = null;
+        public ChessBoard board = null;
         List<string> epd_filenames = new List<string>(); // for epd test selection
 
         public mainWindow()
@@ -260,9 +261,9 @@ namespace epdTester
         }
         private void chessBoard_Click(object sender, EventArgs e)
         {
-            ChessBoard b = new ChessBoard();
-            b.Show();
-            b.BringToFront();
+            if (board == null) board = new ChessBoard(engines);
+            board.Show();
+            board.BringToFront();
         }
     }
 }
