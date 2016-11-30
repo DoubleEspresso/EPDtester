@@ -21,18 +21,15 @@ namespace epdTester
             Log.WriteLine("");
             Application.Run(new mainWindow());
         }
-
         static void OnProcessExit(object sender, EventArgs e)
         {
             Settings.save();
             mainWindow.CloseEngineInstances();
         }
-
         internal static string appname()
         {
            return "Epd Tester";
         }
-
         internal static string versionStr()
         {
             return "0.0.1";

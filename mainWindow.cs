@@ -261,7 +261,7 @@ namespace epdTester
         }
         private void chessBoard_Click(object sender, EventArgs e)
         {
-            if (board == null) board = new ChessBoard(engines);
+            if (board == null) board = new ChessBoard(ActiveEngine);
             board.Show();
             board.BringToFront();
         }

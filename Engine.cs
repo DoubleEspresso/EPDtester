@@ -140,7 +140,7 @@ namespace epdTester
         }
         private async void LogOutputAsync()
         {
-            char [] buff = new char[1024];
+            char [] buff = new char[2048];
             while (!eprocess.HasExited)
             {
                 int length = await engineReader.ReadAsync(buff, 0, buff.Length);
