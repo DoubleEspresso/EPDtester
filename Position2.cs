@@ -70,7 +70,7 @@ namespace epdTester
         // 2 - pp(bish)         10 - castle qs
         // 3 - pp(rook)         11 - quiet move
         // 4 - pp(quen)         12 - capture move
-        // 5 - pc(nite)         13 - 
+        // 5 - pc(nite)         13 - ep capture
         // 6 - pc(bish)         14 - 
         // 7 - pc(rook)         15 - 
 
@@ -145,6 +145,10 @@ namespace epdTester
                 int mt = moveType();
                 return (mt >= (int)MoveType.PROMOTION_CAP && mt < (int)MoveType.CASTLE_KS) ||
                     (mt >= (int)MoveType.PROMOTION && mt < (int)MoveType.PROMOTION_CAP);
+            }
+            public bool isEP()
+            {
+                return moveType() == (int)MoveType.EP;
             }
         }
         public Position2() { init(); }
@@ -310,6 +314,136 @@ namespace epdTester
         {
             return ColDist(s1, s2) == RowDist(s1, s2);
         }
+        private List<int> PawnMoves(int from, int color)
+        {
+            List<int> to_sqs = new List<int>();
+            int forward1 = (color == WHITE ? 8 : -8);
+            int forward2 = (color == WHITE ? 16 : -16);
+            int capRight = (color == WHITE ? 7 : -7);
+            int capLeft = (color == WHITE ? 9 : -9);
+            int to = -1;
+            bool on4 = (color == WHITE ? (RowOf(from) == 4) : (RowOf(from) == 3));
+            bool on2 = (color == WHITE ? (RowOf(from) == 1) : (RowOf(from) == 6));
+            if (on2)
+            {
+                to = (from + forward1);
+                if (Empty(to)) to_sqs.Add(to);
+
+                to = (from + forward2);
+                if (to_sqs.Count > 0 && Empty(to)) to_sqs.Add(to);
+
+                to = (from + capRight);
+                if (EnemyOn(to) && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
+
+                to = (from + capLeft);
+                if (EnemyOn(to) && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
+            }
+            else if (on4 && info.ep_sq == to) // EP move?
+            {
+                int epTo = (color == WHITE ? to - 8 : to + 8);
+                to = (from + capRight);
+                if (EnemyOn(epTo) && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
+
+                to = (from + capLeft);
+                if (EnemyOn(epTo) && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
+            }
+            else
+            {
+                // same condition for normal pawn moves or promotion moves - this method is meant to check if a pawn move exists, it doesn't 
+                // return the exact number of pawn moves.
+                to = (from + forward1);
+                if (Empty(to)) to_sqs.Add(to);
+
+                to = (from + capRight);
+                if (EnemyOn(to) && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
+
+                to = (from + capLeft);
+                if (EnemyOn(to) && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
+            }
+            return to_sqs;
+        }
+        private List<int> KnightMoves(int from, int color)
+        {
+            List<int> to_sqs = new List<int>();
+            int[] deltas = { 16 - 1, 16 + 1, 2 + 8, 2 - 8, -16 + 1, -16 - 1, -2 - 8, -2 + 8 };
+            for (int j = 0; j < deltas.Length; ++j)
+            {
+                int t = deltas[j] + from;
+                if (!onBoard(t) || (!Empty(t) && !EnemyOn(t))) continue;
+                else if (onBoard(t) && Empty(t) && !EnemyOn(t)) to_sqs.Add(t);
+                else if (onBoard(t) && !Empty(t) && EnemyOn(t)) to_sqs.Add(t);
+            }
+            return to_sqs;
+        }
+        private List<int> BishopMoves(int from, int color)
+        {
+            List<int> to_sqs = new List<int>();
+            int[] deltas = { 7, 9, -7, -9 };
+            for (int j = 0; j < deltas.Length; ++j)
+            {
+                int d = deltas[j];
+                int c = 1;
+                int t = from + d * c;
+                while (onBoard(t) && SameDiag(from, t) && (Empty(t) || EnemyOn(t)))
+                {
+                    if (!Empty(t) && !EnemyOn(t)) break;
+                    else if (Empty(t)) to_sqs.Add(t);
+                    else if (EnemyOn(t))
+                    {
+                        to_sqs.Add(t);
+                        break;
+                    }
+                    t = from + d * (++c);
+                }
+            }
+            return to_sqs;
+        }
+        private List<int> RookMoves(int from, int color)
+        {
+            List<int> to_sqs = new List<int>();
+            int[] deltas = { 1, -1, 8, -8 };
+            for (int j = 0; j < deltas.Length; ++j)
+            {
+                int d = deltas[j];
+                int c = 1;
+                int t = from + d * c;
+                while (onBoard(t) && (SameRow(from, t) || SameCol(from, t)) && (Empty(t) || EnemyOn(t)))
+                {
+                    if (Empty(t)) to_sqs.Add(t);
+                    else if (EnemyOn(t))
+                    {
+                        to_sqs.Add(t);
+                        break;
+                    }
+                    t = from + d * (++c);
+                }
+            }
+            return to_sqs;
+        }
+        private List<int> QueenMoves(int from, int color)
+        {
+            List<int> to_sqs_b = new List<int>();
+            List<int> to_sqs_r = new List<int>();
+            List<int> to_sqs_q = new List<int>();
+            to_sqs_b = BishopMoves(from, color);
+            to_sqs_r = RookMoves(from, color);
+            for (int j = 0; j < to_sqs_b.Count; ++j) to_sqs_q.Add(to_sqs_b[j]);
+            for (int j = 0; j < to_sqs_r.Count; ++j) to_sqs_q.Add(to_sqs_r[j]);
+            return to_sqs_q;
+        }
+        private List<int> KingMoves(int from, int color)
+        {
+            List<int> to_sqs = new List<int>();
+            int[] deltas = { 1, -1, 7, 9, 8, -8, -7, -9 };
+            for (int j = 0; j < deltas.Length; ++j)
+            {
+                int t = deltas[j] + from;
+                if (!onBoard(t) || (!Empty(t) && !EnemyOn(t))) continue;
+                else if (onBoard(t) && Empty(t) && !EnemyOn(t)) to_sqs.Add(t);
+                else if (onBoard(t) && !Empty(t) && EnemyOn(t)) to_sqs.Add(t);
+            }
+            return to_sqs;
+        }
         private bool pseudoLegalPawnMove(int from, int to, int color)
         {
             int enemy = EnemyColor();
@@ -420,6 +554,150 @@ namespace epdTester
             else if (EnemyOn(to)) { info.EncodeMove(from, to, MoveType.CAPTURE); return true; }
             return false;
         }
+        private bool isCastle(int from, int to, int piece, int color)
+        {
+            if (piece != (int)Piece.KING) return false;
+            if (PieceOn(from) != (int)Piece.KING) return false;
+            if (from != (color == WHITE ? (int)Squares.E1 : (int)Squares.E8)) return false;
+            if (color == WHITE && (to != (int)Squares.G1 && to != (int)Squares.C1)) return false;
+            if (color == BLACK && (to != (int)Squares.G8 && to != (int)Squares.C8)) return false;
+            return true;
+        }
+        public bool hasCastleRights(int to, int color)
+        {
+            bool ks_ok = (color == WHITE ? ((info.cr & 1) == 1) : ((info.cr & 4) == 4));
+            bool qs_ok = (color == WHITE ? (info.cr & 2) == 2 : (info.cr & 8) == 8);
+            if (color == WHITE)
+            {
+                if (to == (int)Squares.G1 && ks_ok) return true;
+                else if (to == (int)Squares.C1 && qs_ok) return true;
+            }
+            else
+            {
+                if (to == (int)Squares.G8 && ks_ok) return true;
+                else if (to == (int)Squares.C8 && qs_ok) return true;
+            }
+            return false;
+        }
+        private bool isCastleLegal(int from, int to, int piece, int color)
+        {
+            if (!hasCastleRights(to, color)) return false;
+            int sqLeft1 = (color == WHITE ? (int)Squares.D1 : (int)Squares.D8);
+            int sqLeft2 = (color == WHITE ? (int)Squares.C1 : (int)Squares.C8);
+            int sqRight1 = (color == WHITE ? (int)Squares.F1 : (int)Squares.F8);
+            int sqRight2 = (color == WHITE ? (int)Squares.G1 : (int)Squares.G8);
+            if (to == sqRight2)
+            {
+                if (!Empty(sqRight1) && !Empty(sqRight2)) return false;
+                if (isAttacked(sqRight1, color) || isAttacked(sqRight2, color)) return false;
+            }
+            else
+            {
+                if (!Empty(sqLeft1) && !Empty(sqLeft2)) return false;
+                if (isAttacked(sqLeft1, color) || isAttacked(sqLeft2, color)) return false;
+            }
+            return !kingInCheck(color);
+        }
+        private bool isPseudoLegal(int from, int to, int piece, int color)
+        {
+            if (ColorOn(to) == color) return false;
+            switch (piece)
+            {
+                case 0: return pseudoLegalPawnMove(from, to, color);
+                case 1: return pseudoLegalKnightMove(from, to, color);
+                case 2: return pseudoLegalBishopMove(from, to, color);
+                case 3: return pseudoLegalRookMove(from, to, color);
+                case 4: return pseudoLegalQueenMove(from, to, color);
+                case 5: return pseudoLegalKingMove(from, to, color);
+            }
+            return false;
+        }
+        public bool isLegal(int from, int to, int piece, int color)
+        {
+            /*basic sanity checks*/
+            if (color != info.stm || !onBoard(from) || !onBoard(to)) return false;
+            if (PieceOn(from) == (int)Piece.PIECE_NONE) return false;
+            if (!isPseudoLegal(from, to, piece, color)) return false;
+            /* note: move is now encoded & stored in info class */
+            if (isCastle(from, to, piece, color))
+            {
+                MoveType mt = (to == (int)Squares.G1 || to == (int)Squares.G8) ? MoveType.CASTLE_KS : MoveType.CASTLE_QS;
+                info.EncodeMove(from, to, mt);
+                return isCastleLegal(from, to, piece, color);
+            }
+            /*does the move leave the king in check*/
+            // note : we have to "make" a pseudo-move and see if the king is attacked
+            // then unmake the pseudo-move (without editing any state variables)
+            movePiece(from, to, piece, color);
+            bool incheck = kingInCheck(color);
+            movePiece(to, from, piece, color);
+            return !incheck;
+        }
+        private void movePiece(int from, int to, int piece, int color)
+        {
+            /*update tracking info for piece*/
+            if (info.PieceSquares[color][piece].Contains(from))
+            {
+                info.PieceSquares[color][piece].Remove(from);
+                info.PieceSquares[color][piece].Add(to);
+            }
+            int enemy = (color == WHITE ? BLACK : WHITE);
+            // note : we handle ep-moves seperately?
+            if (info.isCapture())
+            {
+                // so we can easily reverse the operations
+                if (info.isEP()) to = (color == WHITE ? to - 8 : to + 8);
+                if (info.color_on[to] == enemy) info.captured_piece = info.piece_on[to];
+                if (info.PieceSquares[enemy][info.captured_piece].Contains(to))
+                {
+                    info.PieceSquares[enemy][info.captured_piece].Remove(from);
+                    info.PieceSquares[enemy][info.captured_piece].Add(to);
+                }
+                if (info.isEP()) to = (color == WHITE ? to + 8 : to - 8); // reset to-square 
+            }
+            info.color_on[from] = (info.isCapture() && info.color_on[to] == enemy ? COLOR_NONE : enemy);
+            info.piece_on[from] = (info.isCapture() && info.color_on[to] == enemy ? (int)Piece.PIECE_NONE : info.captured_piece);
+            info.color_on[to] = color;
+            info.piece_on[to] = piece;
+            /*do castle moves here*/
+        }
+        public bool isAttacked(int from, int c)
+        {
+            int enemy = (c == WHITE ? BLACK : WHITE);
+            for (int p = 0; p <= (int)Piece.KING; ++p)
+            {
+                List<int> sqs = info.PieceSquares[enemy][p];
+                for (int j = 0; j < sqs.Count; ++j) // loop over all sqs of piece type
+                {
+                    List<int> mvs = new List<int>();
+                    switch (p)
+                    {
+                        case (int)Piece.PAWN: mvs = PawnMoves(j, enemy); break;
+                        case (int)Piece.KNIGHT: mvs = KnightMoves(j, enemy); break;
+                        case (int)Piece.BISHOP: mvs = BishopMoves(j, enemy); break;
+                        case (int)Piece.ROOK: mvs = RookMoves(j, enemy); break;
+                        case (int)Piece.QUEEN: mvs = QueenMoves(j, enemy); break;
+                        case (int)Piece.KING: mvs = KingMoves(j, enemy); break;
+                        default: break;
+                    }
+                    if (mvs.Count > 0 && mvs.Contains(from)) return true;
+                }
+            }
+            return false;
+        }
+        public bool kingInCheck(int c)
+        {
+            return isAttacked(info.PieceSquares[c][(int)Piece.KING][0], c);
+        }
+        public bool doMove(int from, int to, int piece, int color)
+        {
+            if (!isLegal(from, to, piece, color))
+            {
+                info.clear(); // remove state variables for the move (illegal)
+                return false;
+            }
+            movePiece(from, to, piece, color);
+            return true;
+        }
     }
-
 }
