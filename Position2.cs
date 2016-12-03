@@ -85,6 +85,7 @@ namespace epdTester
             public UInt16 move = 0; // encoded move
             public int captured_piece = -1;
             public int promoted_piece = -1;
+            public int moving_piece = -1;
             public int[] color_on = null;
             public int[] piece_on = null;
             public int[] king_sqs = null;
@@ -154,6 +155,31 @@ namespace epdTester
             {
                 int mt = moveType();
                 return (mt == (int)MoveType.CASTLE_KS || mt == (int)MoveType.CASTLE_QS);
+            }
+            public bool update()
+            {
+                ++halfmvs;
+                if (moving_piece != (int)Piece.PAWN && !isCapture()) ++move50;
+                /*update castle rights*/
+                if (isCastle()) clearAllCastleRights(stm);
+                if (moving_piece == (int)Piece.KING) clearAllCastleRights(stm);
+                if (moving_piece == (int)Piece.ROOK && From() == (int)Squares.A1 && stm == WHITE) clearCastleRights(W_QS);
+                if (moving_piece == (int)Piece.ROOK && From() == (int)Squares.H1 && stm == WHITE) clearCastleRights(W_KS);
+                if (moving_piece == (int)Piece.ROOK && From() == (int)Squares.A8 && stm == BLACK) clearCastleRights(B_QS);
+                if (moving_piece == (int)Piece.ROOK && From() == (int)Squares.H8 && stm == BLACK) clearCastleRights(B_KS);
+                // set ep square
+                if (moving_piece == (int)Piece.PAWN && Math.Abs(From() - To()) == 16) ep_sq = (stm == WHITE ? To() - 8 : To() + 8);
+                stm ^= 1;
+                return true;
+            }
+            public void clearAllCastleRights(int color)
+            {
+                if (color == WHITE) cr &= 12;
+                else cr &= 3;
+            }
+            public void clearCastleRights(int type)
+            {
+                cr = (cr & (~type));
             }
         }
         public Position2() { init(); }
@@ -622,14 +648,14 @@ namespace epdTester
             /*basic sanity checks*/
             if (color != info.stm || !onBoard(from) || !onBoard(to)) return false;
             if (PieceOn(from) == (int)Piece.PIECE_NONE) return false;
-            if (!isPseudoLegal(from, to, piece, color)) return false;
-            /* note: move is now encoded & stored in info class */
-            if (isCastle(from, to, piece, color))
+            if (isCastle(from, to, piece, color)) // check if castle move before pseudo-legal (king is moving two sqs for castling).
             {
                 MoveType mt = (to == (int)Squares.G1 || to == (int)Squares.G8) ? MoveType.CASTLE_KS : MoveType.CASTLE_QS;
                 info.EncodeMove(from, to, mt);
                 return isCastleLegal(from, to, piece, color);
             }
+            /* note: move is now encoded & stored in info class */
+            if (!isPseudoLegal(from, to, piece, color)) return false;
             /*does the move leave the king in check*/
             // note : we have to "make" a pseudo-move and see if the king is attacked
             // then unmake the pseudo-move (without editing any state variables)
@@ -658,10 +684,15 @@ namespace epdTester
                     info.PieceSquares[enemy][info.captured_piece].Remove(from);
                     info.PieceSquares[enemy][info.captured_piece].Add(to);
                 }
-                if (info.isEP()) to = (color == WHITE ? to + 8 : to - 8); // reset to-square 
+                if (info.isEP()) to = (color == WHITE ? to + 8 : to - 8); // reset to-square
+                info.color_on[from] = (info.color_on[to] == enemy ? COLOR_NONE : enemy);
+                info.piece_on[from] = (info.color_on[to] == enemy ? (int)Piece.PIECE_NONE : info.captured_piece);
             }
-            info.color_on[from] = (info.isCapture() && info.color_on[to] == enemy ? COLOR_NONE : enemy);
-            info.piece_on[from] = (info.isCapture() && info.color_on[to] == enemy ? (int)Piece.PIECE_NONE : info.captured_piece);
+            else // quiet moves
+            {
+                info.color_on[from] = COLOR_NONE;
+                info.piece_on[from] = (int)Piece.PIECE_NONE;
+            }
             info.color_on[to] = color;
             info.piece_on[to] = piece;
             // note : castle moves are handled here as normal quiet moves of the king only
@@ -672,17 +703,17 @@ namespace epdTester
             for (int p = 0; p <= (int)Piece.KING; ++p)
             {
                 List<int> sqs = info.PieceSquares[enemy][p];
-                for (int j = 0; j < sqs.Count; ++j) // loop over all sqs of piece type
+                foreach(int s in sqs)
                 {
                     List<int> mvs = new List<int>();
                     switch (p)
                     {
-                        case (int)Piece.PAWN: mvs = PawnMoves(j, enemy); break;
-                        case (int)Piece.KNIGHT: mvs = KnightMoves(j, enemy); break;
-                        case (int)Piece.BISHOP: mvs = BishopMoves(j, enemy); break;
-                        case (int)Piece.ROOK: mvs = RookMoves(j, enemy); break;
-                        case (int)Piece.QUEEN: mvs = QueenMoves(j, enemy); break;
-                        case (int)Piece.KING: mvs = KingMoves(j, enemy); break;
+                        case (int)Piece.PAWN: mvs = PawnMoves(s, enemy); break;
+                        case (int)Piece.KNIGHT: mvs = KnightMoves(s, enemy); break;
+                        case (int)Piece.BISHOP: mvs = BishopMoves(s, enemy); break;
+                        case (int)Piece.ROOK: mvs = RookMoves(s, enemy); break;
+                        case (int)Piece.QUEEN: mvs = QueenMoves(s, enemy); break;
+                        case (int)Piece.KING: mvs = KingMoves(s, enemy); break;
                         default: break;
                     }
                     if (mvs.Count > 0 && mvs.Contains(from)) return true;
@@ -722,14 +753,12 @@ namespace epdTester
                     int rookto = (to == (int)Squares.C1 ? (int)Squares.D1 : (int)Squares.D8);
                     movePiece(rookFrom, rookto, (int)Piece.ROOK, color);
                 }
-                return true;
             }
             // note : for UI updates, the promoting piece is chosen *after*
             // the pawn move is made .. we handle the rest of the promotion move
             // once the user has selected the piece to promote to (same is done for engines).
-
-            // todo : update position "info" class for nextmove
-            return true;
+            info.update();
+            return UpdateHistory();
         }
     }
 }
