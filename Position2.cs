@@ -664,6 +664,50 @@ namespace epdTester
             movePiece(to, from, piece, color);
             return !incheck;
         }
+        public string toFen()
+        {
+            String fen = "";
+            for (int r = 7; r >= 0; --r)
+            {
+                int empties = 0;
+                for (int c = 0; c < 8; ++c)
+                {
+                    int s = r * 8 + c;
+                    if (Empty(s)) { ++empties; continue; }
+                    if (empties > 0)
+                    {
+                        fen += empties; empties = 0;
+                    }
+                    fen += SanPiece[(info.color_on[s] == BLACK ? info.piece_on[s] + 6 : info.piece_on[s])];
+                }
+                if (empties > 0)
+                {
+                    fen += empties;
+                }
+                if (r > 0) fen += "/";
+            }
+            fen += (info.stm == WHITE ? " w" : " b");
+
+            string castleRights = "";
+            if ((info.cr & W_KS) == W_KS) castleRights += "K";
+            if ((info.cr & W_QS) == W_QS) castleRights += "Q";
+            if ((info.cr & B_KS) == B_KS) castleRights += "k";
+            if ((info.cr & B_QS) == B_QS) castleRights += "q";
+            fen += (castleRights == "" ? " -" : " " + castleRights);
+
+            // ep-square
+            string epSq = "";
+            if (info.ep_sq != 0)
+            {
+                epSq += SanCols[ColOf(info.ep_sq)] + Convert.ToString(RowOf(info.ep_sq) + 1);
+            }
+            fen += (epSq == "" ? " -" : " " + epSq);
+            string mv_str = Convert.ToString(info.move50);
+            fen +=  (mv_str == "" ? " -" : " " + mv_str);
+            mv_str = Convert.ToString(info.halfmvs);
+            fen += (mv_str == "" ? " -" : " " + mv_str);
+            return fen;
+        }
         private void movePiece(int from, int to, int piece, int color)
         {
             /*update tracking info for piece*/
@@ -760,5 +804,6 @@ namespace epdTester
             info.update();
             return UpdateHistory();
         }
+        /*todo: set/get the displayed index.*/
     }
 }
