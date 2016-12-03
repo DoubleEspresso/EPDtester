@@ -351,7 +351,7 @@ namespace epdTester
             return ColDist(s1, s2) == RowDist(s1, s2);
         }
         public bool isPromotion() { return info.isPromotion(); }
-        int MaxDisplayIdx() { return Positions.Count - 1; }
+        public int MaxDisplayIdx() { return Positions.Count - 1; }
         private List<int> PawnMoves(int from, int color)
         {
             List<int> to_sqs = new List<int>();
@@ -448,7 +448,7 @@ namespace epdTester
                 while (onBoard(t) && (SameRow(from, t) || SameCol(from, t)) && (Empty(t) || EnemyOn(t)))
                 {
                     if (Empty(t)) to_sqs.Add(t);
-                    else if (EnemyOn(t))
+                    else if (EnemyOn(t)) // todo : enemyon needs a color parameter :( since we return moves for both colors in multiple legality conditions :(
                     {
                         to_sqs.Add(t);
                         break;
@@ -730,11 +730,11 @@ namespace epdTester
                 // so we can easily reverse the operations
                 if (info.isEP()) to = (color == WHITE ? to - 8 : to + 8);
                 if (info.color_on[to] == enemy) info.captured_piece = info.piece_on[to];
-                if (info.PieceSquares[enemy][info.captured_piece].Contains(to))
+                if (info.PieceSquares[enemy][info.captured_piece].Contains(to)) // e.g. white captures black
                 {
-                    info.PieceSquares[enemy][info.captured_piece].Remove(from);
-                    info.PieceSquares[enemy][info.captured_piece].Add(to);
+                    info.PieceSquares[enemy][info.captured_piece].Remove(to);
                 }
+                else info.PieceSquares[enemy][info.captured_piece].Add(from); // add captured piece back in this case
                 if (info.isEP()) to = (color == WHITE ? to + 8 : to - 8); // reset to-square
                 info.color_on[from] = (info.color_on[to] == enemy ? COLOR_NONE : enemy);
                 info.piece_on[from] = (info.color_on[to] == enemy ? (int)Piece.PIECE_NONE : info.captured_piece);
@@ -748,26 +748,25 @@ namespace epdTester
             info.piece_on[to] = piece;
             // note : castle moves are handled here as normal quiet moves of the king only
         }
-        public bool isAttacked(int from, int c)
+        public bool isAttacked(int to, int c)
         {
             int enemy = (c == WHITE ? BLACK : WHITE);
             for (int p = 0; p <= (int)Piece.KING; ++p)
             {
-                List<int> sqs = info.PieceSquares[enemy][p];
-                foreach(int s in sqs)
+                foreach (int from in info.PieceSquares[enemy][p])
                 {
-                    List<int> mvs = new List<int>();
+                    List<int> tos = new List<int>();
                     switch (p)
                     {
-                        case (int)Piece.PAWN: mvs = PawnMoves(s, enemy); break;
-                        case (int)Piece.KNIGHT: mvs = KnightMoves(s, enemy); break;
-                        case (int)Piece.BISHOP: mvs = BishopMoves(s, enemy); break;
-                        case (int)Piece.ROOK: mvs = RookMoves(s, enemy); break;
-                        case (int)Piece.QUEEN: mvs = QueenMoves(s, enemy); break;
-                        case (int)Piece.KING: mvs = KingMoves(s, enemy); break;
+                        case (int)Piece.PAWN: tos = PawnMoves(from, enemy); break;
+                        case (int)Piece.KNIGHT: tos = KnightMoves(from, enemy); break;
+                        case (int)Piece.BISHOP: tos = BishopMoves(from, enemy); break;
+                        case (int)Piece.ROOK: tos = RookMoves(from, enemy); break;
+                        case (int)Piece.QUEEN: tos = QueenMoves(from, enemy); break;
+                        case (int)Piece.KING: tos = KingMoves(from, enemy); break;
                         default: break;
                     }
-                    if (mvs.Count > 0 && mvs.Contains(from)) return true;
+                    if (tos.Count > 0 && tos.Contains(to)) return true;
                 }
             }
             return false;
@@ -780,7 +779,7 @@ namespace epdTester
         {
             if (!isLegal(from, to, piece, color))
             {
-                info.clear(); // remove state variables for the move (illegal)
+                info.move = 0; // illegal
                 return false;
             }
             // note : movePiece moves only the king for castle moves
@@ -811,65 +810,80 @@ namespace epdTester
             info.update();
             return UpdateHistory();
         }
-        public bool isMate(int from, int to, int piece) // todo : do we need from,to, piece passed here?
+        public bool isMate()
         {
-            // note : we assume that the checking move has already been made
-            // so color = side in check, e.g. the side to move, which is given
-            // by info.stm
-            int enemy = info.stm ^ 1;
-            int ks = PieceSquares(info.stm, (int)Piece.KING)[0];
-            if (!isAttacked(ks, enemy)) return false;
-            int[] tosqs = { ks + 1, ks - 1, ks + 8, ks - 8, ks + 7, ks + 9, ks - 7, ks - 9 };
-            foreach (int s in tosqs) if (isLegal(ks, s, (int)Piece.KING, info.stm)) return false;
-
-            // is this a discovered check (means we need to adjust the attacking sq)
-            int dscTo = DiscoveredChecker(ks);
-            bool isDiscovered = (dscTo != -1 && dscTo != to);
-            // king cannot capture/escape on its own, can we capture the checking piece legally?
-            if (canCapture(to, true)) return false;
-            if (isDiscovered && canCapture(dscTo, true)) return false; // only *LEGAL* captures so double checks will fail this
-            
-            // cannot capture checking piece legally, can we block the check?
-            if (piece != (int)Piece.BISHOP && piece != (int)Piece.ROOK && piece != (int)Piece.QUEEN && !isDiscovered) return true; // cannot block a stepping piece
-            List<int> bSqs = squaresBetween(ks, to); bool canBlock = false;
-            foreach(int s in bSqs)
-            {
-                if (!Empty(s)) break;
-                if (canCapture(s, false)) { canBlock = true; break; } // these are *LEGAL* blocking moves
-            }
-            bool canBlockd = false;
-            if (isDiscovered)
-            {
-                List<int> bSqsd = squaresBetween(ks, dscTo); 
-                foreach (int s in bSqsd)
-                {
-                    if (!Empty(s)) break;
-                    if (canCapture(s, false)) { canBlockd = true; break; } // these are *LEGAL* blocking moves
-                }
-            }
-            return !canBlock && !canBlockd;
+            return kingInCheck(info.stm) && !hasLegalMoves();
         }
-        int DiscoveredChecker(int to) // todo : this should be isAttacked (?)
+        public bool setPositionFromDisplay(int idx, int mvidx)
         {
+            if (idx < 0 || idx > Positions.Count - 1) return false;
+            if (mvidx < 0 || mvidx > Positions[idx].Count - 1) return false;
+            info = Positions[idx][mvidx];
+            if (info == null) return false;
+            displayIdx = idx;
+            return true;
+        }
+        public bool isStaleMate()
+        {
+            return !kingInCheck(info.stm) && !hasLegalMoves();
+        }
+        List<int> AllCheckersOf(int color)
+        {
+            // note : color is the victim color
             int enemy = info.stm ^ 1;
-            for (int p=0; p<6; ++p)
+            int to = info.PieceSquares[color][(int)Piece.KING][0];
+            List<int> checkers = new List<int>();
+            for (int p = 0; p < 6; ++p)
             {
                 List<int> sqs = PieceSquares(enemy, p);
                 foreach (int s in sqs)
                 {
-                    switch(p)
+                    switch (p)
                     {
-                        case 0: if (pseudoLegalPawnMove(s, to, enemy)) return s; break;
-                        case 1: if (pseudoLegalKnightMove(s, to, enemy)) return s; break;
-                        case 2: if (pseudoLegalBishopMove(s, to, enemy)) return s; break;
-                        case 3: if (pseudoLegalRookMove(s, to, enemy)) return s; break;
-                        case 4: if (pseudoLegalQueenMove(s, to, enemy)) return s; break;
-                        case 5: if (pseudoLegalKingMove(s, to, enemy)) return s; break;
+                        case 0: if (PawnMoves(s, enemy).Contains(to)) checkers.Add(s); break;
+                        case 1: if (KnightMoves(s, enemy).Contains(to)) checkers.Add(s); break;
+                        case 2: if (BishopMoves(s, enemy).Contains(to)) checkers.Add(s); break;
+                        case 3: if (RookMoves(s, enemy).Contains(to)) checkers.Add(s); break;
+                        case 4: if (QueenMoves(s, enemy).Contains(to)) checkers.Add(s); break;
+                        case 5: if (KingMoves(s, enemy).Contains(to)) checkers.Add(s); break;
                         default: break;
                     }
                 }
             }
-            return -1;
+            return checkers;
+        }
+        bool hasLegalMoves() // for mate detection only
+        {
+            for (int p = 0; p < 6; ++p)
+            {
+                List<int> sqs = PieceSquares(info.stm, p);
+                foreach (int from in sqs)
+                {
+                    switch (p)
+                    {
+                        case 0:
+                            List<int> tos = PawnMoves(from, info.stm);
+                            foreach (int to in tos) if (isLegal(from, to, p, info.stm)) return true; break;
+                        case 1:
+                            tos = KnightMoves(from, info.stm);
+                            foreach (int to in tos) if (isLegal(from, to, p, info.stm)) return true; break;
+                        case 2:
+                            tos = BishopMoves(from, info.stm);
+                            foreach (int to in tos) if (isLegal(from, to, p, info.stm)) return true; break;
+                        case 3:
+                            tos = RookMoves(from, info.stm);
+                            foreach (int to in tos) if (isLegal(from, to, p, info.stm)) return true; break;
+                        case 4:
+                            tos = QueenMoves(from, info.stm);
+                            foreach (int to in tos) if (isLegal(from, to, p, info.stm)) return true; break;
+                        case 5:
+                            tos = KingMoves(from, info.stm);
+                            foreach (int to in tos) if (isLegal(from, to, p, info.stm)) return true; break;
+                        default: break;
+                    }
+                }
+            }
+            return false;
         }
     }
 }
