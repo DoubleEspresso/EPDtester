@@ -200,8 +200,8 @@ namespace epdTester
             if (!pos.isEmpty(s))
             {
                 GL.Texture t = null;
-                int color = pos.colorOn(s); int p = pos.PieceOn(s);
-                List<int> sqs = pos.PieceSquares(color, p);
+                int color = pos2.ColorOn(s); int p = pos2.PieceOn(s);
+                List<int> sqs = pos2.PieceSquares(color, p);
                 for (int j = 0; j < sqs.Count; ++j) if (s == sqs[j]) { t = PieceTextures[color][p][j]; break; }
 
                 if (t != null && t != id.ActivePiece)
@@ -257,8 +257,8 @@ namespace epdTester
                 case MouseButtons.Left:
                     int s = SquareFromMouseLoc(e.Location);
                     if (pos.isEmpty(s)) { id.reset(); return; }
-                    id.from = s; id.color = pos.colorOn(s); id.piecetype = pos.PieceOn(s);
-                    List<int> sqs = pos.PieceSquares(id.color, id.piecetype);
+                    id.from = s; id.color = pos2.ColorOn(s); id.piecetype = pos2.PieceOn(s);
+                    List<int> sqs = pos2.PieceSquares(id.color, id.piecetype);
                     for (int j = 0; j < sqs.Count; ++j) if (s == sqs[j]) { id.ActivePiece = PieceTextures[id.color][id.piecetype][j]; break; }
                     break;
                 default:
@@ -270,51 +270,62 @@ namespace epdTester
         {
             if (!id.valid()) return; // we aren't dragging any piece (but could be coloring the board).
             int s = SquareFromMouseLoc(e.Location);
-            if (pos.isLegal(id.from, s, id.piecetype, id.color, true))
+            if (!pos2.doMove(id.from, s, id.piecetype, id.color)) return;
+            string san_mv = "";
+            // note: handle promotion moves first so the promoted piecetype is known 
+            // and we can make a san-string move to update the movelist
+            if (pos2.isPromotion())
             {
-                // note: handle promotion moves first (so we know the promoted piece) and can 
-                // make a san-string move to update the movelist
-                // .. the way things are articulated now, the move must be parsed before
-                // a do-move call (else the piece on from/to squares returns piece-none)
-                string san_mv = "";
-                if (pos.isPromotion())
-                {
-                    // todo .. allow user selection, for now auto-promote to queen always.
-                    //PromotionWindow(); // blocking (?)
-                    pos.doMove(id.from, s, id.piecetype, id.color); // required to "do move" before promotion (?)
-                    pos.doPromotionMove(id.from, s, (int)Position.Piece.QUEEN, id.color);
-                    san_mv = Position.SanSquares[s] + "=Q"; // fixme : needs unique san-move parser now - since toSan() expects non-updated from-to
-                }
-                else
-                {
-                    san_mv += pos.toSan(Position.SanSquares[id.from] + Position.SanSquares[s]);
-                    pos.doMove(id.from, s, id.piecetype, id.color); // all moves which are not promotions
-                }
-                gi.displayMove(san_mv, id.color, pos.displayedMoveIdx());
-                if (!pos2.doMove(id.from, s, id.piecetype, id.color))
-                {
-                    Log.WriteLine("..[chessboard] failed to do-move from({0}), to({1}), piecetype({2}), color({3})", id.from, s, id.piecetype, id.color);
-                }
-
-                // check mate/stalemate
-                string game_over = "";
-                if (pos.isMate(id.from, s, id.piecetype, id.color)) game_over += "mate";
-                else if (pos.isStaleMate()) game_over += "stalemate";
-                else if (pos.isRepetitionDraw()) game_over += "3-fold repetition";
-
-                if (!String.IsNullOrWhiteSpace(game_over))
-                {
-                    Log.WriteLine("..game finished, {0}", game_over); // todo : sometimes invalid mates returned.
-                }
-                // send move data to engine
-                if (ActiveEngine != null)
-                {
-                    string fen = pos.getPosition(pos.maxDisplayedMoveIdx(), 0);
-                    ActiveEngine.Command("position fen " + fen);
-                    ActiveEngine.Command("go wtime 3000 btime 3000");
-                }
+                // note : doMove has moved the pawn forward and taken care of all captures (if any)
+                // UI selection of promoted piece happens now, and then we finish the move
+                // by adding the promoted piece to the board, and refreshing.
+                // promotionSelectionUI(); // disables gl-pane interactions until closed/or selected move made.
+                san_mv = Position.SanSquares[s] + "=Q"; // auto-promote for now.
             }
-            pos.clearMoveData();
+            else san_mv += pos.toSan(Position.SanSquares[id.from] + Position.SanSquares[s]);
+            gi.displayMove(san_mv, id.color, pos.displayedMoveIdx());
+
+            //if (pos.isLegal(id.from, s, id.piecetype, id.color, true))
+            //{
+            //    // note: handle promotion moves first (so we know the promoted piece) and can 
+            //    // make a san-string move to update the movelist
+            //    // .. the way things are articulated now, the move must be parsed before
+            //    // a do-move call (else the piece on from/to squares returns piece-none)
+            //    string san_mv = "";
+            //    if (pos.isPromotion())
+            //    {
+            //        // todo .. allow user selection, for now auto-promote to queen always.
+            //        //PromotionWindow(); // blocking (?)
+            //        pos.doMove(id.from, s, id.piecetype, id.color); // required to "do move" before promotion (?)
+            //        pos.doPromotionMove(id.from, s, (int)Position.Piece.QUEEN, id.color);
+            //        san_mv = Position.SanSquares[s] + "=Q"; // fixme : needs unique san-move parser now - since toSan() expects non-updated from-to
+            //    }
+            //    else
+            //    {
+            //        san_mv += pos.toSan(Position.SanSquares[id.from] + Position.SanSquares[s]);
+            //        pos.doMove(id.from, s, id.piecetype, id.color); // all moves which are not promotions
+            //    }
+            //    gi.displayMove(san_mv, id.color, pos.displayedMoveIdx());
+
+            // check mate/stalemate
+            string game_over = "";
+            if (pos.isMate(id.from, s, id.piecetype, id.color)) game_over += "mate";
+            else if (pos.isStaleMate()) game_over += "stalemate";
+            else if (pos.isRepetitionDraw()) game_over += "3-fold repetition";
+
+            if (!String.IsNullOrWhiteSpace(game_over))
+            {
+                Log.WriteLine("..game finished, {0}", game_over); // todo : sometimes invalid mates returned.
+            }
+            // send move data to engine
+            if (ActiveEngine != null)
+            {
+                string fen = pos.getPosition(pos.maxDisplayedMoveIdx(), 0);
+                ActiveEngine.Command("position fen " + fen);
+                ActiveEngine.Command("go wtime 3000 btime 3000");
+            }
+            //}
+            //pos.clearMoveData();
             id.reset();
         }
         // todo : refactor piece move to a single function

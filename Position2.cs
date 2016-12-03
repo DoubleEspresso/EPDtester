@@ -23,7 +23,7 @@ namespace epdTester
         private List<List<Info>> Positions = new List<List<Info>>(); // stores position history [idx][position info]
         private Info info = new Info();
         public bool valid = false;
-
+        public int displayIdx = 0;
         public static string[] SanSquares =
             { "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
               "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
@@ -271,6 +271,7 @@ namespace epdTester
             if (Positions == null) Positions = new List<List<Info>>();
             Positions.Add(new List<Info>());
             Positions[Positions.Count - 1].Add(info);
+            displayIdx = Positions.Count - 1;
             return true;
         }
         public void ClearHistory()
@@ -304,6 +305,10 @@ namespace epdTester
         {
             if (!onBoard(s) || info == null) return (int)COLOR_NONE;
             return info.color_on[s];
+        }
+        public List<int> PieceSquares(int color, int piece)
+        {
+            return info.PieceSquares[color][piece];
         }
         public int EnemyColor()
         {
@@ -345,6 +350,8 @@ namespace epdTester
         {
             return ColDist(s1, s2) == RowDist(s1, s2);
         }
+        public bool isPromotion() { return info.isPromotion(); }
+        int MaxDisplayIdx() { return Positions.Count - 1; }
         private List<int> PawnMoves(int from, int color)
         {
             List<int> to_sqs = new List<int>();
@@ -804,6 +811,65 @@ namespace epdTester
             info.update();
             return UpdateHistory();
         }
-        /*todo: set/get the displayed index.*/
+        public bool isMate(int from, int to, int piece) // todo : do we need from,to, piece passed here?
+        {
+            // note : we assume that the checking move has already been made
+            // so color = side in check, e.g. the side to move, which is given
+            // by info.stm
+            int enemy = info.stm ^ 1;
+            int ks = PieceSquares(info.stm, (int)Piece.KING)[0];
+            if (!isAttacked(ks, enemy)) return false;
+            int[] tosqs = { ks + 1, ks - 1, ks + 8, ks - 8, ks + 7, ks + 9, ks - 7, ks - 9 };
+            foreach (int s in tosqs) if (isLegal(ks, s, (int)Piece.KING, info.stm)) return false;
+
+            // is this a discovered check (means we need to adjust the attacking sq)
+            int dscTo = DiscoveredChecker(ks);
+            bool isDiscovered = (dscTo != -1 && dscTo != to);
+            // king cannot capture/escape on its own, can we capture the checking piece legally?
+            if (canCapture(to, true)) return false;
+            if (isDiscovered && canCapture(dscTo, true)) return false; // only *LEGAL* captures so double checks will fail this
+            
+            // cannot capture checking piece legally, can we block the check?
+            if (piece != (int)Piece.BISHOP && piece != (int)Piece.ROOK && piece != (int)Piece.QUEEN && !isDiscovered) return true; // cannot block a stepping piece
+            List<int> bSqs = squaresBetween(ks, to); bool canBlock = false;
+            foreach(int s in bSqs)
+            {
+                if (!Empty(s)) break;
+                if (canCapture(s, false)) { canBlock = true; break; } // these are *LEGAL* blocking moves
+            }
+            bool canBlockd = false;
+            if (isDiscovered)
+            {
+                List<int> bSqsd = squaresBetween(ks, dscTo); 
+                foreach (int s in bSqsd)
+                {
+                    if (!Empty(s)) break;
+                    if (canCapture(s, false)) { canBlockd = true; break; } // these are *LEGAL* blocking moves
+                }
+            }
+            return !canBlock && !canBlockd;
+        }
+        int DiscoveredChecker(int to) // todo : this should be isAttacked (?)
+        {
+            int enemy = info.stm ^ 1;
+            for (int p=0; p<6; ++p)
+            {
+                List<int> sqs = PieceSquares(enemy, p);
+                foreach (int s in sqs)
+                {
+                    switch(p)
+                    {
+                        case 0: if (pseudoLegalPawnMove(s, to, enemy)) return s; break;
+                        case 1: if (pseudoLegalKnightMove(s, to, enemy)) return s; break;
+                        case 2: if (pseudoLegalBishopMove(s, to, enemy)) return s; break;
+                        case 3: if (pseudoLegalRookMove(s, to, enemy)) return s; break;
+                        case 4: if (pseudoLegalQueenMove(s, to, enemy)) return s; break;
+                        case 5: if (pseudoLegalKingMove(s, to, enemy)) return s; break;
+                        default: break;
+                    }
+                }
+            }
+            return -1;
+        }
     }
 }
