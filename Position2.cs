@@ -150,6 +150,11 @@ namespace epdTester
             {
                 return moveType() == (int)MoveType.EP;
             }
+            public bool isCastle()
+            {
+                int mt = moveType();
+                return (mt == (int)MoveType.CASTLE_KS || mt == (int)MoveType.CASTLE_QS);
+            }
         }
         public Position2() { init(); }
         public Position2(string fen)
@@ -280,7 +285,7 @@ namespace epdTester
         }
         public bool Empty(int s)
         {
-            return PieceOn(s) != (int)Piece.PIECE_NONE;
+            return PieceOn(s) == (int)Piece.PIECE_NONE;
         }
         int RowOf(int from)
         {
@@ -659,7 +664,7 @@ namespace epdTester
             info.piece_on[from] = (info.isCapture() && info.color_on[to] == enemy ? (int)Piece.PIECE_NONE : info.captured_piece);
             info.color_on[to] = color;
             info.piece_on[to] = piece;
-            /*do castle moves here*/
+            // note : castle moves are handled here as normal quiet moves of the king only
         }
         public bool isAttacked(int from, int c)
         {
@@ -696,7 +701,34 @@ namespace epdTester
                 info.clear(); // remove state variables for the move (illegal)
                 return false;
             }
+            // note : movePiece moves only the king for castle moves
+            // and only the promoting pawn forward for promotion moves.
             movePiece(from, to, piece, color);
+
+            // finish moving special move types
+            // 1. castle - move rook only (movePiece handles king)
+            // 2. promotion/promotion capture - add promoted piece to board & remove pawn
+            if (info.isCastle())
+            {
+                if (info.moveType() == (int) MoveType.CASTLE_KS)
+                {
+                    int rookFrom = (to == (int)Squares.G1 ? (int)Squares.H1 : (int)Squares.H8);
+                    int rookto = (to == (int)Squares.G1 ? (int)Squares.F1 : (int)Squares.F8);
+                    movePiece(rookFrom, rookto, (int)Piece.ROOK, color);
+                }
+                else
+                {
+                    int rookFrom = (to == (int)Squares.C1 ? (int)Squares.A1 : (int)Squares.A8);
+                    int rookto = (to == (int)Squares.C1 ? (int)Squares.D1 : (int)Squares.D8);
+                    movePiece(rookFrom, rookto, (int)Piece.ROOK, color);
+                }
+                return true;
+            }
+            // note : for UI updates, the promoting piece is chosen *after*
+            // the pawn move is made .. we handle the rest of the promotion move
+            // once the user has selected the piece to promote to (same is done for engines).
+
+            // todo : update position "info" class for nextmove
             return true;
         }
     }

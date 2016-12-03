@@ -39,6 +39,7 @@ namespace epdTester
         List<List<List<GL.Texture>>> PieceTextures = null;
         List<GL.Texture> squares = null;
         Position pos = null;
+        Position2 pos2 = null;
         Point MousePos = new Point(0, 0);
         public ChessBoard(Engine e)
         {
@@ -83,7 +84,7 @@ namespace epdTester
 
             // the chess position (default is starting position)
             if (pos == null) pos = new Position(Position.StartFen);
-
+            if (pos2 == null) pos2 = new Position2(Position2.StartFen); // dbg.
             SetAspectRatio(Width, Height);
         }
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -290,7 +291,11 @@ namespace epdTester
                     pos.doMove(id.from, s, id.piecetype, id.color); // all moves which are not promotions
                 }
                 gi.displayMove(san_mv, id.color, pos.displayedMoveIdx());
-                
+                if (!pos2.doMove(id.from, s, id.piecetype, id.color))
+                {
+                    Log.WriteLine("..[chessboard] failed to do-move from({0}), to({1}), piecetype({2}), color({3})", id.from, s, id.piecetype, id.color);
+                }
+
                 // check mate/stalemate
                 string game_over = "";
                 if (pos.isMate(id.from, s, id.piecetype, id.color)) game_over += "mate";
