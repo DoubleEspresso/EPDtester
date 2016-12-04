@@ -359,7 +359,7 @@ namespace epdTester
             int forward2 = (color == WHITE ? 16 : -16);
             int capRight = (color == WHITE ? 7 : -7);
             int capLeft = (color == WHITE ? 9 : -9);
-            int to = -1;
+            int to = -1; int enemy = color ^ 1;
             bool on4 = (color == WHITE ? (RowOf(from) == 4) : (RowOf(from) == 3));
             bool on2 = (color == WHITE ? (RowOf(from) == 1) : (RowOf(from) == 6));
             if (on2)
@@ -380,10 +380,10 @@ namespace epdTester
             {
                 int epTo = (color == WHITE ? to - 8 : to + 8);
                 to = (from + capRight);
-                if (EnemyOn(epTo) && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
+                if (enemy == ColorOn(epTo) && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
 
                 to = (from + capLeft);
-                if (EnemyOn(epTo) && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
+                if (enemy == ColorOn(epTo) && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
             }
             else
             {
@@ -393,28 +393,30 @@ namespace epdTester
                 if (Empty(to)) to_sqs.Add(to);
 
                 to = (from + capRight);
-                if (EnemyOn(to) && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
+                if (enemy == ColorOn(to) && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
 
                 to = (from + capLeft);
-                if (EnemyOn(to) && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
+                if (enemy == ColorOn(to) && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
             }
             return to_sqs;
         }
         private List<int> KnightMoves(int from, int color)
         {
+            int enemy = color ^ 1;
             List<int> to_sqs = new List<int>();
             int[] deltas = { 16 - 1, 16 + 1, 2 + 8, 2 - 8, -16 + 1, -16 - 1, -2 - 8, -2 + 8 };
             for (int j = 0; j < deltas.Length; ++j)
             {
-                int t = deltas[j] + from;
-                if (!onBoard(t) || (!Empty(t) && !EnemyOn(t))) continue;
-                else if (onBoard(t) && Empty(t) && !EnemyOn(t)) to_sqs.Add(t);
-                else if (onBoard(t) && !Empty(t) && EnemyOn(t)) to_sqs.Add(t);
+                int t = deltas[j] + from; bool enemyon = (ColorOn(t) == enemy);
+                if (!onBoard(t) || (!Empty(t) && !enemyon)) continue;
+                else if (onBoard(t) && Empty(t) && !enemyon) to_sqs.Add(t);
+                else if (onBoard(t) && !Empty(t) && enemyon) to_sqs.Add(t);
             }
             return to_sqs;
         }
         private List<int> BishopMoves(int from, int color)
         {
+            int enemy = color ^ 1;
             List<int> to_sqs = new List<int>();
             int[] deltas = { 7, 9, -7, -9 };
             for (int j = 0; j < deltas.Length; ++j)
@@ -422,11 +424,11 @@ namespace epdTester
                 int d = deltas[j];
                 int c = 1;
                 int t = from + d * c;
-                while (onBoard(t) && SameDiag(from, t) && (Empty(t) || EnemyOn(t)))
+                while (onBoard(t) && SameDiag(from, t) && (Empty(t) || ColorOn(t) == enemy))
                 {
-                    if (!Empty(t) && !EnemyOn(t)) break;
+                    if (!Empty(t) && ColorOn(t) != enemy) break;
                     else if (Empty(t)) to_sqs.Add(t);
-                    else if (EnemyOn(t))
+                    else if (ColorOn(t) == enemy)
                     {
                         to_sqs.Add(t);
                         break;
@@ -438,6 +440,7 @@ namespace epdTester
         }
         private List<int> RookMoves(int from, int color)
         {
+            int enemy = color ^ 1;
             List<int> to_sqs = new List<int>();
             int[] deltas = { 1, -1, 8, -8 };
             for (int j = 0; j < deltas.Length; ++j)
@@ -445,10 +448,10 @@ namespace epdTester
                 int d = deltas[j];
                 int c = 1;
                 int t = from + d * c;
-                while (onBoard(t) && (SameRow(from, t) || SameCol(from, t)) && (Empty(t) || EnemyOn(t)))
+                while (onBoard(t) && (SameRow(from, t) || SameCol(from, t)) && (Empty(t) || ColorOn(t) == enemy))
                 {
                     if (Empty(t)) to_sqs.Add(t);
-                    else if (EnemyOn(t)) // todo : enemyon needs a color parameter :( since we return moves for both colors in multiple legality conditions :(
+                    else if (ColorOn(t) == enemy) // todo : enemyon needs a color parameter :( since we return moves for both colors in multiple legality conditions :(
                     {
                         to_sqs.Add(t);
                         break;
@@ -569,7 +572,7 @@ namespace epdTester
                     else if (t == to && Empty(t)) { info.EncodeMove(from, to, MoveType.QUIET); return true; }
                     else if (EnemyOn(t) && t == to)
                     {
-                        info.EncodeMove(from, to, MoveType.QUIET);
+                        info.EncodeMove(from, to, MoveType.CAPTURE);
                         return true;
                     }
                     t = from + d * (++c);
@@ -715,7 +718,7 @@ namespace epdTester
             fen += (mv_str == "" ? " -" : " " + mv_str);
             return fen;
         }
-        private void movePiece(int from, int to, int piece, int color)
+        private void movePiece(int from, int to, int piece, int color) // todo : fixme (captures are breaking checks)
         {
             /*update tracking info for piece*/
             if (info.PieceSquares[color][piece].Contains(from))
@@ -723,21 +726,24 @@ namespace epdTester
                 info.PieceSquares[color][piece].Remove(from);
                 info.PieceSquares[color][piece].Add(to);
             }
-            int enemy = (color == WHITE ? BLACK : WHITE);
-            // note : we handle ep-moves seperately?
+            int enemy = color ^ 1;
             if (info.isCapture())
             {
-                // so we can easily reverse the operations
                 if (info.isEP()) to = (color == WHITE ? to - 8 : to + 8);
                 if (info.color_on[to] == enemy) info.captured_piece = info.piece_on[to];
                 if (info.PieceSquares[enemy][info.captured_piece].Contains(to)) // e.g. white captures black
                 {
                     info.PieceSquares[enemy][info.captured_piece].Remove(to);
+                    info.color_on[from] = COLOR_NONE;
+                    info.piece_on[from] = (int)Piece.PIECE_NONE;
                 }
-                else info.PieceSquares[enemy][info.captured_piece].Add(from); // add captured piece back in this case
+                else
+                {
+                    info.PieceSquares[enemy][info.captured_piece].Add(from); // add captured piece back in this case
+                    info.color_on[from] = enemy;
+                    info.piece_on[from] = info.captured_piece;
+                }
                 if (info.isEP()) to = (color == WHITE ? to + 8 : to - 8); // reset to-square
-                info.color_on[from] = (info.color_on[to] == enemy ? COLOR_NONE : enemy);
-                info.piece_on[from] = (info.color_on[to] == enemy ? (int)Piece.PIECE_NONE : info.captured_piece);
             }
             else // quiet moves
             {
@@ -856,7 +862,7 @@ namespace epdTester
         {
             for (int p = 0; p < 6; ++p)
             {
-                List<int> sqs = PieceSquares(info.stm, p);
+                int [] sqs = PieceSquares(info.stm, p).ToArray(); // make a copy since PieceSquares is edited during iteration.
                 foreach (int from in sqs)
                 {
                     switch (p)
