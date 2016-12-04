@@ -626,7 +626,7 @@ namespace epdTester
         }
         private bool pseudoLegalKingMove(int from, int to, int color)
         {
-            if (ColDist(from, to) != 1 || ColDist(from, to) != 1) return false;
+            if (ColDist(from, to) != 1 && RowDist(from, to) != 1) return false;
             if ((!Empty(to) && !EnemyOn(to))) return false;
             if (!onBoard(to)) return false;
             if (Empty(to)) { info.EncodeMove(from, to, MoveType.QUIET); return true; }
