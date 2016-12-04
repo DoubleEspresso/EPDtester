@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -76,7 +78,8 @@ namespace epdTester
 
         /*necessary position state information*/
         public class Info
-        {   
+        {
+            public string fen_tmp = "";
             public int stm = WHITE; // side to move
             public int cr = 0; // castle rights encoding
             public int ep_sq = 0;
@@ -86,11 +89,45 @@ namespace epdTester
             public int captured_piece = -1;
             public int promoted_piece = -1;
             public int moving_piece = -1;
-            public int[] color_on = null;
-            public int[] piece_on = null;
-            public int[] king_sqs = null;
-            public int[] piece_diffs = null;
+            public int[] color_on = new int[64];
+            public int[] piece_on = new int[64];
+            public int[] king_sqs = new int[64];
+            public int[] piece_diffs = new int[64];
             public List<List<List<int>>> PieceSquares = null; // [color][piece][square]
+            public Info() { }
+            public Info(Info src)
+            {
+                fen_tmp = src.fen_tmp;
+                stm = src.stm;
+                cr = src.cr;
+                ep_sq = src.ep_sq;
+                halfmvs = src.halfmvs;
+                move50 = src.move50;
+                move = src.move;
+                captured_piece = src.captured_piece;
+                promoted_piece = src.promoted_piece;
+                moving_piece = src.moving_piece;
+                for (int i=0; i<64; ++i)
+                {
+                    color_on[i] = src.color_on[i]; piece_on[i] = src.piece_on[i];
+                    king_sqs[i] = src.king_sqs[i]; piece_diffs[i] = src.piece_diffs[i];
+                }
+                if (PieceSquares == null) PieceSquares = new List<List<List<int>>>();
+                PieceSquares.Clear();
+                for (int c = 0; c < 2; ++c)
+                {
+                    PieceSquares.Add(new List<List<int>>());
+                    for (int p = 0; p < 6; ++p)
+                    {
+                        PieceSquares[c].Add(new List<int>());
+                        for (int s = 0; s < src.PieceSquares[c][p].Count; ++s)
+                        {
+                            PieceSquares[c][p].Add(src.PieceSquares[c][p][s]);
+                        }
+                        
+                    }
+                }
+            }
             public void clear()
             {
                 stm = WHITE;
@@ -185,7 +222,7 @@ namespace epdTester
         public Position2() { init(); }
         public Position2(string fen)
         {
-            valid = Load(fen);
+            valid = Load(fen); // note : load calls udpateHistory()
         }
         private void init()
         {
@@ -262,15 +299,16 @@ namespace epdTester
             // the move counter
             if (split_fen.Length <= 5) return true;
             else info.halfmvs = (int)Convert.ToInt32(split_fen[5]);
-            return UpdateHistory(); 
+            return UpdatePosition(); 
         }
-        private bool UpdateHistory()
+        public bool UpdatePosition()
         {
             if (info == null) return false;
             // add this position to the position tracking
             if (Positions == null) Positions = new List<List<Info>>();
             Positions.Add(new List<Info>());
-            Positions[Positions.Count - 1].Add(info);
+            info.fen_tmp = toFen();
+            Positions[Positions.Count - 1].Add(new Info(info));
             displayIdx = Positions.Count - 1;
             return true;
         }
@@ -810,11 +848,7 @@ namespace epdTester
                     movePiece(rookFrom, rookto, (int)Piece.ROOK, color);
                 }
             }
-            // note : for UI updates, the promoting piece is chosen *after*
-            // the pawn move is made .. we handle the rest of the promotion move
-            // once the user has selected the piece to promote to (same is done for engines).
-            info.update();
-            return UpdateHistory();
+            return info.update();
         }
         public bool isMate()
         {
@@ -822,10 +856,14 @@ namespace epdTester
         }
         public bool setPositionFromDisplay(int idx, int mvidx)
         {
+            Info previous = info;
             if (idx < 0 || idx > Positions.Count - 1) return false;
             if (mvidx < 0 || mvidx > Positions[idx].Count - 1) return false;
-            info = Positions[idx][mvidx];
-            if (info == null) return false;
+            info = new Info(Positions[idx][mvidx]);
+            if (info == null)
+            {
+                info = previous; return false;
+            }
             displayIdx = idx;
             return true;
         }

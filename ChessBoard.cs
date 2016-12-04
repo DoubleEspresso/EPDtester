@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace epdTester
@@ -275,7 +271,6 @@ namespace epdTester
                 id.ActivePiece = null; // for UI updates (piece will "snap" back to place).
                 return; // note : invalidate called in glpane.cs
             }
-
             string san_mv = "";
             if (pos2.isPromotion())
             {
@@ -287,6 +282,9 @@ namespace epdTester
             }
             else san_mv += pos.toSan(Position.SanSquares[id.from] + Position.SanSquares[s]);
             gi.displayMove(san_mv, id.color, pos2.displayIdx);
+
+            // history tracking (for UI back/forward buttons/scrolling through moves)
+            pos2.UpdatePosition();
 
             // check mate/stalemate
             string game_over = "";
@@ -326,7 +324,9 @@ namespace epdTester
                 san_mv = Position.SanSquares[to] + "=Q";
             }
             else san_mv += pos.toSan(Position.SanSquares[from] + Position.SanSquares[to]);
-            
+            // history tracking (for UI back/forward buttons/scrolling through moves)
+            pos2.UpdatePosition();
+
             gi.displayMove(san_mv, id.color, pos2.displayIdx);
             string game_over = "";
             if (pos2.isMate()) game_over += "mate";
@@ -350,10 +350,18 @@ namespace epdTester
         {
             MousePos = e.Location; // member variable even needed?
         }
+        private int scroll_req = 0;
         private void OnMouse_scroll(object sender, MouseEventArgs e)
         {
+            if (scroll_req != 0)
+            {
+                Log.WriteLine("  !!DBG ignored scroll req nb({0})", scroll_req);
+                return;
+            }
+            Interlocked.Increment(ref scroll_req);
             if (e.Delta > 0) setPreviousBoard();
             else setFutureBoard();
+            Interlocked.Decrement(ref scroll_req);
         }
         /* Key input on chess board*/
         private void OnKey_Down(object sender, KeyEventArgs e)
@@ -378,14 +386,14 @@ namespace epdTester
         {
             int idx = pos2.displayIdx;
             if ((idx - nb_moves) < 0) return;
-            pos2.setPositionFromDisplay(idx - nb_moves, 0);
+            if (!pos2.setPositionFromDisplay(idx - nb_moves, 0)) return;
             boardPane.SafeInvalidate(true);
         }
         private void setFutureBoard(int nb_moves = 1)
         {
             int idx = pos2.displayIdx;
             if ((idx + nb_moves) > pos2.MaxDisplayIdx()) return;
-            pos2.setPositionFromDisplay(idx + nb_moves, 0);
+            if (!pos2.setPositionFromDisplay(idx + nb_moves, 0)) return;
             boardPane.SafeInvalidate(true);
         }
     }
