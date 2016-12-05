@@ -229,6 +229,7 @@ namespace epdTester
             if (info == null) info = new Info();
             info.clear();
         }
+        public int ToMove() { return info.stm; }
         public bool Load(string fen)
         {
             init();
@@ -409,10 +410,10 @@ namespace epdTester
                 if (to_sqs.Count > 0 && Empty(to)) to_sqs.Add(to);
 
                 to = (from + capRight);
-                if (EnemyOn(to) && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
+                if (ColorOn(to) == enemy && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
 
                 to = (from + capLeft);
-                if (EnemyOn(to) && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
+                if (ColorOn(to) == enemy && ColDist(from, to) == 1 && onBoard(to)) to_sqs.Add(to);
             }
             else if (on4 && info.ep_sq == to) // EP move?
             {
@@ -928,6 +929,82 @@ namespace epdTester
                 }
             }
             return false;
+        }
+        public string toSan(string move)
+        {
+            /*sanity checks*/
+            if (move.Length != 4 && move.Length != 5) return "";
+            string fstring = move.Substring(0, 2);
+            string tstring = move.Substring(2, 2);
+            int f = -1; int t = -1;
+            for (int j = 0; j < 64; ++j)
+            {
+                if (fstring == SanSquares[j]) f = j;
+                if (tstring == SanSquares[j]) t = j;
+            }
+            if (!onBoard(f) || !onBoard(t)) return "";
+            int p = PieceOn(t); int color = ColorOn(t);
+            if (p == (int)Piece.PIECE_NONE || color == COLOR_NONE) return "";
+            string sanMove = (p == (int)Piece.PAWN ? "" : Convert.ToString(SanPiece[p]));
+            string promotionPiece = "";
+
+            // special cases (castle moves, promotions)
+            if (info.isCastle())
+            {
+                int left = (color == WHITE ? (int)Squares.C1 : (int)Squares.C8);
+                int right = (color == WHITE ? (int)Squares.G1 : (int)Squares.G8);
+                if (t == right) return "O-O";
+                else if (t == left) return "O-O-O";
+                else return "";
+            }
+            // note : we do not call isPseudoLegal(f, t, p, color) here
+            // since toSan() is called after a doMove call and legality
+            // has been checked already, all state variables for the move
+            // are set correctly.
+            else if (p == (int)Piece.PAWN && info.isPromotion())
+            {
+                promotionPiece = move.Substring(5, 1);
+                if (String.IsNullOrWhiteSpace(promotionPiece)) return "";
+            }
+            else if (info.isEP()) sanMove += SanCols[ColOf(f)];
+
+            List<int> pieces = info.PieceSquares[color][p];
+            List<int> legalFromSqs = new List<int>(); // for those moves where more than one piece attacks the *to* square
+            movePiece(t, f, p, color); // remove piece so the *to* sq is flagged as empty
+            foreach (int fromsq in pieces)
+            {
+                if (fromsq == f) continue; // note : we have already moved the piece when we get here .. skip the piece sitting at *to* sq
+                switch (p)
+                {
+                    case (int)Piece.PAWN: if (PawnMoves(fromsq, color).Contains(t)) legalFromSqs.Add(fromsq); break;
+                    case (int)Piece.KNIGHT: if (KnightMoves(fromsq, color).Contains(t)) legalFromSqs.Add(fromsq); break;
+                    case (int)Piece.BISHOP: if (BishopMoves(fromsq, color).Contains(t)) legalFromSqs.Add(fromsq); break;
+                    case (int)Piece.ROOK: if (RookMoves(fromsq, color).Contains(t)) legalFromSqs.Add(fromsq); break;
+                    case (int)Piece.QUEEN: if (QueenMoves(fromsq, color).Contains(t)) legalFromSqs.Add(fromsq); break;
+                    case (int)Piece.KING: if (KingMoves(fromsq, color).Contains(t)) legalFromSqs.Add(fromsq); break;
+                    default: return "";
+                }
+            }
+            movePiece(f, t, p, color); // reset the piece, we are done checking all those pieces that attack the *to* square.
+            if (legalFromSqs.Count > 0) // note : we are checking if multiple pieces could have been placed on the *to* square
+            {
+                if (RowOf(legalFromSqs[0]) == RowOf(f)) sanMove += SanCols[ColOf(f)];
+                else if (ColOf(legalFromSqs[0]) == ColOf(f)) sanMove += Convert.ToString(RowOf(f));
+                else sanMove += SanCols[ColOf(f)];
+            }
+            if (info.isCapture())
+            {
+                if (p == (int)Piece.PAWN) sanMove += SanCols[ColOf(f)];
+                sanMove += "x";
+            }
+            sanMove += SanSquares[t];
+            if (info.isPromotion()) sanMove += promotionPiece;
+            // note : toSan() is called *after* a doMove call -- which means if
+            // white moved, info.stm = black here, and we check if black is in mate
+            // or checked
+            if (isMate()) { sanMove += "#"; return sanMove; }
+            if (kingInCheck(info.stm)) sanMove += "+";
+            return sanMove;
         }
     }
 }

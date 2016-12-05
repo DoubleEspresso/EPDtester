@@ -280,7 +280,7 @@ namespace epdTester
                 // promotionSelectionUI(); // disables gl-pane interactions until closed/or selected move made.
                 san_mv = Position.SanSquares[s] + "=Q"; // auto-promote for now.
             }
-            else san_mv += pos.toSan(Position.SanSquares[id.from] + Position.SanSquares[s]);
+            else san_mv += pos2.toSan(Position.SanSquares[id.from] + Position.SanSquares[s]);
             gi.displayMove(san_mv, id.color, pos2.displayIdx);
 
             // history tracking (for UI back/forward buttons/scrolling through moves)
@@ -323,7 +323,7 @@ namespace epdTester
                 // todo:
                 san_mv = Position.SanSquares[to] + "=Q";
             }
-            else san_mv += pos.toSan(Position.SanSquares[from] + Position.SanSquares[to]);
+            else san_mv += pos2.toSan(Position.SanSquares[from] + Position.SanSquares[to]);
             // history tracking (for UI back/forward buttons/scrolling through moves)
             pos2.UpdatePosition();
 
@@ -387,6 +387,7 @@ namespace epdTester
             int idx = pos2.displayIdx;
             if ((idx - nb_moves) < 0) return;
             if (!pos2.setPositionFromDisplay(idx - nb_moves, 0)) return;
+            gi.highlightMove(pos2.ToMove() ^ 1, idx - nb_moves - 1);
             boardPane.SafeInvalidate(true);
         }
         private void setFutureBoard(int nb_moves = 1)
@@ -394,6 +395,7 @@ namespace epdTester
             int idx = pos2.displayIdx;
             if ((idx + nb_moves) > pos2.MaxDisplayIdx()) return;
             if (!pos2.setPositionFromDisplay(idx + nb_moves, 0)) return;
+            gi.highlightMove(pos2.ToMove() ^ 1, idx + nb_moves - 1);
             boardPane.SafeInvalidate(true);
         }
     }

@@ -37,6 +37,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.mList.Font = new System.Drawing.Font("Corbel", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.mList.HideSelection = false;
             this.mList.Location = new System.Drawing.Point(3, 3);
             this.mList.Multiline = true;
             this.mList.Name = "mList";

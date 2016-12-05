@@ -32,7 +32,20 @@ namespace epdTester
                 Invoke(new DisplayMoveFunc(displayMove), new object[] { m, c, idx });
                 return true;
             }
-            return mvList.appendMove(m, c, idx); // just pass to child control
+            mvList.appendMove(m, c, idx); // just pass to child control
+            mvList.highlightMove(c, idx);
+            return true;
+        }
+        private delegate bool HighlightMoveFunc(int c, int idx);
+        public bool highlightMove(int c, int idx)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new HighlightMoveFunc(highlightMove), new object[] { c, idx });
+                return true;
+            }
+            if (idx <= -1) return true;
+            return mvList.highlightMove(c, idx);
         }
     }
 }
