@@ -18,7 +18,7 @@ namespace epdTester
         private int[] pieceOn = null;
         private int[] kingSqs = null;
         private int[] pieceDiffs = null;
-        bool gameFinished = false; // for mate/draw global flag
+        //bool gameFinished = false; // for mate/draw global flag
         public int W_KS = 1;
         public int W_QS = 2;
         public int B_KS = 4;
@@ -231,7 +231,7 @@ namespace epdTester
             Move50 = 0;
             HalfMvs = 0;
             displayedMove = 0;
-            gameFinished = false; // for mate/draw global flag
+            //gameFinished = false; // for mate/draw global flag
             capturedPiece = -1;
             promotedPiece = -1;
             moveIsEP = false;

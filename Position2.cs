@@ -23,6 +23,7 @@ namespace epdTester
         public const int COLOR_NONE = 2;
         public static string StartFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         private List<List<Info>> Positions = new List<List<Info>>(); // stores position history [idx][position info]
+        public ChessGame Game = null;
         private Info info = new Info();
         public bool valid = false;
         public int displayIdx = 0;
@@ -79,7 +80,7 @@ namespace epdTester
         /*necessary position state information*/
         public class Info
         {
-            public string fen_tmp = "";
+            //public string fen_tmp = "";
             public int stm = WHITE; // side to move
             public int cr = 0; // castle rights encoding
             public int ep_sq = 0;
@@ -97,7 +98,7 @@ namespace epdTester
             public Info() { }
             public Info(Info src)
             {
-                fen_tmp = src.fen_tmp;
+                //fen_tmp = src.fen_tmp;
                 stm = src.stm;
                 cr = src.cr;
                 ep_sq = src.ep_sq;
@@ -219,6 +220,82 @@ namespace epdTester
                 cr = (cr & (~type));
             }
         }
+        /*node/chessgame classes to track move histories/variations*/
+        public class Node
+        {
+            public Node parent = null;
+            Position2.Info pos = null;
+            string san_move = "";
+            public List<Node> children = null;
+            public Node() { }
+            public Node(Info i, string san) // for inserting nodes into existing list
+            {
+                parent = new Node(); 
+                pos = i;
+                san_move = san;
+                if (children == null) children = new List<Node>();
+                children.Clear();
+            }
+            public bool hasParent() { return parent != null; }
+            public bool hasParentPosition() { return hasParent() && parent.pos != null; }
+            public bool hasPosition() { return pos != null; }
+            public bool isValid()
+            {
+                return (parent != null && pos != null && children != null);
+            }
+            public string SanMove() { return san_move; }
+        }
+        public class ChessGame
+        {
+            Node current = null;
+            public ChessGame(Position2.Info startpos)
+            {
+                current = new Node(startpos, ""); 
+            }
+            public void insert(Node n)
+            {
+                if (!n.isValid()) return;
+                n.parent = current;
+                current.children.Add(n); 
+                current = n;
+            }
+            public void next()
+            {
+                if (current.children == null || current.children.Count == 0) return;
+                current = current.children[0]; // default
+            }
+            public void previous()
+            {
+                if (current.parent == null || !current.parent.hasPosition()) return;
+                current = current.parent;
+            }
+            public void selectSibling(int idx)
+            {
+                if (idx < 0 || current.parent == null ||
+                        current.parent.children == null ||
+                        idx > current.parent.children.Count)
+                    return;
+                current = current.parent.children[idx];
+            }
+            public int MoveIndex()
+            {
+                int count = 0;
+                Node dummy = current;
+                while (dummy != null && dummy.hasParent())
+                {
+                    dummy = dummy.parent; ++count;
+                }
+                return (int) Math.Floor((double)count/2);
+            }
+            public string SanMove()
+            {
+                return current.SanMove();
+            }
+            public bool hasChildren()
+            {
+                return current.children != null && current.children.Count > 0;
+            }
+        }
         public Position2() { init(); }
         public Position2(string fen)
         {
@@ -230,6 +307,7 @@ namespace epdTester
             info.clear();
         }
         public int ToMove() { return info.stm; }
+
         public bool Load(string fen)
         {
             init();
@@ -306,16 +384,20 @@ namespace epdTester
         {
             if (info == null) return false;
             // add this position to the position tracking
-            if (Positions == null) Positions = new List<List<Info>>();
-            Positions.Add(new List<Info>());
-            info.fen_tmp = toFen();
-            Positions[Positions.Count - 1].Add(new Info(info));
-            displayIdx = Positions.Count - 1;
+            if (Game == null)
+            {
+                Game = new ChessGame(new Info(info));
+                return true;
+            }
+            string san = toSan(SanSquares[info.From()] + SanSquares[info.To()]);
+            Game.insert(new Node(new Info(info), san)); // new move
+
+            //if (Positions == null) Positions = new List<List<Info>>();
+            //Positions.Add(new List<Info>());
+            //info.fen_tmp = toFen();
+            //Positions[Positions.Count - 1].Add(new Info(info));
+            //displayIdx = Positions.Count - 1;
             return true;
-        }
-        public void ClearHistory()
-        {
-            Positions.Clear();
         }
         private bool onBoard(int s)
         {

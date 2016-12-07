@@ -43,7 +43,7 @@ namespace epdTester
             Initialize();
             ActiveEngine = e;
             if (ActiveEngine != null) ActiveEngine.SetBestMoveCallback(onEngineBestMoveParsed);
-            if (gi == null) gi = new GameInfo(pos);
+            if (gi == null) gi = new GameInfo(pos2);
             gi.Show(); gi.BringToFront(); // by defualt
             boardPane.PaintGL += Render;
             this.MouseWheel += new MouseEventHandler(OnMouse_scroll);
@@ -279,12 +279,11 @@ namespace epdTester
                 // by adding the promoted piece to the board, and refreshing.
                 // promotionSelectionUI(); // disables gl-pane interactions until closed/or selected move made.
                 san_mv = Position.SanSquares[s] + "=Q"; // auto-promote for now.
+                MessageBox.Show("..ERROR u promoted a piece..time to crash now.");
+                return;
             }
-            else san_mv += pos2.toSan(Position.SanSquares[id.from] + Position.SanSquares[s]);
-            gi.displayMove(san_mv, id.color, pos2.displayIdx);
-
-            // history tracking (for UI back/forward buttons/scrolling through moves)
             pos2.UpdatePosition();
+            gi.AddMoveToUI(id.color); // needs to be after position info is updated.
 
             // check mate/stalemate
             string game_over = "";
@@ -326,8 +325,8 @@ namespace epdTester
             else san_mv += pos2.toSan(Position.SanSquares[from] + Position.SanSquares[to]);
             // history tracking (for UI back/forward buttons/scrolling through moves)
             pos2.UpdatePosition();
+            gi.AddMoveToUI(id.color); // after position update
 
-            gi.displayMove(san_mv, id.color, pos2.displayIdx);
             string game_over = "";
             if (pos2.isMate()) game_over += "mate";
             else if (pos2.isStaleMate()) game_over += "stalemate";
@@ -368,7 +367,7 @@ namespace epdTester
         {
             if (e.Control && e.KeyCode == Keys.G)
             {
-                if (gi == null) gi = new GameInfo(pos);
+                if (gi == null) gi = new GameInfo(pos2);
                 gi.Show();
                 gi.BringToFront();
             }
