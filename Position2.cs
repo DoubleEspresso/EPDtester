@@ -244,6 +244,7 @@ namespace epdTester
                 return (parent != null && pos != null && children != null);
             }
             public string SanMove() { return san_move; }
+            public Info position() { return pos; }
         }
         public class ChessGame
         {
@@ -295,6 +296,7 @@ namespace epdTester
             {
                 return current.children != null && current.children.Count > 0;
             }
+            public Info position() { return current.position(); }
         }
         public Position2() { init(); }
         public Position2(string fen)
@@ -937,18 +939,22 @@ namespace epdTester
         {
             return kingInCheck(info.stm) && !hasLegalMoves();
         }
-        public bool setPositionFromDisplay(int idx, int mvidx)
+        public bool setPositionFromDisplay(int relCount)
         {
-            Info previous = info;
-            if (idx < 0 || idx > Positions.Count - 1) return false;
-            if (mvidx < 0 || mvidx > Positions[idx].Count - 1) return false;
-            info = new Info(Positions[idx][mvidx]);
-            if (info == null)
-            {
-                info = previous; return false;
-            }
-            displayIdx = idx;
+            if (relCount > 0)
+                for (int i = 0; i < relCount; ++i) Game.next();
+            else
+                for (int i = 0; i < Math.Abs(relCount); ++i) Game.previous();
+            info = Game.position();
             return true;
+
+            //info = new Info();
+            //if (info == null)
+            //{
+            //    info = previous; return false;
+            //}
+            //displayIdx = idx;
+            //return true;
         }
         public bool isStaleMate()
         {

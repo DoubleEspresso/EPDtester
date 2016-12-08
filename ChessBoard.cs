@@ -383,18 +383,18 @@ namespace epdTester
         }
         private void setPreviousBoard(int nb_moves = 1)
         {
-            int idx = pos2.displayIdx;
-            if ((idx - nb_moves) < 0) return;
-            if (!pos2.setPositionFromDisplay(idx - nb_moves, 0)) return;
-            gi.highlightMove(pos2.ToMove() ^ 1, idx - nb_moves - 1);
+            //int idx = pos2.displayIdx;
+            //if ((idx - nb_moves) < 0) return;
+            if (!pos2.setPositionFromDisplay(-nb_moves)) return;
+            //gi.highlightMove(pos2.ToMove() ^ 1, idx - nb_moves - 1);
             boardPane.SafeInvalidate(true);
         }
         private void setFutureBoard(int nb_moves = 1)
         {
-            int idx = pos2.displayIdx;
-            if ((idx + nb_moves) > pos2.MaxDisplayIdx()) return;
-            if (!pos2.setPositionFromDisplay(idx + nb_moves, 0)) return;
-            gi.highlightMove(pos2.ToMove() ^ 1, idx + nb_moves - 1);
+            //int idx = pos2.displayIdx;
+            //if ((idx + nb_moves) > pos2.MaxDisplayIdx()) return;
+            if (!pos2.setPositionFromDisplay(nb_moves)) return;
+            //gi.highlightMove(pos2.ToMove() ^ 1, idx + nb_moves - 1);
             boardPane.SafeInvalidate(true);
         }
     }

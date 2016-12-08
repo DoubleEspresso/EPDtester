@@ -46,19 +46,7 @@ namespace epdTester
                 return false;
             }
             // todo : indicate on the UI if this is to be an additional variation
-            // .. maybe italics/bold/astrix (?)
-            //int idx = pos.displayIdx;
-            //if (pos.History[idx].Count > 0)
-            //{
-            //    // note : just realized u will need a different data type to handle this
-            //    // Info i = History[idx] needs a List<Info> children reference
-            //    // we need a direct parent-child relationship (tree) 
-            //    MessageBox.Show("..ERROR u added a move where one already exists..time to crash now.");
-            //    return false;
-            //}
-            //int f = pos.History[idx][0].From();
-            //int t = pos.History[idx][0].To();
-            //string sanmv = pos.toSan(Position.SanSquares[f] + Position.SanSquares[t]);
+            // .. maybe italics/bold(?)
             int idx = pos.Game.MoveIndex();
             mvList.appendMove(san_mv, c, idx);
             mvList.highlightMove(c, idx);
