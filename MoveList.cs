@@ -39,25 +39,10 @@ namespace epdTester
             mList.SelectionLength = eidx - sidx;
             return true;
         }
-        public bool setGameText(Position2.ChessGame g)
+        public bool setGameText(Position.ChessGame g)
         {
             mList.Clear();
             mList.Text += g.Moves();
-            return true;
-        }
-        public bool appendMove(string m, int c, int idx)
-        {
-            try
-            {
-                string entry = " ";
-                if (c == 0) entry += Convert.ToString(idx/2 + 1) + ".";
-                mList.Text += entry + m;
-            }
-            catch (Exception any)
-            {
-                Log.WriteLine("..[MoveList] exception {0}", any.Message);
-                return false;
-            }
             return true;
         }
     }

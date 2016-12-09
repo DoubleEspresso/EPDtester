@@ -35,7 +35,6 @@ namespace epdTester
         List<List<List<GL.Texture>>> PieceTextures = null;
         List<GL.Texture> squares = null;
         Position pos = null;
-        Position2 pos2 = null;
         Point MousePos = new Point(0, 0);
         public ChessBoard(Engine e)
         {
@@ -43,7 +42,7 @@ namespace epdTester
             Initialize();
             ActiveEngine = e;
             if (ActiveEngine != null) ActiveEngine.SetBestMoveCallback(onEngineBestMoveParsed);
-            if (gi == null) gi = new GameInfo(pos2);
+            if (gi == null) gi = new GameInfo(pos);
             gi.Show(); gi.BringToFront(); // by defualt
             boardPane.PaintGL += Render;
             this.MouseWheel += new MouseEventHandler(OnMouse_scroll);
@@ -80,7 +79,6 @@ namespace epdTester
 
             // the chess position (default is starting position)
             if (pos == null) pos = new Position(Position.StartFen);
-            if (pos2 == null) pos2 = new Position2(Position2.StartFen); // dbg.
             SetAspectRatio(Width, Height);
         }
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -193,11 +191,11 @@ namespace epdTester
             float oX = 0;// (float)((Width - 8 * x) / 2f);
             float oY = 0; // (float)((Height - 8 * y) / 2f);
 
-            if (!pos2.Empty(s))
+            if (!pos.Empty(s))
             {
                 GL.Texture t = null;
-                int color = pos2.ColorOn(s); int p = pos2.PieceOn(s);
-                List<int> sqs = pos2.PieceSquares(color, p);
+                int color = pos.ColorOn(s); int p = pos.PieceOn(s);
+                List<int> sqs = pos.PieceSquares(color, p);
                 for (int j = 0; j < sqs.Count; ++j) if (s == sqs[j]) { t = PieceTextures[color][p][j]; break; }
 
                 if (t != null && t != id.ActivePiece)
@@ -252,9 +250,9 @@ namespace epdTester
                     break;
                 case MouseButtons.Left:
                     int s = SquareFromMouseLoc(e.Location);
-                    if (pos2.Empty(s)) { id.reset(); return; }
-                    id.from = s; id.color = pos2.ColorOn(s); id.piecetype = pos2.PieceOn(s);
-                    List<int> sqs = pos2.PieceSquares(id.color, id.piecetype);
+                    if (pos.Empty(s)) { id.reset(); return; }
+                    id.from = s; id.color = pos.ColorOn(s); id.piecetype = pos.PieceOn(s);
+                    List<int> sqs = pos.PieceSquares(id.color, id.piecetype);
                     for (int j = 0; j < sqs.Count; ++j) if (s == sqs[j]) { id.ActivePiece = PieceTextures[id.color][id.piecetype][j]; break; }
                     break;
                 default:
@@ -266,35 +264,33 @@ namespace epdTester
         {
             if (!id.valid()) return; // we aren't dragging any piece (but could be coloring the board).
             int s = SquareFromMouseLoc(e.Location);
-            if (!pos2.doMove(id.from, s, id.piecetype, id.color))
+            if (!pos.doMove(id.from, s, id.piecetype, id.color))
             {
                 id.ActivePiece = null; // for UI updates (piece will "snap" back to place).
                 return; // note : invalidate called in glpane.cs
             }
-            string san_mv = "";
-            if (pos2.isPromotion())
+            if (pos.isPromotion())
             {
                 // note : doMove has moved the pawn forward and taken care of all captures (if any)
                 // UI selection of promoted piece happens now, and then we finish the move
                 // by adding the promoted piece to the board, and refreshing.
                 // promotionSelectionUI(); // disables gl-pane interactions until closed/or selected move made.
-                san_mv = Position.SanSquares[s] + "=Q"; // auto-promote for now.
                 MessageBox.Show("..ERROR u promoted a piece..time to crash now.");
                 return;
             }
-            pos2.UpdatePosition();
+            pos.UpdatePosition();
             gi.UpdateGameMoves(); // needs to be after position info is updated.
 
             // check mate/stalemate
             string game_over = "";
-            if (pos2.isMate()) game_over += "mate";
-            else if (pos2.isStaleMate()) game_over += "stalemate";
+            if (pos.isMate()) game_over += "mate";
+            else if (pos.isStaleMate()) game_over += "stalemate";
             if (!String.IsNullOrWhiteSpace(game_over)) Log.WriteLine("..game finished, {0}", game_over); 
 
             // send move data to engine
             if (ActiveEngine != null)
             {
-                string fen = pos2.toFen();
+                string fen = pos.toFen();
                 ActiveEngine.Command("position fen " + fen);
                 ActiveEngine.Command("go wtime 3000 btime 3000");
             }
@@ -309,27 +305,26 @@ namespace epdTester
             string bestmove = cp.SearchBestMove();
             int[] fromto = Position.FromTo(cp.SearchBestMove());
             int from = fromto[0]; int to = fromto[1];
-            int piecetype = pos2.PieceOn(from); int color = pos2.ColorOn(from);
-            if (!pos2.doMove(from, to, piecetype, color))
+            int piecetype = pos.PieceOn(from); int color = pos.ColorOn(from);
+            if (!pos.doMove(from, to, piecetype, color))
             {
                 Log.WriteLine("..[chessboard] ERROR : engine made illegal move!");
                 boardPane.SafeInvalidate(true);
                 return;
             }
-            string san_mv = "";
-            if (pos2.isPromotion())
+            if (pos.isPromotion())
             {
                 // todo:
-                san_mv = Position.SanSquares[to] + "=Q";
+                MessageBox.Show("..uh oh, promotion, time to crash.");
+                return;
             }
-            else san_mv += pos2.toSan(Position.SanSquares[from] + Position.SanSquares[to]);
             // history tracking (for UI back/forward buttons/scrolling through moves)
-            pos2.UpdatePosition();
+            pos.UpdatePosition();
             gi.UpdateGameMoves(); // after position update
 
             string game_over = "";
-            if (pos2.isMate()) game_over += "mate";
-            else if (pos2.isStaleMate()) game_over += "stalemate";
+            if (pos.isMate()) game_over += "mate";
+            else if (pos.isStaleMate()) game_over += "stalemate";
             //else if (pos2.isRepetitionDraw()) game_over += "3-fold repetition";
 
             if (!String.IsNullOrWhiteSpace(game_over))
@@ -367,7 +362,7 @@ namespace epdTester
         {
             if (e.Control && e.KeyCode == Keys.G)
             {
-                if (gi == null) gi = new GameInfo(pos2);
+                if (gi == null) gi = new GameInfo(pos);
                 gi.Show();
                 gi.BringToFront();
             }
@@ -383,13 +378,13 @@ namespace epdTester
         }
         private void setPreviousBoard(int nb_moves = 1)
         {
-            if (!pos2.setPositionFromDisplay(-nb_moves)) return;
+            if (!pos.setPositionFromDisplay(-nb_moves)) return;
             //gi.highlightMove(pos2.ToMove() ^ 1, idx - nb_moves - 1);
             boardPane.SafeInvalidate(true);
         }
         private void setFutureBoard(int nb_moves = 1)
         {
-            if (!pos2.setPositionFromDisplay(nb_moves)) return;
+            if (!pos.setPositionFromDisplay(nb_moves)) return;
             //gi.highlightMove(pos2.ToMove() ^ 1, idx + nb_moves - 1);
             boardPane.SafeInvalidate(true);
         }
