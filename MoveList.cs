@@ -18,26 +18,6 @@ namespace epdTester
             mList.Clear();
         }
 
-        /*todo : link highlight/inserting/next/backward key events with node class*/
-        //public bool AddMove(Position2 p)
-        //{
-        //    // todo : fixme -- Node & ChessGame class will replace the Positions array
-        //    // contained in Position2.cs .. so that minimal changes happen here .. 
-        //    // and maybe rename Position2.cs as ChessGame or similar
-        //    // also - position2.cs info class should have a method/member for sanMove.
-        //    //int idx = p.displayIdx;
-        //    //Position2.Info i = p.History[idx][0];
-        //    //int f = i.From(); int t = i.To();
-        //    //string sanmv = p.toSan(Position2.SanSquares[f] + Position2.SanSquares[t]);
-
-        //    //Node n = new Node();
-        //    //if (!n.set(i)) return false;
-        //    //game.insert(n);
-
-        //    //return appendMove(sanmv, 0, idx);
-        //}
-
-
         public bool highlightMove(int c, int idx)
         {
             string idxString = Convert.ToString(idx / 2 + 1) + ".";
@@ -57,6 +37,12 @@ namespace epdTester
             if (eidx <= sidx || eidx > mList.Text.Length ) return false;
             mList.SelectionStart = sidx;
             mList.SelectionLength = eidx - sidx;
+            return true;
+        }
+        public bool setGameText(Position2.ChessGame g)
+        {
+            mList.Clear();
+            mList.Text += g.Moves();
             return true;
         }
         public bool appendMove(string m, int c, int idx)

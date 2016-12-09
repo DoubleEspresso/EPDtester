@@ -283,7 +283,7 @@ namespace epdTester
                 return;
             }
             pos2.UpdatePosition();
-            gi.AddMoveToUI(id.color); // needs to be after position info is updated.
+            gi.UpdateGameMoves(); // needs to be after position info is updated.
 
             // check mate/stalemate
             string game_over = "";
@@ -325,7 +325,7 @@ namespace epdTester
             else san_mv += pos2.toSan(Position.SanSquares[from] + Position.SanSquares[to]);
             // history tracking (for UI back/forward buttons/scrolling through moves)
             pos2.UpdatePosition();
-            gi.AddMoveToUI(id.color); // after position update
+            gi.UpdateGameMoves(); // after position update
 
             string game_over = "";
             if (pos2.isMate()) game_over += "mate";
@@ -383,16 +383,12 @@ namespace epdTester
         }
         private void setPreviousBoard(int nb_moves = 1)
         {
-            //int idx = pos2.displayIdx;
-            //if ((idx - nb_moves) < 0) return;
             if (!pos2.setPositionFromDisplay(-nb_moves)) return;
             //gi.highlightMove(pos2.ToMove() ^ 1, idx - nb_moves - 1);
             boardPane.SafeInvalidate(true);
         }
         private void setFutureBoard(int nb_moves = 1)
         {
-            //int idx = pos2.displayIdx;
-            //if ((idx + nb_moves) > pos2.MaxDisplayIdx()) return;
             if (!pos2.setPositionFromDisplay(nb_moves)) return;
             //gi.highlightMove(pos2.ToMove() ^ 1, idx + nb_moves - 1);
             boardPane.SafeInvalidate(true);

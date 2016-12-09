@@ -24,32 +24,18 @@ namespace epdTester
             this.Hide();
             base.OnFormClosing(e);
         }
-        private delegate bool DisplayMoveFunc(int c);
-        public bool AddMoveToUI(int c)
+        private delegate bool DisplayMoveFunc();
+        public bool UpdateGameMoves()
         {
             if (InvokeRequired)
             {
-                Invoke(new DisplayMoveFunc(AddMoveToUI), new object[] { c });
+                Invoke(new DisplayMoveFunc(UpdateGameMoves));
                 return true;
             }
             // note : two cases to consider
             // 1. we have added a variation to an existing position
             // 2. this is a new move
-            string san_mv = "";
-            if (!pos.Game.hasChildren())
-            {
-                san_mv = pos.Game.SanMove();
-            }
-            else
-            {
-                MessageBox.Show("..uh oh! time to crash.");
-                return false;
-            }
-            // todo : indicate on the UI if this is to be an additional variation
-            // .. maybe italics/bold(?)
-            int idx = pos.Game.MoveIndex();
-            mvList.appendMove(san_mv, c, idx);
-            mvList.highlightMove(c, idx);
+            mvList.setGameText(pos.Game);
             return true;
         }
         private delegate bool HighlightMoveFunc(int c, int idx);

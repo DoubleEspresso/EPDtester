@@ -226,6 +226,7 @@ namespace epdTester
             public Node parent = null;
             Position2.Info pos = null;
             string san_move = "";
+            public bool hasSiblings = false;
             public List<Node> children = null;
             public Node() { }
             public Node(Info i, string san) // for inserting nodes into existing list
@@ -236,6 +237,7 @@ namespace epdTester
                 if (children == null) children = new List<Node>();
                 children.Clear();
             }
+            public bool hasChildren() { return children != null && children.Count > 0; }
             public bool hasParent() { return parent != null; }
             public bool hasParentPosition() { return hasParent() && parent.pos != null; }
             public bool hasPosition() { return pos != null; }
@@ -255,10 +257,13 @@ namespace epdTester
             }
             public void insert(Node n)
             {
-                if (!n.isValid()) return;
+                // note : two cases to consider
+                // 1. we have added a variation to an existing position
+                // 2. this is a new move
                 n.parent = current;
-                current.children.Add(n); 
-                current = n;
+                current.children.Add(n);
+                if (hasChildren()) foreach (Node c in current.children) c.hasSiblings = true;
+                current = n; // if this is a new move, it is made current by default
             }
             public void next()
             {
@@ -294,9 +299,29 @@ namespace epdTester
             }
             public bool hasChildren()
             {
-                return current.children != null && current.children.Count > 0;
+                return current.children != null && current.children.Count > 1;
+            }
+            public bool hasSiblings()
+            {
+                return current.parent.children != null && current.parent.children.Count > 1;
             }
             public Info position() { return current.position(); }
+            public string Moves()
+            {
+                int count = 0; string g_mvs = "";
+                Node dummy = (current.hasChildren() ? current.children[0] : current);
+                while (dummy != null && dummy.parent.parent != null)
+                {
+                    dummy = dummy.parent; ++count;
+                }
+                for (int j = 0; j < count; ++j)
+                {
+                    dummy = (dummy.children.Count > 1 ? dummy.children[1] : dummy.children[0]); // default selection for now
+                    g_mvs += (j % 2 == 0 ? " " + Convert.ToString((int)Math.Floor((double)(j + 1) / 2) + 1) + "." : " ");
+                    g_mvs += (dummy.hasSiblings ? "[" + dummy.SanMove() + "]" : dummy.SanMove());
+                }
+                return g_mvs;
+            }
         }
         public Position2() { init(); }
         public Position2(string fen)
@@ -385,7 +410,6 @@ namespace epdTester
         public bool UpdatePosition()
         {
             if (info == null) return false;
-            // add this position to the position tracking
             if (Game == null)
             {
                 Game = new ChessGame(new Info(info));
@@ -393,12 +417,6 @@ namespace epdTester
             }
             string san = toSan(SanSquares[info.From()] + SanSquares[info.To()]);
             Game.insert(new Node(new Info(info), san)); // new move
-
-            //if (Positions == null) Positions = new List<List<Info>>();
-            //Positions.Add(new List<Info>());
-            //info.fen_tmp = toFen();
-            //Positions[Positions.Count - 1].Add(new Info(info));
-            //displayIdx = Positions.Count - 1;
             return true;
         }
         private bool onBoard(int s)
@@ -947,14 +965,6 @@ namespace epdTester
                 for (int i = 0; i < Math.Abs(relCount); ++i) Game.previous();
             info = Game.position();
             return true;
-
-            //info = new Info();
-            //if (info == null)
-            //{
-            //    info = previous; return false;
-            //}
-            //displayIdx = idx;
-            //return true;
         }
         public bool isStaleMate()
         {
