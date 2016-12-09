@@ -151,7 +151,6 @@
     </Compile>
     <Compile Include="Native.cs" />
     <Compile Include="Position.cs" />
-    <Compile Include="Position2.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
