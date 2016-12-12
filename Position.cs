@@ -677,11 +677,12 @@ namespace epdTester
         }
         private bool pseudoLegalKnightMove(int from, int to, int color)
         {
+            bool movesOK = false;
             if ((!Empty(to) && !EnemyOn(to)) || !onBoard(to)) return false;
-            if ((ColDist(from, to) != 2 && ColDist(from, to) != 1)) return false;
-            if ((RowDist(from, to) != 2 && RowDist(from, to) != 1)) return false;
-            if (Empty(to) && !EnemyOn(to)) { info.EncodeMove(from, to, MoveType.QUIET); return true; }
-            else if (!Empty(to) && EnemyOn(to)) { info.EncodeMove(from, to, MoveType.CAPTURE); return true; }
+            if (RowDist(from, to) == 2 && ColDist(from, to) == 1) movesOK = true;
+            else if (!movesOK && RowDist(from, to) == 1 && ColDist(from, to) == 2) movesOK = true;
+            if (Empty(to) && !EnemyOn(to)) { info.EncodeMove(from, to, MoveType.QUIET); return movesOK; }
+            else if (!Empty(to) && EnemyOn(to)) { info.EncodeMove(from, to, MoveType.CAPTURE); return movesOK; }
             return false;
         }
         private bool pseudoLegalBishopMove(int from, int to, int color)
