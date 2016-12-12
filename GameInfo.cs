@@ -13,10 +13,11 @@ namespace epdTester
     public partial class GameInfo : Form
     {
         Position pos = null;
-        public GameInfo(Position p)
+        public GameInfo(Position p, ChessBoard cb)
         {     
             InitializeComponent();
             this.pos = p;
+            mvList.cb = cb;
         }
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
@@ -32,10 +33,8 @@ namespace epdTester
                 Invoke(new DisplayMoveFunc(UpdateGameMoves));
                 return true;
             }
-            // note : two cases to consider
-            // 1. we have added a variation to an existing position
-            // 2. this is a new move
             mvList.setGameText(pos.Game);
+            highlightMove(pos.ToMove() ^ 1, pos.Game.MoveIndex());
             return true;
         }
         private delegate bool HighlightMoveFunc(int c, int idx);

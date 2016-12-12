@@ -44,6 +44,7 @@
             this.mList.ReadOnly = true;
             this.mList.Size = new System.Drawing.Size(479, 240);
             this.mList.TabIndex = 0;
+            this.mList.MouseDown += new System.Windows.Forms.MouseEventHandler(this.OnMouse_click);
             // 
             // MoveList
             // 

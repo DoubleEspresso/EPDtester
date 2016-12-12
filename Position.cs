@@ -245,7 +245,7 @@ namespace epdTester
             {
                 return (parent != null && pos != null && children != null);
             }
-            public string SanMove() { return san_move; }
+            public string SanMove() { return san_move; } // make public?
             public Info position() { return pos; }
         }
         public class ChessGame
@@ -291,7 +291,7 @@ namespace epdTester
                 {
                     dummy = dummy.parent; ++count;
                 }
-                return (int) Math.Floor((double)count/2);
+                return count;
             }
             public string SanMove()
             {

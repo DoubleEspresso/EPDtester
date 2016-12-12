@@ -42,7 +42,7 @@ namespace epdTester
             Initialize();
             ActiveEngine = e;
             if (ActiveEngine != null) ActiveEngine.SetBestMoveCallback(onEngineBestMoveParsed);
-            if (gi == null) gi = new GameInfo(pos);
+            if (gi == null) gi = new GameInfo(pos, this);
             gi.Show(); gi.BringToFront(); // by defualt
             boardPane.PaintGL += Render;
             this.MouseWheel += new MouseEventHandler(OnMouse_scroll);
@@ -362,7 +362,7 @@ namespace epdTester
         {
             if (e.Control && e.KeyCode == Keys.G)
             {
-                if (gi == null) gi = new GameInfo(pos);
+                if (gi == null) gi = new GameInfo(pos, this);
                 gi.Show();
                 gi.BringToFront();
             }
@@ -376,17 +376,21 @@ namespace epdTester
             else if (keyData == Keys.Left) { setPreviousBoard(); return true; }
             return base.ProcessCmdKey(ref msg, keyData);
         }
-        private void setPreviousBoard(int nb_moves = 1)
+        public void setPreviousBoard(int nb_moves = 1)
         {
             if (!pos.setPositionFromDisplay(-nb_moves)) return;
-            //gi.highlightMove(pos2.ToMove() ^ 1, idx - nb_moves - 1);
+            gi.highlightMove(pos.ToMove()^1, pos.Game.MoveIndex());
             boardPane.SafeInvalidate(true);
         }
-        private void setFutureBoard(int nb_moves = 1)
+        public void setFutureBoard(int nb_moves = 1)
         {
             if (!pos.setPositionFromDisplay(nb_moves)) return;
-            //gi.highlightMove(pos2.ToMove() ^ 1, idx + nb_moves - 1);
+            gi.highlightMove(pos.ToMove()^1, pos.Game.MoveIndex());
             boardPane.SafeInvalidate(true);
+        }
+        public int CurrentMoveIdx()
+        {
+            return pos.Game.MoveIndex();
         }
     }
 }
