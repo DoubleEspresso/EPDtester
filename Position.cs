@@ -113,8 +113,7 @@ namespace epdTester
                     color_on[i] = src.color_on[i]; piece_on[i] = src.piece_on[i];
                     king_sqs[i] = src.king_sqs[i]; piece_diffs[i] = src.piece_diffs[i];
                 }
-                if (PieceSquares == null) PieceSquares = new List<List<List<int>>>();
-                PieceSquares.Clear();
+                PieceSquares = new List<List<List<int>>>();
                 for (int c = 0; c < 2; ++c)
                 {
                     PieceSquares.Add(new List<List<int>>());
@@ -231,11 +230,10 @@ namespace epdTester
             public Node() { }
             public Node(Info i, string san) // for inserting nodes into existing list
             {
-                parent = new Node(); 
-                pos = i;
+                parent = new Node();
+                pos = new Position.Info(i);
                 san_move = san;
-                if (children == null) children = new List<Node>();
-                children.Clear();
+                children = new List<Node>();
             }
             public bool hasChildren() { return children != null && children.Count > 0; }
             public bool hasParent() { return parent != null; }
@@ -265,15 +263,17 @@ namespace epdTester
                 if (hasChildren()) foreach (Node c in current.children) c.hasSiblings = true;
                 current = n; // if this is a new move, it is made current by default
             }
-            public void next()
+            public bool next()
             {
-                if (current.children == null || current.children.Count == 0) return;
+                if (current.children == null || current.children.Count == 0) return false;
                 current = current.children[0]; // default
+                return true;
             }
-            public void previous()
+            public bool previous()
             {
-                if (current.parent == null || !current.parent.hasPosition()) return;
+                if (current.parent == null || !current.parent.hasPosition()) return false;
                 current = current.parent;
+                return true;
             }
             public void selectSibling(int idx)
             {
@@ -287,7 +287,7 @@ namespace epdTester
             {
                 int count = 0;
                 Node dummy = current;
-                while (dummy != null && dummy.hasParent())
+                while (dummy != null && dummy.parent.hasParent())
                 {
                     dummy = dummy.parent; ++count;
                 }
@@ -423,11 +423,11 @@ namespace epdTester
             if (info == null) return false;
             if (Game == null)
             {
-                Game = new ChessGame(new Info(info));
+                Game = new ChessGame(info);
                 return true;
             }
             string san = toSan(SanSquares[info.From()] + SanSquares[info.To()]);
-            Game.insert(new Node(new Info(info), san)); // new move
+            Game.insert(new Node(info, san)); // new move
             return true;
         }
         private bool onBoard(int s)
@@ -972,10 +972,10 @@ namespace epdTester
         public bool setPositionFromDisplay(int relCount)
         {
             if (relCount > 0)
-                for (int i = 0; i < relCount; ++i) Game.next();
+                for (int i = 0; i < relCount; ++i) {  if (!Game.next()) return false; }
             else
-                for (int i = 0; i < Math.Abs(relCount); ++i) Game.previous();
-            info = Game.position();
+                for (int i = 0; i < Math.Abs(relCount); ++i) { if (!Game.previous()) return false; }
+            info = new Position.Info(Game.position());
             return true;
         }
         public bool isStaleMate()

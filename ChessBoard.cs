@@ -34,7 +34,7 @@ namespace epdTester
         InteractionData id = new InteractionData();
         List<List<List<GL.Texture>>> PieceTextures = null;
         List<GL.Texture> squares = null;
-        Position pos = null;
+        public Position pos = null;
         Point MousePos = new Point(0, 0);
         public ChessBoard(Engine e)
         {

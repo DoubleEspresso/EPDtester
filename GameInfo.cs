@@ -45,7 +45,7 @@ namespace epdTester
                 Invoke(new HighlightMoveFunc(highlightMove), new object[] { c, idx });
                 return true;
             }
-            if (idx <= -1) return true;
+            if (idx < 1) return true;
             return mvList.highlightMove(c, idx);
         }
     }

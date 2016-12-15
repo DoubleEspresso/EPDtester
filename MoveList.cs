@@ -13,6 +13,9 @@ namespace epdTester
     public partial class MoveList : UserControl
     {
         public ChessBoard cb = null;
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        static extern bool HideCaret(IntPtr hWnd);
+
         public MoveList()
         {
             InitializeComponent();
@@ -20,7 +23,7 @@ namespace epdTester
         }
         public bool highlightMove(int c, int idx)
         {
-            string idxString = Convert.ToString((int)Math.Floor((double)idx/2)) + ".";
+            string idxString = Convert.ToString((int)Math.Floor((double)idx / 2) + (idx % 2 == 0 ? 0 : 1)) + ".";
             int sidx = mList.Text.IndexOf(idxString) + idxString.Length; int eidx = -1;
             if (sidx < 0) return false;
             int count = 0;
@@ -45,6 +48,14 @@ namespace epdTester
             mList.Text += g.Moves();
             return true;
         }
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Down) { cb.setPreviousBoard(3); return true; }
+            else if (keyData == Keys.Up) { cb.setFutureBoard(3); return true; }
+            else if (keyData == Keys.Right) { cb.setFutureBoard(); return true; }
+            else if (keyData == Keys.Left) { cb.setPreviousBoard(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
         private void OnMouse_click(object sender, MouseEventArgs e)
         {
             if (cb == null) return;
@@ -57,20 +68,17 @@ namespace epdTester
                     cm.Show(this, new Point(e.X, e.Y));
                     break;
                 case MouseButtons.Left: // update to clicked move
-                    // note : dbg hack to "set" position based on clicking the move list at a point
-                    // needs debugging/smoothing, requires access to the chessgame/position classes.
-                    int dst_idx = p;
-                    if (dst_idx >= mList.Text.Length) return;
-                    while (mList.Text[dst_idx] != ' ') ++dst_idx;
-                    dst_idx = mList.Text.Substring(0, dst_idx).Count(f => f == ' ') + 1; // number of moves made to get to mouse position
-                    int diff = dst_idx - cb.CurrentMoveIdx();
+                    if (p >= mList.Text.Length) return;
+                    while (p < mList.Text.Length - 1 && mList.Text[p] != ' ') ++p;
+                    p = mList.Text.Substring(0, p).Count(f => f == ' '); // number of moves made to get to mouse position
+                    int diff = p - cb.CurrentMoveIdx();
                     if (diff > 0) cb.setFutureBoard(diff);
                     else cb.setPreviousBoard(-diff);
-                    //MessageBox.Show(string.Format("left-click @({0},{1}), number of moves to this point ({2})", e.X, e.Y, nb_mvs));
                     break;
                 default:
                     break;
             }
+            HideCaret(mList.Handle);
         }
         private void SelectVariation(object sender, EventArgs args)
         {
