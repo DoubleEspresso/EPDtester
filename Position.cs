@@ -283,6 +283,7 @@ namespace epdTester
                     return;
                 current = current.parent.children[idx];
             }
+            public List<Node> Siblings() { return current.parent.children; }
             public int MoveIndex()
             {
                 int count = 0;
@@ -316,6 +317,7 @@ namespace epdTester
                 }
                 for (int j = 0; j < count; ++j)
                 {
+                    // todo: fixme
                     dummy = (dummy.children.Count > 1 ? dummy.children[1] : dummy.children[0]); // default selection for now
                     g_mvs += (j % 2 == 0 ? " " + Convert.ToString((int)Math.Floor((double)(j + 1) / 2) + 1) + "." : " ");
                     g_mvs += (dummy.hasSiblings ? "[" + dummy.SanMove() + "]" : dummy.SanMove());
@@ -977,6 +979,10 @@ namespace epdTester
                 for (int i = 0; i < Math.Abs(relCount); ++i) { if (!Game.previous()) return false; }
             info = new Position.Info(Game.position());
             return true;
+        }
+        public void RefreshData()
+        {
+            info = new Position.Info(Game.position());
         }
         public bool isStaleMate()
         {

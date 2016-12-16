@@ -388,6 +388,10 @@ namespace epdTester
             gi.highlightMove(pos.ToMove()^1, pos.Game.MoveIndex());
             boardPane.SafeInvalidate(true);
         }
+        public void RefreshBoard()
+        {
+            boardPane.SafeInvalidate(true);
+        }
         public int CurrentMoveIdx()
         {
             return pos.Game.MoveIndex();

@@ -63,8 +63,14 @@ namespace epdTester
             switch (e.Button)
             {
                 case MouseButtons.Right:
+                    if (!cb.pos.Game.hasSiblings()) return;
                     ContextMenu cm = new ContextMenu();
-                    cm.MenuItems.Add("test mv (does nothing)", SelectVariation);
+                    int count = 0;
+                    foreach (Position.Node n in cb.pos.Game.Siblings())
+                    {
+                        cm.MenuItems.Add(new MenuItem(Convert.ToString(count + 1) + ". " + n.SanMove(), SelectVariation));
+                        ++count;
+                    }
                     cm.Show(this, new Point(e.X, e.Y));
                     break;
                 case MouseButtons.Left: // update to clicked move
@@ -82,7 +88,12 @@ namespace epdTester
         }
         private void SelectVariation(object sender, EventArgs args)
         {
-            // event to select subvariation on right-click
+            MenuItem m = (MenuItem)sender;
+            cb.pos.Game.selectSibling(m.Index);
+            cb.pos.RefreshData();
+            // todo : set child reference pointer
+            setGameText(cb.pos.Game);
+            cb.RefreshBoard();
         }
     }
 }
