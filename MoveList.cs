@@ -63,6 +63,10 @@ namespace epdTester
             switch (e.Button)
             {
                 case MouseButtons.Right:
+                    // todo:
+                    // 1. right-click on move other than highlighted move
+                    // 2. guard against adding the "same" move
+                    // 3. move list updating for each subvariation currently broken (elements of list are lost..?)
                     if (!cb.pos.Game.hasSiblings()) return;
                     ContextMenu cm = new ContextMenu();
                     int count = 0;

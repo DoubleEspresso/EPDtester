@@ -227,6 +227,7 @@ namespace epdTester
             string san_move = "";
             public bool hasSiblings = false;
             public List<Node> children = null;
+            public int childIdx = 0; // default
             public Node() { }
             public Node(Info i, string san) // for inserting nodes into existing list
             {
@@ -261,6 +262,7 @@ namespace epdTester
                 n.parent = current;
                 current.children.Add(n);
                 if (hasChildren()) foreach (Node c in current.children) c.hasSiblings = true;
+                current.childIdx = current.children.Count - 1;
                 current = n; // if this is a new move, it is made current by default
             }
             public bool next()
@@ -282,6 +284,7 @@ namespace epdTester
                         idx > current.parent.children.Count)
                     return;
                 current = current.parent.children[idx];
+                current.parent.childIdx = idx;
             }
             public List<Node> Siblings() { return current.parent.children; }
             public int MoveIndex()
@@ -317,8 +320,7 @@ namespace epdTester
                 }
                 for (int j = 0; j < count; ++j)
                 {
-                    // todo: fixme
-                    dummy = (dummy.children.Count > 1 ? dummy.children[1] : dummy.children[0]); // default selection for now
+                    dummy = (dummy.children.Count > 1 ? dummy.children[dummy.childIdx] : dummy.children[0]);
                     g_mvs += (j % 2 == 0 ? " " + Convert.ToString((int)Math.Floor((double)(j + 1) / 2) + 1) + "." : " ");
                     g_mvs += (dummy.hasSiblings ? "[" + dummy.SanMove() + "]" : dummy.SanMove());
                 }
