@@ -23,6 +23,7 @@ namespace epdTester
         public string Version = null;
         public bool Loaded = false;
         public bool Running = false;
+        bool useLog = false;
         public string EngineLogFilename = null;
         public string EngineLogDirectory = null;
         Process eprocess = null;
@@ -56,6 +57,7 @@ namespace epdTester
                 Settings.set(string.Format("{0}\\Use Opening Book", basetag), useBook);
                 Settings.set(string.Format("{0}\\Table Base\\Path", basetag), TableBase);
                 Settings.set(string.Format("{0}\\Config file\\Path", basetag), ConfigFile);
+                Settings.set(string.Format("{0}\\Log output", basetag), useLog);
                 Settings.set(string.Format("{0}\\elo", basetag), (int) Elo);
                 Settings.set(string.Format("{0}\\Author", basetag), Author);
                 Settings.set(string.Format("{0}\\Version", basetag), Version);
@@ -77,6 +79,7 @@ namespace epdTester
                 Settings.get(string.Format("{0}\\Name", basetag), ref Name);
                 Settings.get(string.Format("{0}\\Path", basetag), ref FileName);
                 if (!canOpen()) return false;
+                Settings.get(string.Format("{0}\\Log output", basetag), ref useLog);
                 Settings.get(string.Format("{0}\\Opening Book\\Path", basetag), ref OpeningBook);
                 Settings.get(string.Format("{0}\\Use Opening Book", basetag), ref useBook);
                 Settings.get(string.Format("{0}\\Table Base\\Path", basetag), ref TableBase);
@@ -94,6 +97,16 @@ namespace epdTester
             }
             return true;
 
+        }
+        public bool WritingToLogFile()
+        {
+            return useLog;
+        }
+        public void UseLog(bool usingLog)
+        {
+            useLog = usingLog;
+            if (useLog) WriteToLogCallback += WriteLine;
+            else WriteToLogCallback -= WriteLine;
         }
         public void Command(string cmd, string waitToken = null)
         {
@@ -120,18 +133,30 @@ namespace epdTester
                     UseShellExecute = false,
                     WindowStyle = ProcessWindowStyle.Hidden
                 };
-                EngineLogFilename = Name + "-" + StringUtils.TimeStamp() + ".log";
-                EngineLogDirectory = Log.DirectoryName;
-                if (!openEngineLog(EngineLogDirectory, EngineLogFilename))
+
+                if (useLog)
                 {
-                    Log.WriteLine("..[engine] Warning: failed to start log file for engine @({0})", EngineLogFilename);
+                    EngineLogFilename = Name + "-" + StringUtils.TimeStamp() + ".log";
+                    EngineLogDirectory = Log.DirectoryName;
+                    if (!openEngineLog(EngineLogDirectory, EngineLogFilename))
+                    {
+                        EngineLogFilename = null;
+                        EngineLogDirectory = null;
+                        Log.WriteLine("..[engine] Warning: failed to start log file for engine @({0})", EngineLogFilename);
+                        useLog = false; // does not update UI (fyi).
+                    }
+                }
+                else
+                {
+                    EngineLogFilename = null;
+                    EngineLogDirectory = null;
                 }
                 eprocess = Process.Start(pinfo);                
                 engineWriter = eprocess.StandardInput;
                 engineReader = eprocess.StandardOutput;
-                new Task(LogOutputAsync).Start(); // settings controlled?
+                new Task(ReadEngineStreamAsync).Start(); // settings controlled?
                 Running = true;
-                Thread.Sleep(100);                 
+                Thread.Sleep(100); 
             }
             catch(Exception any)
             {
@@ -139,16 +164,21 @@ namespace epdTester
             }
         }
         public event EventHandler<string> ReadoutCallback = null;
-        private async void LogOutputAsync()
+        event EventHandler<string> WriteToLogCallback = null;
+        private async void ReadEngineStreamAsync()
         {
             char [] buff = new char[2048];
             while (!eprocess.HasExited)
             {
                 int length = await engineReader.ReadAsync(buff, 0, buff.Length);
+                if (length <= 1) return;
                 Log.CustomLogName = Name;
                 string readout = new string(buff).Substring(0, length-1);
                 if (ReadoutCallback != null) ReadoutCallback(this, readout);
-                WriteLine(readout); 
+                if (useLog && WriteToLogCallback != null) WriteToLogCallback(this, readout);
+                Parser.ParseLine(readout);
+                if (readout.Contains(stopOnToken) && Parser.CallbackOnBestmove != null)
+                    Parser.CallbackOnBestmove(null, null);
                 Thread.Sleep(1);
             }
             Running = false;
@@ -161,14 +191,11 @@ namespace epdTester
             Parser.CallbackOnBestmove += cb;
             stopOnToken = (stopToken == "" ? "bestmove" : stopToken);
         }
-        public void WriteLine(string str)
+        public void WriteLine(object sender, string str)
         {
             lock (LogLock)
             {
                 logWriter.Write(string.Format("{0}", str));
-                Parser.ParseLine(str);
-                if (str.Contains(stopOnToken) && Parser.CallbackOnBestmove != null)
-                    Parser.CallbackOnBestmove(null, null);
                 logWriter.Flush();
             }
         }

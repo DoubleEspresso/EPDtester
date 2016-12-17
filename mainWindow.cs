@@ -131,8 +131,14 @@ namespace epdTester
         {
 
         }
+        delegate void EngineSelectedChangeFunc(object sender, EventArgs args);
         private void engineList_SelectedEngineChanged(object sender, EventArgs args)
         {
+            if (InvokeRequired)
+            {
+                Invoke(new EngineSelectedChangeFunc(engineList_SelectedEngineChanged), sender, args);
+                return;
+            }
             int idx = engineList.SelectedIndex;
             if (idx >=0 && idx < engines.Count)
             {
@@ -140,6 +146,7 @@ namespace epdTester
                 updateDisplay(e);
                 Settings.set("Engine\\Selected", idx);
                 ActiveEngine = e;
+                this.useLogCheckbox.Checked = (e.WritingToLogFile());
             }
         }
         private void showLog_Click(object sender, EventArgs e)
@@ -267,11 +274,18 @@ namespace epdTester
         }
         public static void CloseEngineInstances()
         {
+            int count = 0; 
             foreach (Engine e in engines)
             {
+                e.SaveSettings(count); 
                 e.Close();
+                ++count;
             }
             Log.WriteLine("..all running engines closed");
+        }
+        private void useLogCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            ActiveEngine.UseLog(useLogCheckbox.Checked);
         }
     }
 }
