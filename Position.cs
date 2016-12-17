@@ -268,7 +268,7 @@ namespace epdTester
             public bool next()
             {
                 if (current.children == null || current.children.Count == 0) return false;
-                current = current.children[0]; // default
+                current = current.children[current.childIdx]; // default
                 return true;
             }
             public bool previous()
@@ -277,16 +277,50 @@ namespace epdTester
                 current = current.parent;
                 return true;
             }
-            public void selectSibling(int idx)
+            public void selectSibling(int idx, int relCount)
             {
-                if (idx < 0 || current.parent == null ||
-                        current.parent.children == null ||
-                        idx > current.parent.children.Count)
+                // note: relCount is the nb of moves forward/backward from current position.
+                Node dummy = current;
+                for (int i = 0; i < Math.Abs(relCount); ++i)
+                {
+                    if (relCount > 0)
+                    {
+                        if (!dummy.hasChildren()) return;
+                        dummy = dummy.children[dummy.childIdx];
+                    }
+                    else
+                    {
+                        if (!dummy.hasParent()) return;
+                        dummy = dummy.parent;
+                    }
+                }
+                if (idx < 0 || dummy.parent == null ||
+                        dummy.parent.children == null ||
+                        idx > dummy.parent.children.Count)
                     return;
-                current = current.parent.children[idx];
+                current = dummy.parent.children[idx];
                 current.parent.childIdx = idx;
             }
             public List<Node> Siblings() { return current.parent.children; }
+            public List<Node> Siblings(int relCount)
+            {
+                // note: relCount is the nb of moves forward/backward from current position.
+                Node dummy = current;
+                for (int i = 0; i < Math.Abs(relCount); ++i)
+                {
+                    if (relCount > 0)
+                    {
+                        if (!dummy.hasChildren()) return null;
+                        dummy = dummy.children[dummy.childIdx];
+                    }
+                    else
+                    {
+                        if (!dummy.hasParent()) return null;
+                        dummy = dummy.parent;
+                    }
+                }
+                return dummy.parent.children; ;
+            }
             public int MoveIndex()
             {
                 int count = 0;
@@ -309,20 +343,40 @@ namespace epdTester
             {
                 return current.parent.children != null && current.parent.children.Count > 1;
             }
+            public bool hasSiblings(int relCount)
+            {
+                // note: relCount is the nb of moves forward/backward from current position.
+                Node dummy = current;
+                for (int i = 0; i < Math.Abs(relCount); ++i)
+                {
+                    if (relCount > 0)
+                    {
+                        if (!dummy.hasChildren()) return false;
+                        dummy = dummy.children[dummy.childIdx];
+                    }
+                    else
+                    {
+                        if (!dummy.hasParent()) return false;
+                        dummy = dummy.parent;
+                    }
+                }
+                return dummy.parent.children != null && dummy.parent.children.Count > 1; ;
+            }
             public Info position() { return current.position(); }
             public string Moves()
             {
-                int count = 0; string g_mvs = "";
+                string g_mvs = "";
                 Node dummy = (current.hasChildren() ? current.children[0] : current);
                 while (dummy != null && dummy.parent.parent != null)
                 {
-                    dummy = dummy.parent; ++count;
-                }
-                for (int j = 0; j < count; ++j)
+                    dummy = dummy.parent;                }
+                int j = 0; // we start from the beginning of the game (which is inefficient)
+                while (dummy != null && dummy.children != null && dummy.children.Count >= 1)
                 {
                     dummy = (dummy.children.Count > 1 ? dummy.children[dummy.childIdx] : dummy.children[0]);
                     g_mvs += (j % 2 == 0 ? " " + Convert.ToString((int)Math.Floor((double)(j + 1) / 2) + 1) + "." : " ");
                     g_mvs += (dummy.hasSiblings ? "[" + dummy.SanMove() + "]" : dummy.SanMove());
+                    ++j;
                 }
                 return g_mvs;
             }

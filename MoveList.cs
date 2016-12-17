@@ -60,6 +60,10 @@ namespace epdTester
         {
             if (cb == null) return;
             int p = mList.GetCharIndexFromPosition(new Point(e.X, e.Y));
+            if (p >= mList.Text.Length) return;
+            while (p < mList.Text.Length - 1 && mList.Text[p] != ' ') ++p;
+            p = mList.Text.Substring(0, p).Count(f => f == ' '); // number of moves made to get to mouse position
+            int diff = p - cb.CurrentMoveIdx();
             switch (e.Button)
             {
                 case MouseButtons.Right:
@@ -67,21 +71,23 @@ namespace epdTester
                     // 1. right-click on move other than highlighted move
                     // 2. guard against adding the "same" move
                     // 3. move list updating for each subvariation currently broken (elements of list are lost..?)
-                    if (!cb.pos.Game.hasSiblings()) return;
+                    if (!cb.pos.Game.hasSiblings(diff)) return;
                     ContextMenu cm = new ContextMenu();
                     int count = 0;
-                    foreach (Position.Node n in cb.pos.Game.Siblings())
+                    foreach (Position.Node n in cb.pos.Game.Siblings(diff))
                     {
-                        cm.MenuItems.Add(new MenuItem(Convert.ToString(count + 1) + ". " + n.SanMove(), SelectVariation));
+                        MenuItem m = new MenuItem(Convert.ToString(count + 1) + ". " + n.SanMove());
+                        m.Click += (sendr, eargs) =>
+                        {
+                            SelectVariation(m, null, diff);
+                        };
+                        cm.MenuItems.Add(m);
+                        //cm.MenuItems.Add(new MenuItem(Convert.ToString(count + 1) + ". " + n.SanMove(), SelectVariation));
                         ++count;
                     }
                     cm.Show(this, new Point(e.X, e.Y));
                     break;
                 case MouseButtons.Left: // update to clicked move
-                    if (p >= mList.Text.Length) return;
-                    while (p < mList.Text.Length - 1 && mList.Text[p] != ' ') ++p;
-                    p = mList.Text.Substring(0, p).Count(f => f == ' '); // number of moves made to get to mouse position
-                    int diff = p - cb.CurrentMoveIdx();
                     if (diff > 0) cb.setFutureBoard(diff);
                     else cb.setPreviousBoard(-diff);
                     break;
@@ -90,10 +96,10 @@ namespace epdTester
             }
             HideCaret(mList.Handle);
         }
-        private void SelectVariation(object sender, EventArgs args)
+        private void SelectVariation(object sender, EventArgs args, int diff)
         {
             MenuItem m = (MenuItem)sender;
-            cb.pos.Game.selectSibling(m.Index);
+            cb.pos.Game.selectSibling(m.Index, diff);
             cb.pos.RefreshData();
             // todo : set child reference pointer
             setGameText(cb.pos.Game);
