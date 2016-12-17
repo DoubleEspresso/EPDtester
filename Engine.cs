@@ -129,7 +129,7 @@ namespace epdTester
                 eprocess = Process.Start(pinfo);                
                 engineWriter = eprocess.StandardInput;
                 engineReader = eprocess.StandardOutput;
-                new Task(LogOutputAsync).Start();
+                new Task(LogOutputAsync).Start(); // settings controlled?
                 Running = true;
                 Thread.Sleep(100);                 
             }
@@ -138,6 +138,7 @@ namespace epdTester
                 Log.WriteLine("..[engine] exception running {0} with args ({1}).\nStackTrace :\n {2}", Name, args, any.StackTrace);
             }
         }
+        public event EventHandler<string> ReadoutCallback = null;
         private async void LogOutputAsync()
         {
             char [] buff = new char[2048];
@@ -145,7 +146,9 @@ namespace epdTester
             {
                 int length = await engineReader.ReadAsync(buff, 0, buff.Length);
                 Log.CustomLogName = Name;
-                WriteLine((new string(buff)).Substring(0, length-1)); // event handler for engine output
+                string readout = new string(buff).Substring(0, length-1);
+                if (ReadoutCallback != null) ReadoutCallback(this, readout);
+                WriteLine(readout); 
                 Thread.Sleep(1);
             }
             Running = false;

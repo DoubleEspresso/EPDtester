@@ -111,6 +111,12 @@
       <DependentUpon>ClockUI.cs</DependentUpon>
     </Compile>
     <Compile Include="Engine.cs" />
+    <Compile Include="EngineAnalysisControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="EngineAnalysisControl.Designer.cs">
+      <DependentUpon>EngineAnalysisControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="EpdFile.cs" />
     <Compile Include="EpdTabDisplay.cs">
       <SubType>UserControl</SubType>
@@ -164,6 +170,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ClockUI.resx">
       <DependentUpon>ClockUI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EngineAnalysisControl.resx">
+      <DependentUpon>EngineAnalysisControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="EpdTabDisplay.resx">
       <DependentUpon>EpdTabDisplay.cs</DependentUpon>

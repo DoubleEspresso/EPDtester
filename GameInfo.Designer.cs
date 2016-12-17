@@ -38,10 +38,11 @@
             this.clockToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.moveListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.evaluationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.engineAnalysisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.engineAnalysisItem = new System.Windows.Forms.ToolStripMenuItem();
             this.databaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.Clock = new epdTester.ClockUI();
             this.mvList = new epdTester.MoveList();
+            this.Clock = new epdTester.ClockUI();
+            this.engineAnalysisControl1 = new epdTester.EngineAnalysisControl();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -90,7 +91,7 @@
             this.clockToolStripMenuItem,
             this.moveListToolStripMenuItem,
             this.evaluationToolStripMenuItem,
-            this.engineAnalysisToolStripMenuItem,
+            this.engineAnalysisItem,
             this.databaseToolStripMenuItem});
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
@@ -114,11 +115,12 @@
             this.evaluationToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
             this.evaluationToolStripMenuItem.Text = "Evaluation";
             // 
-            // engineAnalysisToolStripMenuItem
+            // engineAnalysisItem
             // 
-            this.engineAnalysisToolStripMenuItem.Name = "engineAnalysisToolStripMenuItem";
-            this.engineAnalysisToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
-            this.engineAnalysisToolStripMenuItem.Text = "Engine Analysis";
+            this.engineAnalysisItem.Name = "engineAnalysisItem";
+            this.engineAnalysisItem.Size = new System.Drawing.Size(156, 22);
+            this.engineAnalysisItem.Text = "Engine Analysis";
+            this.engineAnalysisItem.Click += new System.EventHandler(this.engineAnalysisItem_Click);
             // 
             // databaseToolStripMenuItem
             // 
@@ -126,27 +128,37 @@
             this.databaseToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
             this.databaseToolStripMenuItem.Text = "Database";
             // 
-            // Clock
-            // 
-            this.Clock.Location = new System.Drawing.Point(12, 36);
-            this.Clock.Name = "Clock";
-            this.Clock.Size = new System.Drawing.Size(465, 91);
-            this.Clock.TabIndex = 1;
-            // 
             // mvList
             // 
-            this.mvList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.mvList.Location = new System.Drawing.Point(12, 121);
+            this.mvList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.mvList.Location = new System.Drawing.Point(12, 123);
             this.mvList.Name = "mvList";
-            this.mvList.Size = new System.Drawing.Size(464, 177);
+            this.mvList.Size = new System.Drawing.Size(464, 138);
             this.mvList.TabIndex = 2;
+            // 
+            // Clock
+            // 
+            this.Clock.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.Clock.Location = new System.Drawing.Point(12, 36);
+            this.Clock.Name = "Clock";
+            this.Clock.Size = new System.Drawing.Size(465, 81);
+            this.Clock.TabIndex = 1;
+            // 
+            // engineAnalysisControl1
+            // 
+            this.engineAnalysisControl1.Location = new System.Drawing.Point(12, 267);
+            this.engineAnalysisControl1.Name = "engineAnalysisControl1";
+            this.engineAnalysisControl1.Size = new System.Drawing.Size(464, 217);
+            this.engineAnalysisControl1.TabIndex = 3;
             // 
             // GameInfo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(488, 316);
+            this.ClientSize = new System.Drawing.Size(488, 496);
+            this.Controls.Add(this.engineAnalysisControl1);
             this.Controls.Add(this.mvList);
             this.Controls.Add(this.Clock);
             this.Controls.Add(this.menuStrip1);
@@ -172,9 +184,10 @@
         private System.Windows.Forms.ToolStripMenuItem clockToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem moveListToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem evaluationToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem engineAnalysisToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem engineAnalysisItem;
         private System.Windows.Forms.ToolStripMenuItem databaseToolStripMenuItem;
         private ClockUI Clock;
         private MoveList mvList;
+        private EngineAnalysisControl engineAnalysisControl1;
     }
 }

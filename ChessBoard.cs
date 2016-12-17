@@ -35,7 +35,10 @@ namespace epdTester
         List<List<List<GL.Texture>>> PieceTextures = null;
         List<GL.Texture> squares = null;
         public Position pos = null;
+        public enum Mode { ANALYSIS, GAME }
+        public Mode mode = Mode.GAME; 
         Point MousePos = new Point(0, 0);
+        public Engine ChessEngine { get { return ActiveEngine; } }
         public ChessBoard(Engine e)
         {
             InitializeComponent();
@@ -81,6 +84,7 @@ namespace epdTester
             if (pos == null) pos = new Position(Position.StartFen);
             SetAspectRatio(Width, Height);
         }
+        public bool hasEngine() { return ActiveEngine != null; }
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             e.Cancel = true;
@@ -285,18 +289,28 @@ namespace epdTester
             string game_over = "";
             if (pos.isMate()) game_over += "mate";
             else if (pos.isStaleMate()) game_over += "stalemate";
-            if (!String.IsNullOrWhiteSpace(game_over)) Log.WriteLine("..game finished, {0}", game_over); 
+            if (!String.IsNullOrWhiteSpace(game_over)) Log.WriteLine("..game finished, {0}", game_over);
 
             // send move data to engine
             if (ActiveEngine != null)
             {
-                string fen = pos.toFen();
-                ActiveEngine.Command("position fen " + fen);
-                ActiveEngine.Command("go wtime 3000 btime 3000");
+                switch (mode)
+                {
+                    case Mode.GAME:
+                        ActiveEngine.Command("position fen " + pos.toFen()); // hack for now
+                        ActiveEngine.Command("go wtime 3000 btime 3000"); // hack for now
+                        break;
+                    case Mode.ANALYSIS:
+                        gi.ClearAnalysisPane();
+                        ActiveEngine.Command("stop");
+                        ActiveEngine.Command("position fen " + pos.toFen());
+                        ActiveEngine.Command("go infinite");
+                        break;
+                    default: break;
+                }
             }
             id.reset();
         }
-        // todo : refactor piece move to a single function
         public void onEngineBestMoveParsed(object sender, EventArgs e)
         {
             if (ActiveEngine == null) return;
@@ -379,14 +393,28 @@ namespace epdTester
         public void setPreviousBoard(int nb_moves = 1)
         {
             if (!pos.setPositionFromDisplay(-nb_moves)) return;
-            gi.highlightMove(pos.ToMove()^1, pos.Game.MoveIndex());
+            gi.highlightMove(pos.ToMove() ^ 1, pos.Game.MoveIndex());
             boardPane.SafeInvalidate(true);
+            if (ActiveEngine != null && mode == Mode.ANALYSIS)
+            {
+                gi.ClearAnalysisPane();
+                ActiveEngine.Command("stop");
+                ActiveEngine.Command("position fen " + pos.toFen());
+                ActiveEngine.Command("go infinite");
+            }
         }
         public void setFutureBoard(int nb_moves = 1)
         {
             if (!pos.setPositionFromDisplay(nb_moves)) return;
             gi.highlightMove(pos.ToMove()^1, pos.Game.MoveIndex());
             boardPane.SafeInvalidate(true);
+            if (ActiveEngine != null && mode == Mode.ANALYSIS)
+            {
+                gi.ClearAnalysisPane();
+                ActiveEngine.Command("stop");
+                ActiveEngine.Command("position fen " + pos.toFen());
+                ActiveEngine.Command("go infinite");
+            }
         }
         public void RefreshBoard()
         {

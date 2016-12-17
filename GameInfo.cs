@@ -13,11 +13,13 @@ namespace epdTester
     public partial class GameInfo : Form
     {
         Position pos = null;
+        ChessBoard board = null;
         public GameInfo(Position p, ChessBoard cb)
         {     
             InitializeComponent();
             this.pos = p;
             mvList.cb = cb;
+            board = cb;
         }
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
@@ -47,6 +49,18 @@ namespace epdTester
             }
             if (idx < 1) return true;
             return mvList.highlightMove(c, idx);
+        }
+        public void ClearAnalysisPane()
+        {
+            engineAnalysisControl1.Clear();
+        }
+        private void engineAnalysisItem_Click(object sender, EventArgs e)
+        {
+            // todo :: should "disable" the option if no engine present..
+            if (!board.hasEngine()) return;
+            board.mode = ChessBoard.Mode.ANALYSIS;
+            // update for "analysis control" game info view
+            engineAnalysisControl1.setEngine(board.ChessEngine);
         }
     }
 }
