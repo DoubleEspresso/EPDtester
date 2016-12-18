@@ -13,27 +13,43 @@ namespace epdTester
     public partial class EngineAnalysisControl : UserControl
     {
         Engine e = null;
+        ChessBoard cb = null;
         public EngineAnalysisControl()
         {
             InitializeComponent();
         }
-        public void setEngine(Engine engine)
+        public void Initialize(Engine engine, ChessBoard b)
         {
             this.e = engine;
-            e.ReadoutCallback += EngineStreamRecieved;
+            e.AnalysisUICallback += EngineStreamRecieved;
+            analysisGroup.Text = e.Name + " analysis";
+            this.cb = b;
         }
         public void Clear()
         {
-            engineAnalysis.Text = "";
+            depth.Text = "";
+            eval.Text = "";
+            nps.Text = "";
+            hashfull.Text = "";
+            currmove.Text = "";
+            cpu.Text = "";
+            pv.Text = "";
         }
-        public void EngineStreamRecieved(object sender, string s)
+        public void EngineStreamRecieved(object sender, Engine.AnalysisUIData d)
         {
             if (InvokeRequired)
             {
-                Invoke(new EventHandler<string>(EngineStreamRecieved), sender, s);
+                Invoke(new EventHandler<Engine.AnalysisUIData>(EngineStreamRecieved), sender,d);
                 return;
             }
-            engineAnalysis.Text += s + "\n";
+            depth.Text = d.depth;
+            eval.Text = d.eval;
+            nps.Text = d.nps;
+            hashfull.Text = d.hashfull;
+            currmove.Text = d.currmove;
+            cpu.Text = d.cpu;
+            pv.Text = d.pv;
         }
+        
     }
 }

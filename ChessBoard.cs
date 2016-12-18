@@ -49,6 +49,7 @@ namespace epdTester
             gi.Show(); gi.BringToFront(); // by defualt
             boardPane.PaintGL += Render;
             this.MouseWheel += new MouseEventHandler(OnMouse_scroll);
+            ActiveEngine.chessBoard = this; // for analysis updating
         }
         void Initialize()
         {
@@ -266,6 +267,7 @@ namespace epdTester
         }
         private void OnMouse_Up(object sender, MouseEventArgs e)
         {
+            // todo : keep UI quick by pushing all analysis to a background thread (?)
             if (!id.valid()) return; // we aren't dragging any piece (but could be coloring the board).
             int s = SquareFromMouseLoc(e.Location);
             if (!pos.doMove(id.from, s, id.piecetype, id.color))
@@ -410,8 +412,8 @@ namespace epdTester
             boardPane.SafeInvalidate(true);
             if (ActiveEngine != null && mode == Mode.ANALYSIS)
             {
-                gi.ClearAnalysisPane();
                 ActiveEngine.Command("stop");
+                gi.ClearAnalysisPane();
                 ActiveEngine.Command("position fen " + pos.toFen());
                 ActiveEngine.Command("go infinite");
             }

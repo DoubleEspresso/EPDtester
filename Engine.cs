@@ -33,6 +33,7 @@ namespace epdTester
         public enum Type { UCI, WINBOARD, UNKNOWN }
         public Type EngineProtocol = Type.UCI;
         public ChessParser Parser = new UCIParser();
+        public ChessBoard chessBoard = null;
 
         public Engine() { }
         public bool canOpen()
@@ -108,15 +109,14 @@ namespace epdTester
             if (useLog) WriteToLogCallback += WriteLine;
             else WriteToLogCallback -= WriteLine;
         }
-        public void Command(string cmd, string waitToken = null)
+        public void Command(string cmd)
         {
             if (!Running || !Loaded || eprocess == null || engineWriter == null) return;
             if (cmd.Contains("go"))
             {
-                Parser.NewSearch(waitToken); // uci specific.
+                Parser.NewSearch(); // uci specific.
             }
             engineWriter.WriteLine(cmd);
-            Thread.Sleep(20);
         }
         public void Start(string args = "")
         {            
@@ -163,7 +163,7 @@ namespace epdTester
                 Log.WriteLine("..[engine] exception running {0} with args ({1}).\nStackTrace :\n {2}", Name, args, any.StackTrace);
             }
         }
-        public event EventHandler<string> ReadoutCallback = null;
+        public event EventHandler<AnalysisUIData> AnalysisUICallback = null;
         event EventHandler<string> WriteToLogCallback = null;
         private async void ReadEngineStreamAsync()
         {
@@ -174,14 +174,68 @@ namespace epdTester
                 if (length <= 1) return;
                 Log.CustomLogName = Name;
                 string readout = new string(buff).Substring(0, length-1);
-                if (ReadoutCallback != null) ReadoutCallback(this, readout);
+                if (AnalysisUICallback != null)
+                {
+                    // parse readout on this (background) thread
+                    AnalysisUIData data = FormatForAnalysisUI();
+                    if (data != null) AnalysisUICallback(this, data);
+                }
                 if (useLog && WriteToLogCallback != null) WriteToLogCallback(this, readout);
                 Parser.ParseLine(readout);
                 if (readout.Contains(stopOnToken) && Parser.CallbackOnBestmove != null)
                     Parser.CallbackOnBestmove(null, null);
-                Thread.Sleep(1);
+                Thread.Sleep(10);
             }
             Running = false;
+            Log.WriteLine("..WARNING: engine process has exited");
+        }
+        public class AnalysisUIData
+        {
+            public string depth;
+            public string eval;
+            public string nps;
+            public string hashfull;
+            public string currmove;
+            public string cpu;
+            public string pv;
+        }
+        private AnalysisUIData FormatForAnalysisUI()
+        {
+            if (Parser == null) return null;
+            AnalysisUIData data = new AnalysisUIData();
+            foreach (ChessParser.Data d in Parser.History)
+            {
+                if (String.IsNullOrWhiteSpace(d.pv)) continue;
+                data.depth = "depth: " + Convert.ToString(d.depth);
+                data.eval = "eval: " + String.Format("{0:F2}", d.eval / 100.0);
+                data.nps = "nps: " + Convert.ToString(d.nps);
+                data.hashfull = "hashhits: " + Convert.ToString(d.hashhits);
+                data.currmove = "currmove: " + Convert.ToString("n/a");
+                data.cpu = "cpu: " + Convert.ToString("n/a");
+                data.pv = "pv: " + FormatPV(d.pv);
+            }
+            return data;
+        }
+        string FormatPV(string moves)
+        {
+            if (String.IsNullOrWhiteSpace(moves)) return "";
+            try
+            {
+                Position p = new Position(chessBoard.pos.toFen());
+                string san_moves = "";
+                string[] tokens = moves.Split(' ');
+                foreach (string move in tokens)
+                {
+                    if (String.IsNullOrWhiteSpace(move)) continue;
+                    int[] fto = Position.FromTo(move);
+                    if (p.doMove(fto[0], fto[1], p.PieceOn(fto[0]), p.ToMove())) san_moves += p.toSan(move) + " ";
+                    else break;
+                    if (san_moves.Length > 100) break;
+                }
+                return san_moves;
+            }
+            catch { } // silently ignore.
+            return "";
         }
         object LogLock = new object();
         string stopOnToken = "";
@@ -193,6 +247,10 @@ namespace epdTester
         }
         public void WriteLine(object sender, string str)
         {
+            // fixme : with analysis mode active, possible race condition/deadlock
+            // results from writing to the log both for the engine/analysis and 
+            // for the main event logs .. issue (engine stalls/log writing stalls) is reproducible, but does not appear
+            // when not logging engine output 
             lock (LogLock)
             {
                 logWriter.Write(string.Format("{0}", str));

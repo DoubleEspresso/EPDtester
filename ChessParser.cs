@@ -13,7 +13,7 @@ namespace epdTester
         {
             public uint depth;
             public uint ms;
-            public uint eval;
+            public int eval;
             public uint hashhits;
             public uint nodes;
             public uint nps;
@@ -21,16 +21,14 @@ namespace epdTester
             public string bestmove;
             public string pondermove;
         }
-        string waitToken = "";
         public List<Data> History = null;
         public EventHandler CallbackOnBestmove = null;
 
         public ChessParser() { }
 
-        public void NewSearch(string waitToken)
+        public void NewSearch()
         {
             if (History == null) History = new List<Data>();
-            this.waitToken = waitToken;
             History.Clear();
         }
         public string SearchBestMove()
@@ -138,12 +136,14 @@ namespace epdTester
                         string token = tokens[j];
                         switch (token)
                         {
-                            case "cp": d.eval = Convert.ToUInt32(tokens[++j]); break;
+                            case "cp": d.eval = Convert.ToInt32(tokens[++j]); break;
                             case "depth": d.depth = Convert.ToUInt32(tokens[++j]); break;
                             case "nodes": d.nodes = Convert.ToUInt32(tokens[++j]); break;
                             case "tbhits": d.hashhits = Convert.ToUInt32(tokens[++j]); break;
                             case "nps": d.nps = Convert.ToUInt32(tokens[++j]); break;
                             case "bestmove": d.bestmove = tokens[++j]; break;
+                            case "pv": 
+                                for (i = ++j; i < tokens.Length - 1; ++i) d.pv += tokens[i] + " "; j = tokens.Length - 1; break;
                             default: ++skipped; break;
                         }
                     }

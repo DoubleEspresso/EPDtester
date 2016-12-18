@@ -59,8 +59,14 @@ namespace epdTester
             // todo :: should "disable" the option if no engine present..
             if (!board.hasEngine()) return;
             board.mode = ChessBoard.Mode.ANALYSIS;
+
+            // note: take engine out of "game" mode so it does not try to stop
+            // on best-move parsing (causes illegal engine moves/crashes)
+            // todo : if we toggle this option, we need to re-set the callback.
+            board.ChessEngine.Parser.CallbackOnBestmove = null;
+             
             // update for "analysis control" game info view
-            engineAnalysisControl1.setEngine(board.ChessEngine);
+            engineAnalysisControl1.Initialize(board.ChessEngine, board);
         }
     }
 }
