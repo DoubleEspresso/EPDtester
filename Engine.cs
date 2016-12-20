@@ -192,27 +192,31 @@ namespace epdTester
         public class AnalysisUIData
         {
             public string depth;
-            public string eval;
             public string nps;
             public string hashfull;
             public string currmove;
             public string cpu;
             public string pv;
+            public List<double> evals;
         }
         private AnalysisUIData FormatForAnalysisUI()
         {
             if (Parser == null) return null;
+            ChessParser.Data[] history = new ChessParser.Data[Parser.History.Count];
+            Parser.History.CopyTo(history);
             AnalysisUIData data = new AnalysisUIData();
-            foreach (ChessParser.Data d in Parser.History)
+            data.evals = new List<double>();
+            if (history == null || history.Length <= 0) return null;
+            foreach (ChessParser.Data d in history)
             {
                 if (String.IsNullOrWhiteSpace(d.pv)) continue;
                 data.depth = "depth: " + Convert.ToString(d.depth);
-                data.eval = "eval: " + String.Format("{0:F2}", d.eval / 100.0);
+                double eval = d.eval / 100.0; data.evals.Add(eval);
                 data.nps = "nps: " + Convert.ToString(d.nps);
                 data.hashfull = "hashhits: " + Convert.ToString(d.hashhits);
                 data.currmove = "currmove: " + Convert.ToString("n/a");
                 data.cpu = "cpu: " + Convert.ToString("n/a");
-                data.pv = "pv: " + FormatPV(d.pv);
+                data.pv = "[" + String.Format("{0:F2}", eval) + "]  " + FormatPV(d.pv);
             }
             return data;
         }
@@ -228,6 +232,7 @@ namespace epdTester
                 {
                     if (String.IsNullOrWhiteSpace(move)) continue;
                     int[] fto = Position.FromTo(move);
+                    if (fto == null) break;
                     if (p.doMove(fto[0], fto[1], p.PieceOn(fto[0]), p.ToMove())) san_moves += p.toSan(move) + " ";
                     else break;
                     if (san_moves.Length > 100) break;

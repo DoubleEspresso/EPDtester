@@ -394,6 +394,7 @@ namespace epdTester
         public int ToMove() { return info.stm; }
         public static int[] FromTo(string move)
         {
+            if (move.Length < 2) return null;
             int ifrom = -1; int ito = -1;
             string from = move.Substring(0, 2);
             string to = move.Substring(2, 2);

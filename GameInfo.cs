@@ -20,6 +20,7 @@ namespace epdTester
             this.pos = p;
             mvList.cb = cb;
             board = cb;
+            //chessPlot.setPoints(new List<double>() { 0 });
         }
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
@@ -49,6 +50,10 @@ namespace epdTester
             }
             if (idx < 1) return true;
             return mvList.highlightMove(c, idx);
+        }
+        public void setPlotValues(List<double> vals)
+        {
+            //chessPlot.setPoints(vals);
         }
         public void ClearAnalysisPane()
         {

@@ -28,7 +28,6 @@ namespace epdTester
         public void Clear()
         {
             depth.Text = "";
-            eval.Text = "";
             nps.Text = "";
             hashfull.Text = "";
             currmove.Text = "";
@@ -39,17 +38,34 @@ namespace epdTester
         {
             if (InvokeRequired)
             {
-                Invoke(new EventHandler<Engine.AnalysisUIData>(EngineStreamRecieved), sender,d);
+                Invoke(new EventHandler<Engine.AnalysisUIData>(EngineStreamRecieved), sender, d);
                 return;
             }
             depth.Text = d.depth;
-            eval.Text = d.eval;
             nps.Text = d.nps;
             hashfull.Text = d.hashfull;
             currmove.Text = d.currmove;
             cpu.Text = d.cpu;
             pv.Text = d.pv;
+            //cb.UpdateAnalysisGraph(d.evals);
+            //updateEvalGraph(d.evals);
         }
-        
+        //private void updateEvalGraph(List<double> evals)
+        //{
+
+        //    evalGraph.ForeColor = Color.Green;
+        //    if (evals == null || evals.Count <= 0) return;
+        //    for (int j = 0; j < evals.Count; ++j)
+        //    {
+        //        int v = (int)(100 * evals[j]);
+        //        if (v > 100) v = 100;
+        //        if (v < 0)
+        //        {
+        //            evalGraph.ForeColor = Color.Red;
+        //            v = -v;
+        //        }
+        //        evalGraph.Value = v;
+        //    }
+        //}
     }
 }

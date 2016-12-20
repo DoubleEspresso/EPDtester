@@ -319,7 +319,13 @@ namespace epdTester
             ChessParser cp = ActiveEngine.Parser;
             if (cp == null) return;
             string bestmove = cp.SearchBestMove();
+            if (bestmove == "") return;
             int[] fromto = Position.FromTo(cp.SearchBestMove());
+            if (fromto == null)
+            {
+                Log.WriteLine("..ERROR failed to parse bestmove ({0})", bestmove);
+                return;
+            }
             int from = fromto[0]; int to = fromto[1];
             int piecetype = pos.PieceOn(from); int color = pos.ColorOn(from);
             if (!pos.doMove(from, to, piecetype, color))
@@ -425,6 +431,10 @@ namespace epdTester
         public int CurrentMoveIdx()
         {
             return pos.Game.MoveIndex();
+        }
+        public void UpdateAnalysisGraph(List<double> evals)
+        {
+            gi.setPlotValues(evals);
         }
     }
 }

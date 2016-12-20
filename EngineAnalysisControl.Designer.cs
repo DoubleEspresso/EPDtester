@@ -35,7 +35,6 @@
             this.currmove = new System.Windows.Forms.Label();
             this.hashfull = new System.Windows.Forms.Label();
             this.nps = new System.Windows.Forms.Label();
-            this.eval = new System.Windows.Forms.Label();
             this.analysisGroup.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -49,10 +48,9 @@
             this.analysisGroup.Controls.Add(this.currmove);
             this.analysisGroup.Controls.Add(this.hashfull);
             this.analysisGroup.Controls.Add(this.nps);
-            this.analysisGroup.Controls.Add(this.eval);
             this.analysisGroup.Location = new System.Drawing.Point(3, 3);
             this.analysisGroup.Name = "analysisGroup";
-            this.analysisGroup.Size = new System.Drawing.Size(517, 82);
+            this.analysisGroup.Size = new System.Drawing.Size(517, 78);
             this.analysisGroup.TabIndex = 0;
             this.analysisGroup.TabStop = false;
             this.analysisGroup.Text = "engine";
@@ -79,7 +77,7 @@
             // cpu
             // 
             this.cpu.AutoSize = true;
-            this.cpu.Location = new System.Drawing.Point(445, 23);
+            this.cpu.Location = new System.Drawing.Point(358, 23);
             this.cpu.Name = "cpu";
             this.cpu.Size = new System.Drawing.Size(28, 13);
             this.cpu.TabIndex = 4;
@@ -88,7 +86,7 @@
             // currmove
             // 
             this.currmove.AutoSize = true;
-            this.currmove.Location = new System.Drawing.Point(336, 23);
+            this.currmove.Location = new System.Drawing.Point(257, 23);
             this.currmove.Name = "currmove";
             this.currmove.Size = new System.Drawing.Size(54, 13);
             this.currmove.TabIndex = 3;
@@ -97,7 +95,7 @@
             // hashfull
             // 
             this.hashfull.AutoSize = true;
-            this.hashfull.Location = new System.Drawing.Point(245, 23);
+            this.hashfull.Location = new System.Drawing.Point(158, 23);
             this.hashfull.Name = "hashfull";
             this.hashfull.Size = new System.Drawing.Size(46, 13);
             this.hashfull.TabIndex = 2;
@@ -106,20 +104,11 @@
             // nps
             // 
             this.nps.AutoSize = true;
-            this.nps.Location = new System.Drawing.Point(167, 23);
+            this.nps.Location = new System.Drawing.Point(80, 23);
             this.nps.Name = "nps";
             this.nps.Size = new System.Drawing.Size(27, 13);
             this.nps.TabIndex = 1;
             this.nps.Text = "nps:";
-            // 
-            // eval
-            // 
-            this.eval.AutoSize = true;
-            this.eval.Location = new System.Drawing.Point(82, 23);
-            this.eval.Name = "eval";
-            this.eval.Size = new System.Drawing.Size(30, 13);
-            this.eval.TabIndex = 0;
-            this.eval.Text = "eval:";
             // 
             // EngineAnalysisControl
             // 
@@ -127,7 +116,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.analysisGroup);
             this.Name = "EngineAnalysisControl";
-            this.Size = new System.Drawing.Size(522, 91);
+            this.Size = new System.Drawing.Size(522, 85);
             this.analysisGroup.ResumeLayout(false);
             this.analysisGroup.PerformLayout();
             this.ResumeLayout(false);
@@ -143,6 +132,5 @@
         private System.Windows.Forms.Label currmove;
         private System.Windows.Forms.Label hashfull;
         private System.Windows.Forms.Label nps;
-        private System.Windows.Forms.Label eval;
     }
 }
