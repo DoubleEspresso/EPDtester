@@ -123,12 +123,19 @@ namespace epdTester
         public override bool ParseLine(string line)
         {
             if (History == null) History = new List<Data>();
+            if (History.Count > 100) History.Clear();
             try
             {
                 string[] delimits = new string[] { "\r\n" };
                 string[] bufferedLines = line.Split(delimits, StringSplitOptions.None);
                 for (int i = 0; i < bufferedLines.Length; ++i)
                 {
+                    // todo : fixme
+                    if (bufferedLines[i].Contains("currmove"))
+                    {
+                        //History.Clear();
+                        continue;
+                    }
                     string[] tokens = bufferedLines[i].Split(' ');
                     int skipped = 0; Data d = new Data();
                     for (int j = 0; j < tokens.Length - 1; ++j)
@@ -143,7 +150,7 @@ namespace epdTester
                             case "nps": d.nps = Convert.ToUInt32(tokens[++j]); break;
                             case "bestmove": d.bestmove = tokens[++j]; break;
                             case "pv": 
-                                for (i = ++j; i < tokens.Length - 1; ++i) d.pv += tokens[i] + " "; j = tokens.Length - 1; break;
+                                for (int k = ++j; k < tokens.Length - 1; ++k) d.pv += tokens[k] + " "; j = tokens.Length - 1; break;
                             default: ++skipped; break;
                         }
                     }

@@ -303,7 +303,7 @@ namespace epdTester
                         ActiveEngine.Command("go wtime 3000 btime 3000"); // hack for now
                         break;
                     case Mode.ANALYSIS:
-                        gi.ClearAnalysisPane();
+                        //gi.ClearAnalysisPane();
                         ActiveEngine.Command("stop");
                         ActiveEngine.Command("position fen " + pos.toFen());
                         ActiveEngine.Command("go infinite");

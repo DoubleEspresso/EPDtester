@@ -174,6 +174,9 @@ namespace epdTester
                 if (length <= 1) return;
                 Log.CustomLogName = Name;
                 string readout = new string(buff).Substring(0, length-1);
+                Parser.ParseLine(readout);
+                if (readout.Contains(stopOnToken) && Parser.CallbackOnBestmove != null)
+                    Parser.CallbackOnBestmove(null, null);
                 if (AnalysisUICallback != null)
                 {
                     // parse readout on this (background) thread
@@ -181,10 +184,7 @@ namespace epdTester
                     if (data != null) AnalysisUICallback(this, data);
                 }
                 if (useLog && WriteToLogCallback != null) WriteToLogCallback(this, readout);
-                Parser.ParseLine(readout);
-                if (readout.Contains(stopOnToken) && Parser.CallbackOnBestmove != null)
-                    Parser.CallbackOnBestmove(null, null);
-                Thread.Sleep(10);
+                Thread.Sleep(1);
             }
             Running = false;
             Log.WriteLine("..WARNING: engine process has exited");
@@ -207,9 +207,10 @@ namespace epdTester
             AnalysisUIData data = new AnalysisUIData();
             data.evals = new List<double>();
             if (history == null || history.Length <= 0) return null;
-            foreach (ChessParser.Data d in history)
+            //foreach (ChessParser.Data d in history)
             {
-                if (String.IsNullOrWhiteSpace(d.pv)) continue;
+                ChessParser.Data d = history[history.Length - 1];
+                //if (String.IsNullOrWhiteSpace(d.pv)) continue;
                 data.depth = "depth: " + Convert.ToString(d.depth);
                 double eval = d.eval / 100.0; data.evals.Add(eval);
                 data.nps = "nps: " + Convert.ToString(d.nps);
