@@ -201,24 +201,17 @@ namespace epdTester
         }
         private AnalysisUIData FormatForAnalysisUI()
         {
-            if (Parser == null) return null;
-            ChessParser.Data[] history = new ChessParser.Data[Parser.History.Count];
-            Parser.History.CopyTo(history);
+            if (Parser == null || Parser.History.Count <= 0) return null;
+            ChessParser.Data d = Parser.History[Parser.History.Count - 1]; // take most recent
             AnalysisUIData data = new AnalysisUIData();
             data.evals = new List<double>();
-            if (history == null || history.Length <= 0) return null;
-            //foreach (ChessParser.Data d in history)
-            {
-                ChessParser.Data d = history[history.Length - 1];
-                //if (String.IsNullOrWhiteSpace(d.pv)) continue;
-                data.depth = "depth: " + Convert.ToString(d.depth);
-                double eval = d.eval / 100.0; data.evals.Add(eval);
-                data.nps = "nps: " + Convert.ToString(d.nps);
-                data.hashfull = "hashhits: " + Convert.ToString(d.hashhits);
-                data.currmove = "currmove: " + Convert.ToString("n/a");
-                data.cpu = "cpu: " + Convert.ToString("n/a");
-                data.pv = "[" + String.Format("{0:F2}", eval) + "]  " + FormatPV(d.pv);
-            }
+            data.depth = "depth: " + Convert.ToString(d.depth);
+            double eval = d.eval / 100.0; data.evals.Add(eval);
+            data.nps = "nps: " + Convert.ToString(d.nps);
+            data.hashfull = "hashhits: " + Convert.ToString(d.hashhits);
+            data.currmove = "currmove: " + Convert.ToString("n/a");
+            data.cpu = "cpu: " + Convert.ToString("n/a");
+            data.pv = "[" + String.Format("{0:F2}", eval) + "]  " + FormatPV(d.pv);
             return data;
         }
         string FormatPV(string moves)

@@ -402,31 +402,24 @@ namespace epdTester
         {
             if (!pos.setPositionFromDisplay(-nb_moves)) return;
             gi.highlightMove(pos.ToMove() ^ 1, pos.Game.MoveIndex());
-            boardPane.SafeInvalidate(true);
-            if (ActiveEngine != null && mode == Mode.ANALYSIS)
-            {
-                gi.ClearAnalysisPane();
-                ActiveEngine.Command("stop");
-                ActiveEngine.Command("position fen " + pos.toFen());
-                ActiveEngine.Command("go infinite");
-            }
+            RefreshBoard();
         }
         public void setFutureBoard(int nb_moves = 1)
         {
             if (!pos.setPositionFromDisplay(nb_moves)) return;
-            gi.highlightMove(pos.ToMove()^1, pos.Game.MoveIndex());
-            boardPane.SafeInvalidate(true);
-            if (ActiveEngine != null && mode == Mode.ANALYSIS)
-            {
-                ActiveEngine.Command("stop");
-                gi.ClearAnalysisPane();
-                ActiveEngine.Command("position fen " + pos.toFen());
-                ActiveEngine.Command("go infinite");
-            }
+            gi.highlightMove(pos.ToMove() ^ 1, pos.Game.MoveIndex());
+            RefreshBoard();
         }
         public void RefreshBoard()
         {
             boardPane.SafeInvalidate(true);
+            if (ActiveEngine != null && mode == Mode.ANALYSIS)
+            {
+                gi.ClearAnalysisPane();
+                ActiveEngine.Command("stop");
+                ActiveEngine.Command("position fen " + pos.toFen());
+                ActiveEngine.Command("go infinite");
+            }
         }
         public int CurrentMoveIdx()
         {
