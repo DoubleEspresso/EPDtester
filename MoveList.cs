@@ -101,7 +101,6 @@ namespace epdTester
             MenuItem m = (MenuItem)sender;
             cb.pos.Game.selectSibling(m.Index, diff);
             cb.pos.RefreshData();
-            // todo : set child reference pointer
             setGameText(cb.pos.Game);
             cb.RefreshBoard();
         }

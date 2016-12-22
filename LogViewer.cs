@@ -268,7 +268,6 @@ namespace epdTester
                 refresh.Enabled = true;
             }
         }
-
         private void openLogFolder_Click(object sender, EventArgs e)
         {
             try

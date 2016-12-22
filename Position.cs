@@ -993,6 +993,24 @@ namespace epdTester
         {
             return isAttacked(info.PieceSquares[c][(int)Piece.KING][0], c);
         }
+        public bool doPromotion(int from, int to, int piece, int color, int promotedPiece)
+        {
+            // note : we already checked isLegal in doMove 
+            // which was called first (for human moves), onMouseUp and after promotion selection UI 
+            // what is left, is to remove "piece" from the list, and add promotedPiece to the list
+            if (promotedPiece <= 0) return false;
+            // promoting piece now resides on *to* square
+            if (info.PieceSquares[color][piece].Contains(to)) info.PieceSquares[color][piece].Remove(to);
+            // add the new piece (captures are already handled).
+            info.PieceSquares[color][promotedPiece].Add(to);
+            info.color_on[to] = color;
+            info.piece_on[to] = promotedPiece;
+            return true;
+        }
+        public void undoPromotion(int from, int to, int piece, int color)
+        {
+            movePiece(to, from, piece, color); // move pawn back, replace any captured pieces.
+        }
         public bool doMove(int from, int to, int piece, int color)
         {
             if (!isLegal(from, to, piece, color))

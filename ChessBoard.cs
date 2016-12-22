@@ -267,7 +267,6 @@ namespace epdTester
         }
         private void OnMouse_Up(object sender, MouseEventArgs e)
         {
-            // todo : keep UI quick by pushing all analysis to a background thread (?)
             if (!id.valid()) return; // we aren't dragging any piece (but could be coloring the board).
             int s = SquareFromMouseLoc(e.Location);
             if (!pos.doMove(id.from, s, id.piecetype, id.color))
@@ -278,11 +277,18 @@ namespace epdTester
             if (pos.isPromotion())
             {
                 // note : doMove has moved the pawn forward and taken care of all captures (if any)
-                // UI selection of promoted piece happens now, and then we finish the move
-                // by adding the promoted piece to the board, and refreshing.
-                // promotionSelectionUI(); // disables gl-pane interactions until closed/or selected move made.
-                MessageBox.Show("..ERROR u promoted a piece..time to crash now.");
-                return;
+                PromotionUI p = new PromotionUI();
+                p.setButtonImages(id.color, pos);
+                p.ShowDialog(); // pause execution and continue only when closed.
+                if (p.selectedPiece < 0)
+                {
+                    // todo: (not working) undo the promotion, user closed the dialog without making a selection.
+                    pos.undoPromotion(id.from, s, id.piecetype, id.color);
+                    id.ActivePiece = null; // for UI updates (piece will "snap" back to place).
+                    return;
+                }
+                else pos.doPromotion(id.from, s, id.piecetype, id.color, p.selectedPiece);
+                // todo: tosan() for promotions not working.
             }
             pos.UpdatePosition();
             gi.UpdateGameMoves(); // needs to be after position info is updated.
@@ -303,7 +309,6 @@ namespace epdTester
                         ActiveEngine.Command("go wtime 3000 btime 3000"); // hack for now
                         break;
                     case Mode.ANALYSIS:
-                        //gi.ClearAnalysisPane();
                         ActiveEngine.Command("stop");
                         ActiveEngine.Command("position fen " + pos.toFen());
                         ActiveEngine.Command("go infinite");
@@ -356,11 +361,6 @@ namespace epdTester
             }
             id.reset();
             boardPane.SafeInvalidate(true); // move the piece
-        }
-        // promotion handling
-        private void PromotionWindow()
-        {
-
         }
         private void OnMouse_move(object sender, MouseEventArgs e)
         {

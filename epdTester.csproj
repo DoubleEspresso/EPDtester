@@ -159,6 +159,12 @@
     <Compile Include="Native.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="PromotionUI.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PromotionUI.Designer.cs">
+      <DependentUpon>PromotionUI.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="StringUtils.cs" />
@@ -193,6 +199,9 @@
     <EmbeddedResource Include="MoveList.resx">
       <DependentUpon>MoveList.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="PromotionUI.resx">
+      <DependentUpon>PromotionUI.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -201,6 +210,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -214,6 +224,30 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="graphics\pieces\wn.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="graphics\pieces\wr.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="graphics\pieces\wb.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="graphics\pieces\wq.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="graphics\pieces\bb.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="graphics\pieces\bn.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="graphics\pieces\bq.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="graphics\pieces\br.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
