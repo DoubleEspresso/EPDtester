@@ -35,6 +35,7 @@
             this.currmove = new System.Windows.Forms.Label();
             this.hashfull = new System.Windows.Forms.Label();
             this.nps = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             this.analysisGroup.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -42,6 +43,7 @@
             // 
             this.analysisGroup.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.analysisGroup.Controls.Add(this.button1);
             this.analysisGroup.Controls.Add(this.depth);
             this.analysisGroup.Controls.Add(this.pv);
             this.analysisGroup.Controls.Add(this.cpu);
@@ -110,6 +112,17 @@
             this.nps.TabIndex = 1;
             this.nps.Text = "nps:";
             // 
+            // button1
+            // 
+            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button1.Location = new System.Drawing.Point(478, 9);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(37, 23);
+            this.button1.TabIndex = 7;
+            this.button1.Text = "go";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // EngineAnalysisControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -132,5 +145,6 @@
         private System.Windows.Forms.Label currmove;
         private System.Windows.Forms.Label hashfull;
         private System.Windows.Forms.Label nps;
+        private System.Windows.Forms.Button button1;
     }
 }

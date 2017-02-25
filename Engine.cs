@@ -23,6 +23,7 @@ namespace epdTester
         public string Version = null;
         public bool Loaded = false;
         public bool Running = false;
+        private bool thinking = false;
         bool useLog = false;
         public string EngineLogFilename = null;
         public string EngineLogDirectory = null;
@@ -109,17 +110,23 @@ namespace epdTester
             if (useLog) WriteToLogCallback += WriteLine;
             else WriteToLogCallback -= WriteLine;
         }
+        public bool Thinking
+        {
+            get { return thinking; }
+        }
         public void Command(string cmd)
         {
             if (!Running || !Loaded || eprocess == null || engineWriter == null) return;
             if (cmd.Contains("go"))
             {
+                thinking = true;
                 Parser.NewSearch(); // uci specific.
             }
+            else if (cmd.Contains("stop")) thinking = false;
             engineWriter.WriteLine(cmd);
         }
-        public void Start(string args = "")
-        {            
+        public bool Start(string args = "")
+        {
             try
             {
                 ProcessStartInfo pinfo = new ProcessStartInfo(FileName, args)
@@ -151,16 +158,18 @@ namespace epdTester
                     EngineLogFilename = null;
                     EngineLogDirectory = null;
                 }
-                eprocess = Process.Start(pinfo);                
+                eprocess = Process.Start(pinfo);
                 engineWriter = eprocess.StandardInput;
                 engineReader = eprocess.StandardOutput;
                 new Task(ReadEngineStreamAsync).Start(); // settings controlled?
                 Running = true;
-                Thread.Sleep(100); 
+                Thread.Sleep(100);
+                return true;
             }
-            catch(Exception any)
+            catch (Exception any)
             {
                 Log.WriteLine("..[engine] exception running {0} with args ({1}).\nStackTrace :\n {2}", Name, args, any.StackTrace);
+                return false;
             }
         }
         public event EventHandler<AnalysisUIData> AnalysisUICallback = null;

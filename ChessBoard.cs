@@ -86,6 +86,19 @@ namespace epdTester
             SetAspectRatio(Width, Height);
         }
         public bool hasEngine() { return ActiveEngine != null; }
+        public void CloseEngine() { if (hasEngine()) ActiveEngine.Close(); }
+        public void SetEngine(Engine e)
+        {
+            if (e == ActiveEngine) return;
+            if (hasEngine())
+            {
+                ActiveEngine.Close();
+                ActiveEngine = null;
+            }
+            ActiveEngine = e;
+            ActiveEngine.chessBoard = this;
+            
+        }
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             e.Cancel = true;
@@ -282,7 +295,7 @@ namespace epdTester
                 p.ShowDialog(); // pause execution and continue only when closed.
                 if (p.selectedPiece < 0)
                 {
-                    // todo: (not working) undo the promotion, user closed the dialog without making a selection.
+                    // todo: (not working for captures) undo the promotion, user closed the dialog without making a selection.
                     pos.undoPromotion(id.from, s, id.piecetype, id.color);
                     id.ActivePiece = null; // for UI updates (piece will "snap" back to place).
                     return;
@@ -388,10 +401,63 @@ namespace epdTester
                 gi.Show();
                 gi.BringToFront();
             }
+            else if (e.Control && e.KeyCode == Keys.V)
+            {
+                if (ActiveEngine != null) ActiveEngine.Command("stop");
+
+                string pgn_text = Clipboard.GetText();
+                if (!string.IsNullOrWhiteSpace(pgn_text))
+                {
+                   if (!valid_pgn(pgn_text))
+                    {
+                        Log.WriteLine("..ERROR: failed to set game from pgn string");
+                    }
+                }
+            }
+        }
+        // utility to load a position from pgn text
+        bool valid_pgn(string pgn)
+        {
+            if (string.IsNullOrWhiteSpace(pgn)) return false;
+            // clean the string .. removing "\r\n" and "\n" chars --> " "
+            pgn = pgn.Replace("\r\n", " ");  pgn = pgn.Replace("\n", " ");
+
+            string[] moves = pgn.Split(' ');
+            if (moves.Length <= 0) return false;
+            List<string> valid_moves = new List<string>();
+
+            pos = new Position(Position.StartFen); 
+            //gi = new GameInfo(pos, this);
+            gi.SetPosition(pos);
+            int pgn_mv = 0; bool white_move = false;
+            int valid_counter = 0;
+            for (int j = 0; j < moves.Length; ++j)
+            {
+                string move = moves[j];
+                if (int.TryParse(move.Trim().Replace(".", ""), out pgn_mv)) { white_move = true; continue; }
+                else
+                {
+                    move = move.Trim().Replace("\r\n", "").Replace("\n", "").Replace("\r", "");
+
+                    int color = (white_move ? 0 : 1);
+                    if (!pos.doSanMove(color, move))
+                    {
+                        Log.WriteLine("..[pgn] failed to parse {0}", move);
+                        break;
+                    }
+                    pos.UpdatePosition();
+                    gi.UpdateGameMoves();
+                    white_move = false;
+                    ++valid_counter;
+                    RefreshBoard();
+                }
+            }
+            return true;
         }
         // for those keys not handled by key-down events (navigation/tab/enter)
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
+            if (ActiveEngine != null) ActiveEngine.Command("stop");
             if (keyData == Keys.Down) { setPreviousBoard(3); return true; }
             else if (keyData == Keys.Up) { setFutureBoard(3); return true; }
             else if (keyData == Keys.Right) { setFutureBoard(); return true; }
@@ -399,7 +465,7 @@ namespace epdTester
             return base.ProcessCmdKey(ref msg, keyData);
         }
         public void setPreviousBoard(int nb_moves = 1)
-        {
+        {   
             if (!pos.setPositionFromDisplay(-nb_moves)) return;
             gi.highlightMove(pos.ToMove() ^ 1, pos.Game.MoveIndex());
             RefreshBoard();

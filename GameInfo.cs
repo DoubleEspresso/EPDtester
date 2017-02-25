@@ -22,6 +22,7 @@ namespace epdTester
             board = cb;
             //chessPlot.setPoints(new List<double>() { 0 });
         }
+        public void SetPosition(Position p) { this.pos = p; }
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             e.Cancel = true;
@@ -72,6 +73,9 @@ namespace epdTester
              
             // update for "analysis control" game info view
             engineAnalysisControl1.Initialize(board.ChessEngine, board);
+
+            // start analyzing right away
+            board.RefreshBoard();
         }
     }
 }

@@ -50,6 +50,21 @@ namespace epdTester
             //cb.UpdateAnalysisGraph(d.evals);
             //updateEvalGraph(d.evals);
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (cb == null) return;
+            if (cb.ChessEngine.Thinking)
+            {
+                cb.ChessEngine.Command("stop");
+                button1.Text = "go";
+            }
+            else
+            {
+                cb.ChessEngine.Command("go infinite");
+                button1.Text = "stop";
+            }
+        }
         //private void updateEvalGraph(List<double> evals)
         //{
 

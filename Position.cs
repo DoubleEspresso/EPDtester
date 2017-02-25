@@ -369,7 +369,8 @@ namespace epdTester
                 Node dummy = (current.hasChildren() ? current.children[0] : current);
                 while (dummy != null && dummy.parent.parent != null)
                 {
-                    dummy = dummy.parent;                }
+                    dummy = dummy.parent;
+                }
                 int j = 0; // we start from the beginning of the game (which is inefficient)
                 while (dummy != null && dummy.children != null && dummy.children.Count >= 1)
                 {
@@ -390,6 +391,7 @@ namespace epdTester
         {
             if (info == null) info = new Info();
             info.clear();
+            if (Game != null) Game = null; // re-initialized on UpdatePosition
         }
         public int ToMove() { return info.stm; }
         public static int[] FromTo(string move)
@@ -620,6 +622,7 @@ namespace epdTester
             {
                 int t = deltas[j] + from; bool enemyon = (ColorOn(t) == enemy);
                 if (!onBoard(t) || (!Empty(t) && !enemyon)) continue;
+                else if (ColDist(from, t) > 2 || RowDist(from, t) > 2) continue;
                 else if (onBoard(t) && Empty(t) && !enemyon) to_sqs.Add(t);
                 else if (onBoard(t) && !Empty(t) && enemyon) to_sqs.Add(t);
             }
@@ -1121,7 +1124,7 @@ namespace epdTester
             }
             return false;
         }
-        public string toSan(string move)
+        public string toSan(string move, bool check_to = true)
         {
             /*sanity checks*/
             if (move.Length != 4 && move.Length != 5) return "";
@@ -1130,11 +1133,18 @@ namespace epdTester
             int f = -1; int t = -1;
             for (int j = 0; j < 64; ++j)
             {
-                if (fstring == SanSquares[j]) f = j;
-                if (tstring == SanSquares[j]) t = j;
+                if (fstring.Equals(SanSquares[j])) f = j;
+                if (tstring.Equals(SanSquares[j])) t = j;
             }
-            if (!onBoard(f) || !onBoard(t)) return "";
+            if (!onBoard(f)) return "";
+            if (check_to && !onBoard(t)) return "";
             int p = PieceOn(t); int color = ColorOn(t);
+            if (!check_to)
+            {
+                p = PieceOn(f);
+                color = ColorOn(f);
+            }
+
             if (p == (int)Piece.PIECE_NONE || color == COLOR_NONE) return "";
             string sanMove = (p == (int)Piece.PAWN ? "" : Convert.ToString(SanPiece[p]));
             string promotionPiece = "";
@@ -1154,6 +1164,8 @@ namespace epdTester
             // are set correctly.
             else if (p == (int)Piece.PAWN && info.isPromotion())
             {
+                //string fen = toFen();
+                if (move.Length < 6) return "";
                 promotionPiece = move.Substring(5, 1);
                 if (String.IsNullOrWhiteSpace(promotionPiece)) return "";
             }
@@ -1161,7 +1173,7 @@ namespace epdTester
 
             List<int> pieces = info.PieceSquares[color][p];
             List<int> legalFromSqs = new List<int>(); // for those moves where more than one piece attacks the *to* square
-            movePiece(t, f, p, color); // remove piece so the *to* sq is flagged as empty
+            if (check_to) movePiece(t, f, p, color); // remove piece so the *to* sq is flagged as empty
             foreach (int fromsq in pieces)
             {
                 if (fromsq == f) continue; // note : we have already moved the piece when we get here .. skip the piece sitting at *to* sq
@@ -1176,7 +1188,7 @@ namespace epdTester
                     default: return "";
                 }
             }
-            movePiece(f, t, p, color); // reset the piece, we are done checking all those pieces that attack the *to* square.
+            if (check_to) movePiece(f, t, p, color); // reset the piece, we are done checking all those pieces that attack the *to* square.
             if (legalFromSqs.Count > 0) // note : we are checking if multiple pieces could have been placed on the *to* square
             {
                 if (RowOf(legalFromSqs[0]) == RowOf(f)) sanMove += SanCols[ColOf(f)];
@@ -1185,7 +1197,7 @@ namespace epdTester
             }
             if (info.isCapture())
             {
-                if (p == (int)Piece.PAWN) sanMove += SanCols[ColOf(f)];
+                if (p == (int)Piece.PAWN && string.IsNullOrWhiteSpace(sanMove)) sanMove += SanCols[ColOf(f)];
                 sanMove += "x";
             }
             sanMove += SanSquares[t];
@@ -1193,9 +1205,103 @@ namespace epdTester
             // note : toSan() is called *after* a doMove call -- which means if
             // white moved, info.stm = black here, and we check if black is in mate
             // or checked
-            if (isMate()) { sanMove += "#"; return sanMove; }
-            if (kingInCheck(info.stm)) sanMove += "+";
+            if (check_to) // we've already made the move
+            {
+                if (isMate()) { sanMove += "#"; return sanMove; }
+                if (kingInCheck(info.stm)) sanMove += "+";
+            }
+            else
+            {
+                movePiece(f, t, p, color);
+                if (isMate()) { sanMove += "#"; return sanMove; }
+                if (kingInCheck(info.stm ^ 1)) sanMove += "+";
+                movePiece(t, f, p, color);
+            }
             return sanMove;
+        }
+        // for pasting long pgn strings onto main UI
+        // san notation assumed for the pgn string .. (?)
+        public bool doSanMove(int color, string move)
+        {
+            
+            int len = move.Length;
+            int is_num = 0;
+            if (color != 0 && color != 1) return false;
+            if (len <= 0 || len > 5) return false;
+            if (int.TryParse(move, out is_num)) return false;
+
+            // slow but easiest/most effective
+            List<string> legal_san_moves = new List<string>();
+            List<int> legal_froms = new List<int>();
+            List<int> legal_tos = new List<int>();
+            List<int> selected_pieces = new List<int>();
+
+            for (int p = (int) Piece.PAWN; p<= (int) Piece.KING; ++p)
+            {
+                List<int> frm = new List<int>(info.PieceSquares[color][p]);
+                foreach (int f in frm)
+                {
+                    List<int> tos = new List<int>();
+                    switch ((Piece)p)
+                    {
+                        case Piece.PAWN: tos = PawnMoves(f, color); break;
+                        case Piece.KNIGHT: tos = KnightMoves(f, color); break;
+                        case Piece.BISHOP: tos = BishopMoves(f, color); break;
+                        case Piece.ROOK: tos = RookMoves(f, color); break;
+                        case Piece.QUEEN: tos = QueenMoves(f, color); break;
+                        case Piece.KING: tos = KingMoves(f, color); break;
+                        default: break;
+                    }
+
+                    foreach(int to in tos)
+                    {
+                        if (isLegal(f, to, p, color))
+                        {
+                            string str_mv = SanSquares[f] + SanSquares[to];
+                            string san = toSan(str_mv, false); // don't check the to-square
+                            if (!string.IsNullOrWhiteSpace(san)) legal_san_moves.Add(san);
+                            legal_froms.Add(f);
+                            legal_tos.Add(to);
+                            selected_pieces.Add(p);
+                        }
+                    }
+                }
+            }
+
+            // handle castle moves
+            if (move.ToLower().Trim().Equals("o-o") || move.ToLower().Trim().Equals("o-o-o"))
+            {
+                bool ks_castle = move.ToLower().Trim().Equals("o-o");
+                int f = info.PieceSquares[color][(int)Piece.KING][0];
+                int t = (ks_castle ? f + 2 : f - 2);
+                if (isCastleLegal(f, t, (int)Piece.KING, color))
+                {
+                    legal_san_moves.Add((ks_castle ? "O-O" : "O-O-O"));
+                    legal_froms.Add(f);
+                    legal_tos.Add(t);
+                    selected_pieces.Add((int)Piece.KING);
+                }
+            }
+
+            if (legal_san_moves.Count <= 0) return false;
+
+            bool isOK = false; int counter = 0;
+            foreach(string mv in legal_san_moves)
+            {
+                if (mv.ToLower().Equals(move.ToLower()))
+                {
+                    isOK = true;
+                    break;
+                }
+                ++counter;
+            }
+
+            if (isOK)
+            {
+                isOK = doMove(legal_froms[counter], legal_tos[counter], selected_pieces[counter], color);
+            }
+
+            return isOK;
         }
     }
 }

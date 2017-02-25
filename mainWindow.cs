@@ -33,7 +33,7 @@ namespace epdTester
         private void LoadEPDSettings()
         {
             string tmp = "";
-            Settings.get(string.Format("EPD\\Base directory"), ref tmp);            
+            Settings.get(string.Format("EPD\\Base directory"), ref tmp);
             try
             {
                 if (Directory.Exists(tmp))
@@ -56,7 +56,7 @@ namespace epdTester
         private void LoadEnginesFromSettings()
         {
             int count = 0; Settings.get("Engine\\Count", ref count); if (count == 0) return;
-            for (int j=0; j< count; ++j)
+            for (int j = 0; j < count; ++j)
             {
                 Engine e = new Engine();
                 if (e.ReadSettings(j))
@@ -75,7 +75,7 @@ namespace epdTester
         private void engineAddClick(object sender, EventArgs ea)
         {
             OpenFileDialog ofd = new OpenFileDialog(); ofd.DefaultExt = ".exe";
-            if (ofd.ShowDialog() == DialogResult.OK && 
+            if (ofd.ShowDialog() == DialogResult.OK &&
                 !string.IsNullOrWhiteSpace(ofd.FileName) &&
                 File.Exists(ofd.FileName))
             {
@@ -85,7 +85,7 @@ namespace epdTester
                 {
                     engines.Add(e);
                     AddEngineToUI(e);
-                    e.SaveSettings(engines.Count-1);
+                    e.SaveSettings(engines.Count - 1);
                     Settings.set("Engine\\Count", engines.Count);
                     Settings.set("Engine\\Selected", engines.Count);
                 }
@@ -122,6 +122,9 @@ namespace epdTester
             authorLabel.Text = "Author: " + e.Author;
             protocolLabel.Text = "Protocol: " + (e.EngineProtocol == Engine.Type.UCI ? "UCI" :
                     e.EngineProtocol == Engine.Type.WINBOARD ? "WinBoard" : "Unknown");
+
+            if (e.Running) status.Text = string.Format("Status: {0} currently running", e.Name);
+            else status.Text = string.Format("Status: {0} not running", e.Name);
         }
         bool isDuplicateEngine(Engine e)
         {
@@ -140,7 +143,7 @@ namespace epdTester
                 return;
             }
             int idx = engineList.SelectedIndex;
-            if (idx >=0 && idx < engines.Count)
+            if (idx >= 0 && idx < engines.Count)
             {
                 Engine e = engines[idx];
                 updateDisplay(e);
@@ -174,6 +177,10 @@ namespace epdTester
         }
         private void startEngine_Click(object sender, EventArgs args)
         {
+            // close any active engines connected to the main board
+            if (board != null) board.CloseEngine();
+            status.Text = "";
+
             int idx = engineList.SelectedIndex;
             if (idx >= 0 && idx < engines.Count)
             {
@@ -183,7 +190,12 @@ namespace epdTester
                     Log.WriteLine("..[engine] {0} already running, ignored", e.Name);
                     return;
                 }
-                e.Start(eCommandBox.Text);
+                if (!e.Start(eCommandBox.Text))
+                {
+                    Log.WriteLine("..WARNING: enigne-{0} failed to start!", e.Name);
+                }
+                else if (board != null) board.SetEngine(e);
+                updateDisplay(e);
             }
         }
         private void setEPDdirectory_Click(object sender, EventArgs e)
