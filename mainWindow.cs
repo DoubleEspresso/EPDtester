@@ -17,8 +17,9 @@ namespace epdTester
         static List<Engine> engines = new List<Engine>(); // static so we can delete them on application exit.
         List<EpdFile> tests = new List<EpdFile>();
         public Engine ActiveEngine = null;
-        public ChessBoard board = null;
+        public ChessBoard2 board2 = null;
         List<string> epd_filenames = new List<string>(); // for epd test selection
+        public MoveList MoveList { get { return moveList; } }
 
         public mainWindow()
         {
@@ -28,6 +29,28 @@ namespace epdTester
             EPDTestProgress_label.Text = "";
             EPDTestCorrect_label.Text = "";
             label7.Text = "";
+            
+            board2 = new ChessBoard2(null, cboard, this);
+            moveList.SetBoard(board2);
+        }
+        protected override void OnLoad(EventArgs e)
+        {
+            Width = 1400;
+            Height = 800;
+            ResizeFinished(null, null);
+        }
+        private void ResizeFinished(object sender, EventArgs e)
+        {
+            SetAspectRatio(Width, Height);
+        }
+        private void SetAspectRatio(int w, int h)
+        {
+            w -= tabControl1.Width;
+            float mind = (float)Math.Min(w, h);
+            float nw = (w >= mind ? mind : w);
+            float nh = (h >= mind ? mind : h);
+            if (board2 != null) board2.SetDims((int)nw-40, (int)nh-65);
+            Width = (int)(nw + tabControl1.Width); Height = (int)nh;
         }
         /*EPD file management*/
         private void LoadEPDSettings()
@@ -178,7 +201,7 @@ namespace epdTester
         private void startEngine_Click(object sender, EventArgs args)
         {
             // close any active engines connected to the main board
-            if (board != null) board.CloseEngine();
+            if (board2 != null) board2.CloseEngine();
             status.Text = "";
 
             int idx = engineList.SelectedIndex;
@@ -194,7 +217,20 @@ namespace epdTester
                 {
                     Log.WriteLine("..WARNING: enigne-{0} failed to start!", e.Name);
                 }
-                else if (board != null) board.SetEngine(e);
+                else if (board2 != null)
+                {
+                    board2.SetEngine(e);
+
+                    // note: take engine out of "game" mode so it does not try to stop
+                    // on best-move parsing (causes illegal engine moves/crashes)
+                    // todo : if we toggle this option, we need to re-set the callback.
+                    board2.ChessEngine.Parser.CallbackOnBestmove = null;
+
+                    engineAnalysisControl.Initialize(board2.ChessEngine, board2);
+                   
+                    board2.mode = ChessBoard2.Mode.ANALYSIS;
+                    
+                }
                 updateDisplay(e);
             }
         }
@@ -242,6 +278,7 @@ namespace epdTester
             ActiveEngine.Command(s); // multiple lines ok?
         }
         delegate void EpdBestMoveParsedFunc(object sender, EventArgs e);
+        // fixme
         public void onEPDtestBestMoveParsed(object sender, EventArgs e)
         {
             if (InvokeRequired)
@@ -257,13 +294,14 @@ namespace epdTester
             label7.Text = "solved correctly ..";
             EPDTestProgress_label.Text = "..searching " + progress + " / " + totalTests + " positions";
             EPDTestCorrect_label.Text = nbCorrect + " / " + totalTests;
-            epdTabDisplay.SelectedTest.BestMoveEvent.Set();
+            //epdTabDisplay.SelectedTest.BestMoveEvent.Set();
             Log.WriteLine("...set betsmove event");
         }        
         private void epdStart_Click(object sender, EventArgs e)
         {
+            // fixme
             ActiveEngine.SetBestMoveCallback(onEPDtestBestMoveParsed);
-            epdTabDisplay.SelectedTest.startTest(timePerPosition);
+            //epdTabDisplay.SelectedTest.startTest(timePerPosition);
         }
         uint timePerPosition = 1000;
         private void epdFixedTimePosition_TextChanged(object sender, EventArgs e)
@@ -276,13 +314,8 @@ namespace epdTester
         }
         private void stopEpdTest_Click(object sender, EventArgs e)
         {
-            epdTabDisplay.SelectedTest.CancelTest();
-        }
-        private void chessBoard_Click(object sender, EventArgs e)
-        {
-            if (board == null) board = new ChessBoard(ActiveEngine);
-            board.Show();
-            board.BringToFront();
+            //fixme
+            //epdTabDisplay.SelectedTest.CancelTest();
         }
         public static void CloseEngineInstances()
         {
@@ -299,5 +332,7 @@ namespace epdTester
         {
             ActiveEngine.UseLog(useLogCheckbox.Checked);
         }
+
+      
     }
 }

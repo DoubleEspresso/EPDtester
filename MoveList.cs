@@ -12,7 +12,7 @@ namespace epdTester
 {
     public partial class MoveList : UserControl
     {
-        public ChessBoard cb = null;
+        public ChessBoard2 cb = null;
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         static extern bool HideCaret(IntPtr hWnd);
 
@@ -20,6 +20,10 @@ namespace epdTester
         {
             InitializeComponent();
             mList.Clear();
+        }
+        public void SetBoard(ChessBoard2 b)
+        {
+            cb = b;
         }
         public bool highlightMove(int c, int idx)
         {
@@ -56,7 +60,7 @@ namespace epdTester
             else if (keyData == Keys.Left) { cb.setPreviousBoard(); return true; }
             return base.ProcessCmdKey(ref msg, keyData);
         }
-        private void OnMouse_click(object sender, MouseEventArgs e)
+        public void OnMouse_click(object sender, MouseEventArgs e)
         {
             if (cb == null) return;
             int p = mList.GetCharIndexFromPosition(new Point(e.X, e.Y));

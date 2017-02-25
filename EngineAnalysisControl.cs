@@ -13,12 +13,12 @@ namespace epdTester
     public partial class EngineAnalysisControl : UserControl
     {
         Engine e = null;
-        ChessBoard cb = null;
+        ChessBoard2 cb = null;
         public EngineAnalysisControl()
         {
             InitializeComponent();
         }
-        public void Initialize(Engine engine, ChessBoard b)
+        public void Initialize(Engine engine, ChessBoard2 b)
         {
             this.e = engine;
             e.AnalysisUICallback += EngineStreamRecieved;

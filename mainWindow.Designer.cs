@@ -30,9 +30,10 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(mainWindow));
             this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage5 = new System.Windows.Forms.TabPage();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.chessBoard = new System.Windows.Forms.Button();
             this.engineDetailsGroupBox = new System.Windows.Forms.GroupBox();
+            this.status = new System.Windows.Forms.Label();
             this.useLogCheckbox = new System.Windows.Forms.CheckBox();
             this.eEloBox = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
@@ -87,11 +88,13 @@
             this.epdCombobox = new System.Windows.Forms.ComboBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.status = new System.Windows.Forms.Label();
+            this.cboard = new epdTester.GL();
+            this.moveList = new epdTester.MoveList();
+            this.engineAnalysisControl = new epdTester.EngineAnalysisControl();
             this.epdTabDisplay = new epdTester.EpdTabDisplay();
             this.chessPlot1 = new epdTester.ChessPlot();
             this.tabControl1.SuspendLayout();
+            this.tabPage5.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.engineDetailsGroupBox.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -101,22 +104,33 @@
             // 
             // tabControl1
             // 
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tabControl1.Controls.Add(this.tabPage5);
             this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage4);
-            this.tabControl1.Controls.Add(this.tabPage5);
-            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.tabControl1.Location = new System.Drawing.Point(0, 0);
+            this.tabControl1.Location = new System.Drawing.Point(585, -2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1108, 272);
+            this.tabControl1.Size = new System.Drawing.Size(618, 589);
             this.tabControl1.TabIndex = 6;
+            // 
+            // tabPage5
+            // 
+            this.tabPage5.BackColor = System.Drawing.SystemColors.Menu;
+            this.tabPage5.Controls.Add(this.moveList);
+            this.tabPage5.Controls.Add(this.engineAnalysisControl);
+            this.tabPage5.Location = new System.Drawing.Point(4, 22);
+            this.tabPage5.Name = "tabPage5";
+            this.tabPage5.Size = new System.Drawing.Size(610, 563);
+            this.tabPage5.TabIndex = 4;
+            this.tabPage5.Text = "board..";
             // 
             // tabPage3
             // 
             this.tabPage3.BackColor = System.Drawing.SystemColors.Menu;
-            this.tabPage3.Controls.Add(this.chessBoard);
             this.tabPage3.Controls.Add(this.engineDetailsGroupBox);
             this.tabPage3.Controls.Add(this.engineList);
             this.tabPage3.Controls.Add(this.button8);
@@ -124,21 +138,9 @@
             this.tabPage3.Controls.Add(this.addEngineToList);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(1100, 246);
+            this.tabPage3.Size = new System.Drawing.Size(610, 563);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "engine..";
-            // 
-            // chessBoard
-            // 
-            this.chessBoard.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.chessBoard.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.chessBoard.Location = new System.Drawing.Point(964, 209);
-            this.chessBoard.Name = "chessBoard";
-            this.chessBoard.Size = new System.Drawing.Size(57, 32);
-            this.chessBoard.TabIndex = 10;
-            this.chessBoard.Text = "..board";
-            this.chessBoard.UseVisualStyleBackColor = true;
-            this.chessBoard.Click += new System.EventHandler(this.chessBoard_Click);
             // 
             // engineDetailsGroupBox
             // 
@@ -166,18 +168,27 @@
             this.engineDetailsGroupBox.Controls.Add(this.label3);
             this.engineDetailsGroupBox.Controls.Add(this.eNameBox);
             this.engineDetailsGroupBox.Controls.Add(this.label2);
-            this.engineDetailsGroupBox.Location = new System.Drawing.Point(466, 5);
+            this.engineDetailsGroupBox.Location = new System.Drawing.Point(125, 5);
             this.engineDetailsGroupBox.Name = "engineDetailsGroupBox";
-            this.engineDetailsGroupBox.Size = new System.Drawing.Size(625, 199);
+            this.engineDetailsGroupBox.Size = new System.Drawing.Size(479, 199);
             this.engineDetailsGroupBox.TabIndex = 9;
             this.engineDetailsGroupBox.TabStop = false;
             this.engineDetailsGroupBox.Text = "Engine setup..";
             // 
+            // status
+            // 
+            this.status.AutoSize = true;
+            this.status.Location = new System.Drawing.Point(330, 56);
+            this.status.Name = "status";
+            this.status.Size = new System.Drawing.Size(40, 13);
+            this.status.TabIndex = 26;
+            this.status.Text = "Status:";
+            // 
             // useLogCheckbox
             // 
             this.useLogCheckbox.AutoSize = true;
-            this.useLogCheckbox.Location = new System.Drawing.Point(492, 175);
-            this.useLogCheckbox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.useLogCheckbox.Location = new System.Drawing.Point(275, 175);
+            this.useLogCheckbox.Margin = new System.Windows.Forms.Padding(2);
             this.useLogCheckbox.Name = "useLogCheckbox";
             this.useLogCheckbox.Size = new System.Drawing.Size(66, 17);
             this.useLogCheckbox.TabIndex = 25;
@@ -189,7 +200,7 @@
             // 
             this.eEloBox.Location = new System.Drawing.Point(95, 172);
             this.eEloBox.Name = "eEloBox";
-            this.eEloBox.Size = new System.Drawing.Size(252, 20);
+            this.eEloBox.Size = new System.Drawing.Size(173, 20);
             this.eEloBox.TabIndex = 24;
             // 
             // label10
@@ -204,7 +215,7 @@
             // updatePath
             // 
             this.updatePath.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.updatePath.Location = new System.Drawing.Point(353, 143);
+            this.updatePath.Location = new System.Drawing.Point(275, 143);
             this.updatePath.Name = "updatePath";
             this.updatePath.Size = new System.Drawing.Size(35, 23);
             this.updatePath.TabIndex = 20;
@@ -216,7 +227,7 @@
             // 
             this.ePathBox.Location = new System.Drawing.Point(95, 146);
             this.ePathBox.Name = "ePathBox";
-            this.ePathBox.Size = new System.Drawing.Size(252, 20);
+            this.ePathBox.Size = new System.Drawing.Size(173, 20);
             this.ePathBox.TabIndex = 21;
             // 
             // label9
@@ -231,7 +242,7 @@
             // findConfigFile
             // 
             this.findConfigFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.findConfigFile.Location = new System.Drawing.Point(353, 117);
+            this.findConfigFile.Location = new System.Drawing.Point(275, 117);
             this.findConfigFile.Name = "findConfigFile";
             this.findConfigFile.Size = new System.Drawing.Size(35, 23);
             this.findConfigFile.TabIndex = 17;
@@ -243,13 +254,13 @@
             // 
             this.eConfigfileBox.Location = new System.Drawing.Point(95, 120);
             this.eConfigfileBox.Name = "eConfigfileBox";
-            this.eConfigfileBox.Size = new System.Drawing.Size(252, 20);
+            this.eConfigfileBox.Size = new System.Drawing.Size(173, 20);
             this.eConfigfileBox.TabIndex = 18;
             // 
             // findOpeningBook
             // 
             this.findOpeningBook.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.findOpeningBook.Location = new System.Drawing.Point(353, 62);
+            this.findOpeningBook.Location = new System.Drawing.Point(275, 62);
             this.findOpeningBook.Name = "findOpeningBook";
             this.findOpeningBook.Size = new System.Drawing.Size(35, 23);
             this.findOpeningBook.TabIndex = 16;
@@ -260,7 +271,7 @@
             // findEndgameBook
             // 
             this.findEndgameBook.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.findEndgameBook.Location = new System.Drawing.Point(353, 90);
+            this.findEndgameBook.Location = new System.Drawing.Point(275, 90);
             this.findEndgameBook.Name = "findEndgameBook";
             this.findEndgameBook.Size = new System.Drawing.Size(35, 23);
             this.findEndgameBook.TabIndex = 10;
@@ -271,7 +282,7 @@
             // authorLabel
             // 
             this.authorLabel.AutoSize = true;
-            this.authorLabel.Location = new System.Drawing.Point(410, 36);
+            this.authorLabel.Location = new System.Drawing.Point(330, 36);
             this.authorLabel.Name = "authorLabel";
             this.authorLabel.Size = new System.Drawing.Size(41, 13);
             this.authorLabel.TabIndex = 15;
@@ -280,7 +291,7 @@
             // protocolLabel
             // 
             this.protocolLabel.AutoSize = true;
-            this.protocolLabel.Location = new System.Drawing.Point(410, 16);
+            this.protocolLabel.Location = new System.Drawing.Point(330, 16);
             this.protocolLabel.Name = "protocolLabel";
             this.protocolLabel.Size = new System.Drawing.Size(49, 13);
             this.protocolLabel.TabIndex = 14;
@@ -299,7 +310,7 @@
             // 
             this.eEndgameBookBox.Location = new System.Drawing.Point(95, 93);
             this.eEndgameBookBox.Name = "eEndgameBookBox";
-            this.eEndgameBookBox.Size = new System.Drawing.Size(252, 20);
+            this.eEndgameBookBox.Size = new System.Drawing.Size(173, 20);
             this.eEndgameBookBox.TabIndex = 12;
             // 
             // label5
@@ -313,14 +324,13 @@
             // 
             // startEngine
             // 
-            this.startEngine.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.startEngine.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.startEngine.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.startEngine.Location = new System.Drawing.Point(560, 161);
+            this.startEngine.Location = new System.Drawing.Point(416, 160);
             this.startEngine.Name = "startEngine";
-            this.startEngine.Size = new System.Drawing.Size(59, 32);
+            this.startEngine.Size = new System.Drawing.Size(57, 32);
             this.startEngine.TabIndex = 10;
-            this.startEngine.Text = "Start";
+            this.startEngine.Text = "load..";
             this.startEngine.UseVisualStyleBackColor = true;
             this.startEngine.Click += new System.EventHandler(this.startEngine_Click);
             // 
@@ -328,7 +338,7 @@
             // 
             this.eOpeningBookBox.Location = new System.Drawing.Point(95, 65);
             this.eOpeningBookBox.Name = "eOpeningBookBox";
-            this.eOpeningBookBox.Size = new System.Drawing.Size(252, 20);
+            this.eOpeningBookBox.Size = new System.Drawing.Size(173, 20);
             this.eOpeningBookBox.TabIndex = 5;
             // 
             // label4
@@ -344,7 +354,7 @@
             // 
             this.eCommandBox.Location = new System.Drawing.Point(95, 39);
             this.eCommandBox.Name = "eCommandBox";
-            this.eCommandBox.Size = new System.Drawing.Size(252, 20);
+            this.eCommandBox.Size = new System.Drawing.Size(173, 20);
             this.eCommandBox.TabIndex = 3;
             // 
             // label3
@@ -360,7 +370,7 @@
             // 
             this.eNameBox.Location = new System.Drawing.Point(95, 15);
             this.eNameBox.Name = "eNameBox";
-            this.eNameBox.Size = new System.Drawing.Size(252, 20);
+            this.eNameBox.Size = new System.Drawing.Size(173, 20);
             this.eNameBox.TabIndex = 1;
             // 
             // label2
@@ -374,12 +384,11 @@
             // 
             // engineList
             // 
-            this.engineList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.engineList.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.engineList.FormattingEnabled = true;
-            this.engineList.Location = new System.Drawing.Point(6, 5);
+            this.engineList.Location = new System.Drawing.Point(9, 5);
             this.engineList.Name = "engineList";
-            this.engineList.Size = new System.Drawing.Size(434, 199);
+            this.engineList.Size = new System.Drawing.Size(110, 199);
             this.engineList.TabIndex = 8;
             this.engineList.SelectedIndexChanged += new System.EventHandler(this.engineList_SelectedEngineChanged);
             // 
@@ -387,19 +396,19 @@
             // 
             this.button8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button8.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button8.Location = new System.Drawing.Point(1027, 209);
+            this.button8.Location = new System.Drawing.Point(541, 209);
             this.button8.Name = "button8";
             this.button8.Size = new System.Drawing.Size(57, 32);
             this.button8.TabIndex = 7;
-            this.button8.Text = "..log";
+            this.button8.Text = "log..";
             this.button8.UseVisualStyleBackColor = true;
             this.button8.Click += new System.EventHandler(this.showLog_Click);
             // 
             // removeEngineFromList
             // 
-            this.removeEngineFromList.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.removeEngineFromList.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.removeEngineFromList.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.removeEngineFromList.Location = new System.Drawing.Point(405, 210);
+            this.removeEngineFromList.Location = new System.Drawing.Point(51, 210);
             this.removeEngineFromList.Name = "removeEngineFromList";
             this.removeEngineFromList.Size = new System.Drawing.Size(34, 33);
             this.removeEngineFromList.TabIndex = 6;
@@ -409,9 +418,9 @@
             // 
             // addEngineToList
             // 
-            this.addEngineToList.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.addEngineToList.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.addEngineToList.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.addEngineToList.Location = new System.Drawing.Point(365, 210);
+            this.addEngineToList.Location = new System.Drawing.Point(11, 210);
             this.addEngineToList.Name = "addEngineToList";
             this.addEngineToList.Size = new System.Drawing.Size(34, 33);
             this.addEngineToList.TabIndex = 3;
@@ -422,6 +431,7 @@
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.SystemColors.Menu;
+            this.tabPage1.Controls.Add(this.epdTabDisplay);
             this.tabPage1.Controls.Add(this.chessPlot1);
             this.tabPage1.Controls.Add(this.groupBox3);
             this.tabPage1.Controls.Add(this.groupBox2);
@@ -431,8 +441,8 @@
             this.tabPage1.Controls.Add(this.epdCombobox);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tabPage1.Size = new System.Drawing.Size(1100, 246);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(610, 563);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "epd testing..";
             // 
@@ -443,9 +453,9 @@
             this.groupBox3.Controls.Add(this.EPDTestProgress_label);
             this.groupBox3.Controls.Add(this.epdStart);
             this.groupBox3.Controls.Add(this.stopEpdTest);
-            this.groupBox3.Location = new System.Drawing.Point(352, 24);
+            this.groupBox3.Location = new System.Drawing.Point(352, 53);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(388, 216);
+            this.groupBox3.Size = new System.Drawing.Size(252, 187);
             this.groupBox3.TabIndex = 42;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "test progress..";
@@ -484,7 +494,7 @@
             // 
             this.epdStart.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.epdStart.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.epdStart.Location = new System.Drawing.Point(258, 178);
+            this.epdStart.Location = new System.Drawing.Point(122, 149);
             this.epdStart.Name = "epdStart";
             this.epdStart.Size = new System.Drawing.Size(64, 32);
             this.epdStart.TabIndex = 40;
@@ -496,7 +506,7 @@
             // 
             this.stopEpdTest.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.stopEpdTest.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.stopEpdTest.Location = new System.Drawing.Point(328, 178);
+            this.stopEpdTest.Location = new System.Drawing.Point(191, 149);
             this.stopEpdTest.Name = "stopEpdTest";
             this.stopEpdTest.Size = new System.Drawing.Size(57, 32);
             this.stopEpdTest.TabIndex = 41;
@@ -657,7 +667,7 @@
             // 
             // setEPDdirectory
             // 
-            this.setEPDdirectory.Location = new System.Drawing.Point(316, 24);
+            this.setEPDdirectory.Location = new System.Drawing.Point(352, 24);
             this.setEPDdirectory.Name = "setEPDdirectory";
             this.setEPDdirectory.Size = new System.Drawing.Size(30, 23);
             this.setEPDdirectory.TabIndex = 6;
@@ -679,7 +689,7 @@
             this.epdCombobox.FormattingEnabled = true;
             this.epdCombobox.Location = new System.Drawing.Point(58, 26);
             this.epdCombobox.Name = "epdCombobox";
-            this.epdCombobox.Size = new System.Drawing.Size(250, 21);
+            this.epdCombobox.Size = new System.Drawing.Size(288, 21);
             this.epdCombobox.TabIndex = 0;
             this.epdCombobox.SelectedIndexChanged += new System.EventHandler(this.epdCombobox_SelectedIndexChanged);
             // 
@@ -688,8 +698,8 @@
             this.tabPage2.BackColor = System.Drawing.SystemColors.Menu;
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tabPage2.Size = new System.Drawing.Size(1100, 246);
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(610, 563);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "regression..";
             // 
@@ -698,38 +708,44 @@
             this.tabPage4.BackColor = System.Drawing.SystemColors.Menu;
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(1100, 246);
+            this.tabPage4.Size = new System.Drawing.Size(610, 563);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "tuning..";
             // 
-            // tabPage5
+            // cboard
             // 
-            this.tabPage5.BackColor = System.Drawing.SystemColors.Menu;
-            this.tabPage5.Location = new System.Drawing.Point(4, 22);
-            this.tabPage5.Name = "tabPage5";
-            this.tabPage5.Size = new System.Drawing.Size(1100, 246);
-            this.tabPage5.TabIndex = 4;
-            this.tabPage5.Text = "board..";
+            this.cboard.Location = new System.Drawing.Point(12, 12);
+            this.cboard.Name = "cboard";
+            this.cboard.Size = new System.Drawing.Size(567, 571);
+            this.cboard.TabIndex = 8;
             // 
-            // status
+            // moveList
             // 
-            this.status.AutoSize = true;
-            this.status.Location = new System.Drawing.Point(410, 56);
-            this.status.Name = "status";
-            this.status.Size = new System.Drawing.Size(40, 13);
-            this.status.TabIndex = 26;
-            this.status.Text = "Status:";
+            this.moveList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.moveList.Location = new System.Drawing.Point(5, 3);
+            this.moveList.Name = "moveList";
+            this.moveList.Size = new System.Drawing.Size(602, 474);
+            this.moveList.TabIndex = 1;
+            // 
+            // engineAnalysisControl
+            // 
+            this.engineAnalysisControl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.engineAnalysisControl.Location = new System.Drawing.Point(4, 475);
+            this.engineAnalysisControl.Name = "engineAnalysisControl";
+            this.engineAnalysisControl.Size = new System.Drawing.Size(603, 85);
+            this.engineAnalysisControl.TabIndex = 0;
             // 
             // epdTabDisplay
             // 
             this.epdTabDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.epdTabDisplay.Location = new System.Drawing.Point(4, 278);
-            this.epdTabDisplay.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.epdTabDisplay.Location = new System.Drawing.Point(9, 247);
             this.epdTabDisplay.Name = "epdTabDisplay";
-            this.epdTabDisplay.Size = new System.Drawing.Size(1100, 303);
-            this.epdTabDisplay.TabIndex = 7;
+            this.epdTabDisplay.Size = new System.Drawing.Size(598, 310);
+            this.epdTabDisplay.TabIndex = 44;
             // 
             // chessPlot1
             // 
@@ -744,13 +760,15 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.InactiveBorder;
-            this.ClientSize = new System.Drawing.Size(1108, 587);
-            this.Controls.Add(this.epdTabDisplay);
+            this.ClientSize = new System.Drawing.Size(1207, 599);
+            this.Controls.Add(this.cboard);
             this.Controls.Add(this.tabControl1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "mainWindow";
             this.Text = "..EPD tester";
+            this.ResizeEnd += new System.EventHandler(this.ResizeFinished);
             this.tabControl1.ResumeLayout(false);
+            this.tabPage5.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
             this.engineDetailsGroupBox.ResumeLayout(false);
             this.engineDetailsGroupBox.PerformLayout();
@@ -822,11 +840,13 @@
         private System.Windows.Forms.Label EPDTestProgress_label;
         private System.Windows.Forms.Label EPDTestCorrect_label;
         private ChessPlot chessPlot1;
-        private EpdTabDisplay epdTabDisplay;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Button chessBoard;
         private System.Windows.Forms.CheckBox useLogCheckbox;
         private System.Windows.Forms.Label status;
+        private GL cboard;
+        private EpdTabDisplay epdTabDisplay;
+        private MoveList moveList;
+        private EngineAnalysisControl engineAnalysisControl;
     }
 }
 

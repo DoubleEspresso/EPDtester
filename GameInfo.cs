@@ -13,8 +13,8 @@ namespace epdTester
     public partial class GameInfo : Form
     {
         Position pos = null;
-        ChessBoard board = null;
-        public GameInfo(Position p, ChessBoard cb)
+        ChessBoard2 board = null;
+        public GameInfo(Position p, ChessBoard2 cb)
         {     
             InitializeComponent();
             this.pos = p;
@@ -60,22 +60,23 @@ namespace epdTester
         {
             engineAnalysisControl1.Clear();
         }
+        // fixme
         private void engineAnalysisItem_Click(object sender, EventArgs e)
         {
             // todo :: should "disable" the option if no engine present..
-            if (!board.hasEngine()) return;
-            board.mode = ChessBoard.Mode.ANALYSIS;
+            //if (!board.hasEngine()) return;
+            //board.mode = ChessBoard.Mode.ANALYSIS;
 
-            // note: take engine out of "game" mode so it does not try to stop
-            // on best-move parsing (causes illegal engine moves/crashes)
-            // todo : if we toggle this option, we need to re-set the callback.
-            board.ChessEngine.Parser.CallbackOnBestmove = null;
+            //// note: take engine out of "game" mode so it does not try to stop
+            //// on best-move parsing (causes illegal engine moves/crashes)
+            //// todo : if we toggle this option, we need to re-set the callback.
+            //board.ChessEngine.Parser.CallbackOnBestmove = null;
              
-            // update for "analysis control" game info view
-            engineAnalysisControl1.Initialize(board.ChessEngine, board);
+            //// update for "analysis control" game info view
+            //engineAnalysisControl1.Initialize(board.ChessEngine, board);
 
-            // start analyzing right away
-            board.RefreshBoard();
+            //// start analyzing right away
+            //board.RefreshBoard();
         }
     }
 }
