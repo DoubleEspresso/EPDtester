@@ -12,14 +12,17 @@ namespace epdTester
         ChessBoard2 cb = null;
         AutoResetEvent newEvalAvail = new AutoResetEvent(false); // signal to update Eval changes
         BackgroundWorker update_worker = new BackgroundWorker();
+        float dx = 3.3f;
+        float prev_eval = 0f;
+        float x = 0f;
+        bool updating = false;
+        float eval = 0f;
 
         public EngineAnalysisControl()
         {
             InitializeComponent();
             button1.Enabled = false;
             gl.PaintGL += RenderEval;
-            //Thread thread = new Thread(() => Timer());
-            //thread.Start();
         }
         public void Initialize(Engine engine, ChessBoard2 b)
         {
@@ -67,21 +70,24 @@ namespace epdTester
             currmove.Text = d.currmove;
             cpu.Text = d.cpu;
             pv.Text = d.pv;
-            Eval = (float) d.evals[d.evals.Count - 1]; // should be scaled -100 to 100 or so..
 
-            if (!updating) newEvalAvail.Set();
+
+            if (!updating)
+            {
+                Eval = (float)d.evals[d.evals.Count - 1]; // should be scaled -100 to 100 or so..
+                newEvalAvail.Set();
+            }
             //cb.UpdateAnalysisGraph(d.evals);
             //updateEvalGraph(d.evals);
         }
 
-        bool updating = false;
         void update_doWork(object sender, DoWorkEventArgs e)
         {
             while(true)
             {
                 newEvalAvail.WaitOne();
                 updating = true;
-                List<float> vertices = Vertices;
+                List<float> vertices = new List<float> (Vertices);
                 foreach (float v in vertices)
                 {
                     x = v;
@@ -91,7 +97,6 @@ namespace epdTester
                 updating = false;
             }
         }
-
         void update_Finished(object sender, RunWorkerCompletedEventArgs e)
         {
             Log.WriteLine("..closing eval update thread");
@@ -111,15 +116,10 @@ namespace epdTester
                 button1.Text = "stop";
             }
         }
-
-        float eval = 0f;
         float Eval
         {
             get
             {
-                //Random r = new Random();
-                //double e = r.NextDouble();
-                //return (float)(-gl.Width + 2 * gl.Width * e);
                 return eval;
             }
             set
@@ -128,27 +128,21 @@ namespace epdTester
                 eval = -gl.Width * 0.5f + gl.Width * tmp; // map to [-width/2, width/2]
             }
         }
-
-        float dx = 3.3f;
-        float prev_eval = 0f;
-        float x = 0f;
         List<float> Vertices
         {
             get
             {
                 List<float> res = new List<float>();
-
-                //res.Add(0);
                 float target = Eval;
 
                 // abort if the eval change is < 10% of the width of the GL graphic
                 float percent_change = (target - prev_eval) / gl.Width * 100f;
                 if (Math.Abs(percent_change) <= 5) return res;
 
-                float curr_pos = prev_eval;
+                float curr_pos = 0;
                 float dist_left = target - curr_pos;
                 float total_dist = dist_left;
-                dx = 12f;
+                dx = 10f;
 
                 int j = 1;
                 while(Math.Abs(dist_left) > 1.1f * dx && j < 250)
@@ -156,16 +150,12 @@ namespace epdTester
                     curr_pos += (total_dist < 0 ? -dx : dx);
                     dist_left = target - curr_pos;
                     res.Add(curr_pos);
-
-                    if (dx > 4f && Math.Abs(dist_left) < 0.10f * Math.Abs(total_dist)) dx -= 0.5f; // start slowing down
                     ++j;
                 }
-
                 prev_eval = target;
                 return res;
             }
         }
-        
         void RenderEval()
         {
             GL.MatrixMode(GL.PROJECTION);
@@ -205,20 +195,6 @@ namespace epdTester
 
                 GL.End();
             }
-
-            // dark outline
-            GL.Color3f(0.1f, 0.1f, 0.1f);
-            GL.LineWidth(2.2f);
-            GL.Begin(GL.LINES);
-            GL.Vertex2f(0, 0);
-            GL.Vertex2f(gl.Width, 0);
-            GL.Vertex2f(gl.Width, 0);
-            GL.Vertex2f(gl.Width, gl.Height);
-            GL.Vertex2f(gl.Width, gl.Height);
-            GL.Vertex2f(0, gl.Height);
-            GL.Vertex2f(0, gl.Height);
-            GL.Vertex2f(0, 0);
-            GL.End();
         }
         //private void updateEvalGraph(List<double> evals)
         //{

@@ -238,7 +238,7 @@ namespace epdTester
                     if (fto == null) break;
                     if (p.doMove(fto[0], fto[1], p.PieceOn(fto[0]), p.ToMove())) san_moves += p.toSan(move) + " ";
                     else break;
-                    if (san_moves.Length > 100) break;
+                    if (san_moves.Length > 16) break;
                 }
                 return san_moves;
             }
