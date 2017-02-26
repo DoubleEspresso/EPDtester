@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -42,10 +43,12 @@ namespace epdTester
         public Mode mode = Mode.GAME;
         Point MousePos = new Point(0, 0);
         GL boardPane = null;
+        GL evalPane = null;
+        BackgroundWorker eval_worker = new BackgroundWorker();
         mainWindow mw = null;
         public Engine ChessEngine { get { return ActiveEngine; } }
 
-        public ChessBoard2(Engine e, GL boardPane, mainWindow mw)
+        public ChessBoard2(Engine e, GL boardPane, GL evalPane, mainWindow mw)
         {
             Initialize();
             ActiveEngine = e;
@@ -61,6 +64,9 @@ namespace epdTester
             boardPane.KeyDown += OnKey_Down;
             boardPane.PreviewKeyDown += PreviewKeyDown;
             this.mw = mw;
+
+            this.evalPane = evalPane;
+            evalPane.PaintGL += DrawEval;
         }
         void Initialize()
         {
@@ -95,6 +101,14 @@ namespace epdTester
             // the chess position (default is starting position)
             if (pos == null) pos = new Position(Position.StartFen);
             //SetAspectRatio(Width, Height);
+
+            eval_worker = new BackgroundWorker();
+            eval_worker.DoWork += new DoWorkEventHandler(eval_renderWork);
+            eval_worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(eval_renderFinished);
+            eval_worker.WorkerReportsProgress = false;
+            eval_worker.WorkerSupportsCancellation = false;
+
+            eval_worker.RunWorkerAsync();
         }
         public bool hasEngine() { return ActiveEngine != null; }
         public void CloseEngine() { if (hasEngine()) ActiveEngine.Close(); }
@@ -109,12 +123,123 @@ namespace epdTester
             ActiveEngine = e;
             ActiveEngine.chessBoard = this;
         }
-        //protected override void OnFormClosing(FormClosingEventArgs e)
-        //{
-        //    e.Cancel = true;
-        //    this.Hide();
-        //    base.OnFormClosing(e);
-        //}
+
+        float prev_eval = 0f;
+        float eval = 0f;
+        float Eval
+        {
+            get
+            {
+                return eval;
+            }
+            set
+            {
+                float tmp = (value < -12f ? 0 : value > 12f ? 1.0f : value / 24.0f + 0.5f); // map to [0, 1] range
+                eval = -boardPane.Height * 0.5f + boardPane.Height * tmp; // map to [-width/2, width/2]
+            }
+        }
+        List<float> EvalVertices
+        {
+            get
+            {
+                List<float> res = new List<float>();
+                float target = Eval;
+
+                // abort if the eval change is < 10% of the width of the GL graphic
+                float percent_change = (target - prev_eval) / boardPane.Height * 100f;
+                if (Math.Abs(percent_change) <= 0.5) return res;
+
+                float curr_pos = 0;
+                float dist_left = target - curr_pos;
+                float total_dist = dist_left;
+                float dx = 5f;
+
+                int j = 1;
+                while (Math.Abs(dist_left) > 1.1f * dx && j < 250)
+                {
+                    curr_pos += (total_dist < 0 ? -dx : dx);
+                    dist_left = target - curr_pos;
+                    res.Add(curr_pos);
+                    ++j;
+                }
+                prev_eval = target;
+                return res;
+            }
+        }
+        bool updating = false;
+        float y = 0;
+        AutoResetEvent newEvalAvail = new AutoResetEvent(false);
+        void eval_renderWork(object sender, DoWorkEventArgs e)
+        {
+            while (true)
+            {
+                newEvalAvail.WaitOne();
+                updating = true;
+                List<float> vertices = new List<float>(EvalVertices);
+                foreach (float v in vertices)
+                {
+                    y = v;
+                    evalPane.SafeInvalidate(true);
+                }
+                newEvalAvail.Reset();
+                updating = false;
+            }
+        }
+        void eval_renderFinished(object sender, RunWorkerCompletedEventArgs e)
+        {
+            Log.WriteLine("..closing eval update thread");
+        }
+        public void updateEval(float eval)
+        {
+            if (!updating)
+            {
+                Eval = eval;
+                newEvalAvail.Set();
+            } 
+        }
+        void DrawEval()
+        {
+            GL.MatrixMode(GL.PROJECTION);
+            GL.LoadIdentity();
+            GL.Ortho(0, evalPane.Width, boardPane.Height, 0, 0, 1);
+            GL.MatrixMode(GL.MODELVIEW);
+            GL.Viewport(0, 0, evalPane.Width, boardPane.Height);
+            GL.Clear(GL.DEPTH_BUFFER_BIT | GL.COLOR_BUFFER_BIT);
+            GL.LoadIdentity();
+            GL.ClearColor(0f, 0f, 0f, 1f);
+
+            // draw background
+            GL.Color3f(0.6f, 0.6f, 0.6f);
+
+            GL.Begin(GL.QUADS);
+            GL.Vertex2f(0, 0);
+            GL.Vertex2f(evalPane.Width, 0);
+            GL.Vertex2f(evalPane.Width, boardPane.Height);
+            GL.Vertex2f(0, boardPane.Height);
+            GL.End();
+
+            float w = evalPane.Width;
+            float h = 0.5f * boardPane.Height;
+            {
+                GL.Begin(GL.QUADS);
+                GL.ClearColor(1f, 1f, 1f, 1f);
+                GL.Color3f(0.2f, 0.2f, 0.2f);
+
+                GL.Vertex2f(0, h);
+
+                GL.Color3f((y < 0f ? 0.01f + Math.Abs(y / 100.0f) : 0), (y >= 0 ? 0.01f + Math.Abs(y / 100.0f) : 0), 0.01f);
+
+                GL.Vertex2f(0, h + y);
+
+                GL.Color3f((y < 0f ? 0.01f + Math.Abs(y / 100.0f) : 0), (y >= 0 ? 0.01f + Math.Abs(y / 100.0f) : 0), 0.01f);
+
+                GL.Vertex2f(w, h + y);
+                GL.Vertex2f(w, h);
+
+                GL.End();
+            }
+        }
+
         void Render()
         {
             GL.MatrixMode(GL.PROJECTION);
@@ -129,8 +254,10 @@ namespace epdTester
         }
         public void SetDims(int w, int h)
         {
-            boardPane.Width = w;
+            boardPane.Width = w-4;
             boardPane.Height = h;
+            evalPane.Width = (int) Math.Max(12, 0.01f * boardPane.Width);
+            evalPane.Height = h;
         }
         public void RenderBoard()
         {

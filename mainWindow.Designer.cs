@@ -92,6 +92,7 @@
             this.epdCombobox = new System.Windows.Forms.ComboBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.gl_eval = new epdTester.GL();
             this.cboard = new epdTester.GL();
             this.tabControl1.SuspendLayout();
             this.tabPage5.SuspendLayout();
@@ -130,20 +131,21 @@
             // 
             // moveList
             // 
-            this.moveList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.moveList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.moveList.Location = new System.Drawing.Point(5, 3);
+            this.moveList.Location = new System.Drawing.Point(10, 185);
             this.moveList.Name = "moveList";
-            this.moveList.Size = new System.Drawing.Size(602, 455);
+            this.moveList.Size = new System.Drawing.Size(585, 364);
             this.moveList.TabIndex = 1;
             // 
             // engineAnalysisControl
             // 
-            this.engineAnalysisControl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.engineAnalysisControl.Location = new System.Drawing.Point(5, 464);
+            this.engineAnalysisControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.engineAnalysisControl.Location = new System.Drawing.Point(10, 9);
             this.engineAnalysisControl.Name = "engineAnalysisControl";
-            this.engineAnalysisControl.Size = new System.Drawing.Size(603, 96);
+            this.engineAnalysisControl.Size = new System.Drawing.Size(585, 170);
             this.engineAnalysisControl.TabIndex = 0;
             // 
             // tabPage3
@@ -748,11 +750,19 @@
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "tuning..";
             // 
+            // gl_eval
+            // 
+            this.gl_eval.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.gl_eval.Location = new System.Drawing.Point(571, 12);
+            this.gl_eval.Name = "gl_eval";
+            this.gl_eval.Size = new System.Drawing.Size(10, 568);
+            this.gl_eval.TabIndex = 9;
+            // 
             // cboard
             // 
-            this.cboard.Location = new System.Drawing.Point(12, 12);
+            this.cboard.Location = new System.Drawing.Point(5, 11);
             this.cboard.Name = "cboard";
-            this.cboard.Size = new System.Drawing.Size(567, 571);
+            this.cboard.Size = new System.Drawing.Size(543, 571);
             this.cboard.TabIndex = 8;
             // 
             // mainWindow
@@ -761,6 +771,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.InactiveBorder;
             this.ClientSize = new System.Drawing.Size(1207, 599);
+            this.Controls.Add(this.gl_eval);
             this.Controls.Add(this.cboard);
             this.Controls.Add(this.tabControl1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -847,6 +858,7 @@
         private EpdTabDisplay epdTabDisplay;
         private MoveList moveList;
         private EngineAnalysisControl engineAnalysisControl;
+        private GL gl_eval;
     }
 }
 

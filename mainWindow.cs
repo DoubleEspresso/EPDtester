@@ -30,7 +30,7 @@ namespace epdTester
             EPDTestCorrect_label.Text = "";
             label7.Text = "";
             
-            board2 = new ChessBoard2(null, cboard, this);
+            board2 = new ChessBoard2(null, cboard, gl_eval, this);
             moveList.SetBoard(board2);
         }
         protected override void OnLoad(EventArgs e)
@@ -50,7 +50,6 @@ namespace epdTester
             float nw = (w >= mind ? mind : w);
             float nh = (h >= mind ? mind : h);
             if (board2 != null) board2.SetDims((int)nw-40, (int)nh-65);
-            if (engineAnalysisControl != null) engineAnalysisControl.SetEvalDims(tabControl1.Width - 50, 10);
             Width = (int)(nw + tabControl1.Width); Height = (int)nh;
         }
         /*EPD file management*/
