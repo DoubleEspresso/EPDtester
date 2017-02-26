@@ -50,6 +50,7 @@ namespace epdTester
             float nw = (w >= mind ? mind : w);
             float nh = (h >= mind ? mind : h);
             if (board2 != null) board2.SetDims((int)nw-40, (int)nh-65);
+            if (engineAnalysisControl != null) engineAnalysisControl.SetEvalDims(tabControl1.Width - 50, 10);
             Width = (int)(nw + tabControl1.Width); Height = (int)nh;
         }
         /*EPD file management*/
@@ -229,6 +230,7 @@ namespace epdTester
                     engineAnalysisControl.Initialize(board2.ChessEngine, board2);
                    
                     board2.mode = ChessBoard2.Mode.ANALYSIS;
+                    engineAnalysisControl.enableGoClick(board2.hasEngine());
                     
                 }
                 updateDisplay(e);

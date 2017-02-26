@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace epdTester
@@ -14,9 +10,16 @@ namespace epdTester
     {
         Engine e = null;
         ChessBoard2 cb = null;
+        AutoResetEvent newEvalAvail = new AutoResetEvent(false); // signal to update Eval changes
+        BackgroundWorker update_worker = new BackgroundWorker();
+
         public EngineAnalysisControl()
         {
             InitializeComponent();
+            button1.Enabled = false;
+            gl.PaintGL += RenderEval;
+            //Thread thread = new Thread(() => Timer());
+            //thread.Start();
         }
         public void Initialize(Engine engine, ChessBoard2 b)
         {
@@ -24,6 +27,23 @@ namespace epdTester
             e.AnalysisUICallback += EngineStreamRecieved;
             analysisGroup.Text = e.Name + " analysis";
             this.cb = b;
+
+            update_worker = new BackgroundWorker();
+            update_worker.DoWork += new DoWorkEventHandler(update_doWork);
+            update_worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(update_Finished);
+            update_worker.WorkerReportsProgress = false;
+            update_worker.WorkerSupportsCancellation = false;
+
+            update_worker.RunWorkerAsync();
+        }
+        public void SetEvalDims(int w, int h)
+        {
+            gl.Width = w;
+            gl.Height = h;
+        }
+        public void enableGoClick(bool en)
+        {
+            this.button1.Enabled = en;
         }
         public void Clear()
         {
@@ -47,8 +67,34 @@ namespace epdTester
             currmove.Text = d.currmove;
             cpu.Text = d.cpu;
             pv.Text = d.pv;
+            Eval = (float) d.evals[d.evals.Count - 1]; // should be scaled -100 to 100 or so..
+
+            if (!updating) newEvalAvail.Set();
             //cb.UpdateAnalysisGraph(d.evals);
             //updateEvalGraph(d.evals);
+        }
+
+        bool updating = false;
+        void update_doWork(object sender, DoWorkEventArgs e)
+        {
+            while(true)
+            {
+                newEvalAvail.WaitOne();
+                updating = true;
+                List<float> vertices = Vertices;
+                foreach (float v in vertices)
+                {
+                    x = v;
+                    gl.SafeInvalidate(true);
+                }
+                newEvalAvail.Reset();
+                updating = false;
+            }
+        }
+
+        void update_Finished(object sender, RunWorkerCompletedEventArgs e)
+        {
+            Log.WriteLine("..closing eval update thread");
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -64,6 +110,115 @@ namespace epdTester
                 cb.ChessEngine.Command("go infinite");
                 button1.Text = "stop";
             }
+        }
+
+        float eval = 0f;
+        float Eval
+        {
+            get
+            {
+                //Random r = new Random();
+                //double e = r.NextDouble();
+                //return (float)(-gl.Width + 2 * gl.Width * e);
+                return eval;
+            }
+            set
+            {
+                float tmp = (value < -5f ? 0 : value > 5f ? 1.0f : value / 10.0f + 0.5f); // map to [0, 1] range
+                eval = -gl.Width * 0.5f + gl.Width * tmp; // map to [-width/2, width/2]
+            }
+        }
+
+        float dx = 3.3f;
+        float prev_eval = 0f;
+        float x = 0f;
+        List<float> Vertices
+        {
+            get
+            {
+                List<float> res = new List<float>();
+
+                //res.Add(0);
+                float target = Eval;
+
+                // abort if the eval change is < 10% of the width of the GL graphic
+                float percent_change = (target - prev_eval) / gl.Width * 100f;
+                if (Math.Abs(percent_change) <= 5) return res;
+
+                float curr_pos = prev_eval;
+                float dist_left = target - curr_pos;
+                float total_dist = dist_left;
+                dx = 12f;
+
+                int j = 1;
+                while(Math.Abs(dist_left) > 1.1f * dx && j < 250)
+                {
+                    curr_pos += (total_dist < 0 ? -dx : dx);
+                    dist_left = target - curr_pos;
+                    res.Add(curr_pos);
+
+                    if (dx > 4f && Math.Abs(dist_left) < 0.10f * Math.Abs(total_dist)) dx -= 0.5f; // start slowing down
+                    ++j;
+                }
+
+                prev_eval = target;
+                return res;
+            }
+        }
+        
+        void RenderEval()
+        {
+            GL.MatrixMode(GL.PROJECTION);
+            GL.LoadIdentity();
+            GL.Ortho(0, gl.Width, gl.Height, 0, 0, 1);
+            GL.MatrixMode(GL.MODELVIEW);
+            GL.Viewport(0, 0, gl.Width, gl.Height);
+            GL.Clear(GL.DEPTH_BUFFER_BIT | GL.COLOR_BUFFER_BIT);
+            GL.LoadIdentity();
+            GL.ClearColor(0f, 0f, 0f, 1f);
+
+            // draw background
+            GL.Color3f(0.6f, 0.6f, 0.6f);
+
+            GL.Begin(GL.QUADS);
+            GL.Vertex2f(0, 0);
+            GL.Vertex2f(gl.Width, 0);
+            GL.Vertex2f(gl.Width, gl.Height);
+            GL.Vertex2f(0, gl.Height);
+            GL.End();
+            
+            {
+                GL.Begin(GL.QUADS);
+                GL.ClearColor(1f, 1f, 1f, 1f);
+                GL.Color3f(0.2f, 0.2f, 0.2f);
+
+                GL.Vertex2f(0.5f * gl.Width, 0);
+
+                GL.Color3f((x < 0f ? 0.01f + Math.Abs(x / 100.0f) : 0), (x >= 0 ? 0.01f + Math.Abs(x / 100.0f) : 0), 0.01f);
+
+                GL.Vertex2f(0.5f * gl.Width + x, 0);
+
+                GL.Color3f((x < 0f ? 0.01f + Math.Abs(x / 100.0f) : 0), (x >= 0 ? 0.01f + Math.Abs(x / 100.0f) : 0), 0.01f);
+
+                GL.Vertex2f(0.5f * gl.Width + x, gl.Height);
+                GL.Vertex2f(0.5f * gl.Width, gl.Height);
+
+                GL.End();
+            }
+
+            // dark outline
+            GL.Color3f(0.1f, 0.1f, 0.1f);
+            GL.LineWidth(2.2f);
+            GL.Begin(GL.LINES);
+            GL.Vertex2f(0, 0);
+            GL.Vertex2f(gl.Width, 0);
+            GL.Vertex2f(gl.Width, 0);
+            GL.Vertex2f(gl.Width, gl.Height);
+            GL.Vertex2f(gl.Width, gl.Height);
+            GL.Vertex2f(0, gl.Height);
+            GL.Vertex2f(0, gl.Height);
+            GL.Vertex2f(0, 0);
+            GL.End();
         }
         //private void updateEvalGraph(List<double> evals)
         //{

@@ -326,9 +326,12 @@ namespace epdTester
                         ActiveEngine.Command("go wtime 3000 btime 3000"); // hack for now
                         break;
                     case Mode.ANALYSIS:
-                        ActiveEngine.Command("stop");
-                        ActiveEngine.Command("position fen " + pos.toFen());
-                        ActiveEngine.Command("go infinite");
+                        if (ActiveEngine.Thinking)
+                        {
+                            ActiveEngine.Command("stop");
+                            ActiveEngine.Command("position fen " + pos.toFen());
+                            ActiveEngine.Command("go infinite");
+                        }
                         break;
                     default: break;
                 }
@@ -499,7 +502,7 @@ namespace epdTester
         public void RefreshBoard()
         {
             boardPane.SafeInvalidate(true);
-            if (ActiveEngine != null && mode == Mode.ANALYSIS)
+            if (ActiveEngine != null && mode == Mode.ANALYSIS && ActiveEngine.Thinking)
             {
                 gi.ClearAnalysisPane();
                 ActiveEngine.Command("stop");

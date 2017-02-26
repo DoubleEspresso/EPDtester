@@ -29,13 +29,14 @@
         private void InitializeComponent()
         {
             this.analysisGroup = new System.Windows.Forms.GroupBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.depth = new System.Windows.Forms.Label();
             this.pv = new System.Windows.Forms.Label();
             this.cpu = new System.Windows.Forms.Label();
             this.currmove = new System.Windows.Forms.Label();
             this.hashfull = new System.Windows.Forms.Label();
             this.nps = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
+            this.gl = new epdTester.GL();
             this.analysisGroup.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -43,6 +44,7 @@
             // 
             this.analysisGroup.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.analysisGroup.Controls.Add(this.gl);
             this.analysisGroup.Controls.Add(this.button1);
             this.analysisGroup.Controls.Add(this.depth);
             this.analysisGroup.Controls.Add(this.pv);
@@ -52,10 +54,21 @@
             this.analysisGroup.Controls.Add(this.nps);
             this.analysisGroup.Location = new System.Drawing.Point(3, 3);
             this.analysisGroup.Name = "analysisGroup";
-            this.analysisGroup.Size = new System.Drawing.Size(517, 78);
+            this.analysisGroup.Size = new System.Drawing.Size(517, 122);
             this.analysisGroup.TabIndex = 0;
             this.analysisGroup.TabStop = false;
             this.analysisGroup.Text = "engine";
+            // 
+            // button1
+            // 
+            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button1.Location = new System.Drawing.Point(478, 9);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(37, 23);
+            this.button1.TabIndex = 7;
+            this.button1.Text = "go";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // depth
             // 
@@ -112,16 +125,14 @@
             this.nps.TabIndex = 1;
             this.nps.Text = "nps:";
             // 
-            // button1
+            // gl
             // 
-            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(478, 9);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(37, 23);
-            this.button1.TabIndex = 7;
-            this.button1.Text = "go";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.gl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.gl.Location = new System.Drawing.Point(14, 79);
+            this.gl.Name = "gl";
+            this.gl.Size = new System.Drawing.Size(497, 37);
+            this.gl.TabIndex = 1;
             // 
             // EngineAnalysisControl
             // 
@@ -129,7 +140,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.analysisGroup);
             this.Name = "EngineAnalysisControl";
-            this.Size = new System.Drawing.Size(522, 85);
+            this.Size = new System.Drawing.Size(522, 140);
             this.analysisGroup.ResumeLayout(false);
             this.analysisGroup.PerformLayout();
             this.ResumeLayout(false);
@@ -146,5 +157,6 @@
         private System.Windows.Forms.Label hashfull;
         private System.Windows.Forms.Label nps;
         private System.Windows.Forms.Button button1;
+        private GL gl;
     }
 }

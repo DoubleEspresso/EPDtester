@@ -45,6 +45,7 @@ namespace epdTester
         public const int TEXTURE_1D = 0x0DE0;
         public const int TEXTURE_2D = 0x0DE1;
         public const int TEXTURE_3D = 0x806F;
+        public const int FRAMEBUFFER = 0x8D40;
 
         public const int TEXTURE_MAG_FILTER = 0x2800;
         public const int TEXTURE_MIN_FILTER = 0x2801;
@@ -131,6 +132,8 @@ namespace epdTester
         public static extern void GenTextures(int n, [Out] int[] textures);
         [DllImport(OPENGL, EntryPoint = "glBindTexture")]
         public static extern void BindTexture(int ntarget, int texture);
+        [DllImport(OPENGL, EntryPoint = "glBindFrameBuffer")]
+        public static extern void BindFrameBuffer(int ntarget, int fbo);
         [DllImport(OPENGL, EntryPoint = "glDeleteTextures")]
         public static extern void DeleteTextures(int n, ref int textures);
         [DllImport(OPENGL, EntryPoint = "glTexCoord1d")]
@@ -190,6 +193,8 @@ namespace epdTester
         {
             Vertex2d(p.x, p.y);
         }
+        [DllImport(OPENGL, EntryPoint = "glLineWidth")]
+        public static extern void LineWidth(float width);
         [DllImport(OPENGL, EntryPoint = "glVertex3f")]
         public static extern void Vertex3f(float x, float y, float z);
         [DllImport(OPENGL, EntryPoint = "glViewport")]
@@ -233,6 +238,9 @@ namespace epdTester
         public static extern void Begin(uint mode);
         [DllImport(OPENGL, EntryPoint = "glEnd")]
         public static extern void End();
+        [DllImport(OPENGL, EntryPoint = "glFlush")]
+        public static extern void Flush();
+
 
         [DllImport(OPENGL, EntryPoint = "glGetError")]
         public static extern int GetError();
