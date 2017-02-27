@@ -31,8 +31,8 @@ namespace epdTester
         }
         public void Clear()
         {
-            depth.Text = "";
-            nps.Text = "";
+            depth_lbl.Text = "";
+            nps_lbl.Text = "";
             //hashfull.Text = "";
             //currmove.Text = "";
             //cpu.Text = "";
@@ -45,13 +45,13 @@ namespace epdTester
                 Invoke(new EventHandler<Engine.AnalysisUIData>(EngineStreamRecieved), sender, d);
                 return;
             }
-            depth.Text = d.depth;
-            nps.Text = d.nps;
+            depth_box.Text = d.depth;
+            nps_box.Text = d.nps;
+            move_box.Text = d.pv;
+            eval_box.Text = string.Format("{0:F3}", d.evals[d.evals.Count - 1]);
             //hashfull.Text = d.hashfull;
             //currmove.Text = d.currmove;
             //cpu.Text = d.cpu;
-            //pv.Text = d.pv;
-
 
             if (cb != null)
             {

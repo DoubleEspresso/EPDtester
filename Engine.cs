@@ -214,13 +214,13 @@ namespace epdTester
             ChessParser.Data d = Parser.History[Parser.History.Count - 1]; // take most recent
             AnalysisUIData data = new AnalysisUIData();
             data.evals = new List<double>();
-            data.depth = "depth: " + Convert.ToString(d.depth);
+            data.depth = Convert.ToString(d.depth);
             double eval = d.eval / 100.0; data.evals.Add(eval);
-            data.nps = "nps: " + Convert.ToString(d.nps);
-            data.hashfull = "hashhits: " + Convert.ToString(d.hashhits);
-            data.currmove = "currmove: " + Convert.ToString("n/a");
-            data.cpu = "cpu: " + Convert.ToString("n/a");
-            data.pv = "[" + String.Format("{0:F2}", eval) + "]  " + FormatPV(d.pv);
+            data.nps = string.Format("{0:F3}k", (float)d.nps / 1000.0f);// Convert.ToString(d.nps);
+            data.hashfull = string.Format("{0:F3}k", (float)d.hashhits / 1000.0f); //Convert.ToString(d.hashhits);
+            data.currmove = Convert.ToString("n/a");
+            data.cpu = Convert.ToString("n/a");
+            data.pv = FormatPV(d.pv); //"[" + String.Format("{0:F2}", eval) + "]  " + FormatPV(d.pv);
             return data;
         }
         string FormatPV(string moves)
@@ -236,9 +236,13 @@ namespace epdTester
                     if (String.IsNullOrWhiteSpace(move)) continue;
                     int[] fto = Position.FromTo(move);
                     if (fto == null) break;
-                    if (p.doMove(fto[0], fto[1], p.PieceOn(fto[0]), p.ToMove())) san_moves += p.toSan(move) + " ";
-                    else break;
-                    if (san_moves.Length > 16) break;
+                    if (p.doMove(fto[0], fto[1], p.PieceOn(fto[0]), p.ToMove()))
+                    {
+                        san_moves += p.toSan(move);// + " ";
+                        break;
+                    }
+                    //else break;
+                    //if (san_moves.Length > 16) break;
                 }
                 return san_moves;
             }

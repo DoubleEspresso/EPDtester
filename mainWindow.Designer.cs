@@ -31,8 +31,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(mainWindow));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.moveList = new epdTester.MoveList();
-            this.engineAnalysisControl = new epdTester.EngineAnalysisControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.engineDetailsGroupBox = new System.Windows.Forms.GroupBox();
             this.status = new System.Windows.Forms.Label();
@@ -63,8 +61,6 @@
             this.removeEngineFromList = new System.Windows.Forms.Button();
             this.addEngineToList = new System.Windows.Forms.Button();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.epdTabDisplay = new epdTester.EpdTabDisplay();
-            this.chessPlot1 = new epdTester.ChessPlot();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.label7 = new System.Windows.Forms.Label();
             this.EPDTestCorrect_label = new System.Windows.Forms.Label();
@@ -94,6 +90,10 @@
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.gl_eval = new epdTester.GL();
             this.cboard = new epdTester.GL();
+            this.engineAnalysisControl = new epdTester.EngineAnalysisControl();
+            this.moveList = new epdTester.MoveList();
+            this.epdTabDisplay = new epdTester.EpdTabDisplay();
+            this.chessPlot1 = new epdTester.ChessPlot();
             this.tabControl1.SuspendLayout();
             this.tabPage5.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -112,41 +112,22 @@
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage4);
-            this.tabControl1.Location = new System.Drawing.Point(585, -2);
+            this.tabControl1.Location = new System.Drawing.Point(624, -2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(618, 589);
+            this.tabControl1.Size = new System.Drawing.Size(618, 601);
             this.tabControl1.TabIndex = 6;
             // 
             // tabPage5
             // 
             this.tabPage5.BackColor = System.Drawing.SystemColors.Menu;
-            this.tabPage5.Controls.Add(this.moveList);
             this.tabPage5.Controls.Add(this.engineAnalysisControl);
+            this.tabPage5.Controls.Add(this.moveList);
             this.tabPage5.Location = new System.Drawing.Point(4, 22);
             this.tabPage5.Name = "tabPage5";
-            this.tabPage5.Size = new System.Drawing.Size(610, 563);
+            this.tabPage5.Size = new System.Drawing.Size(610, 575);
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "board..";
-            // 
-            // moveList
-            // 
-            this.moveList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.moveList.Location = new System.Drawing.Point(10, 185);
-            this.moveList.Name = "moveList";
-            this.moveList.Size = new System.Drawing.Size(585, 364);
-            this.moveList.TabIndex = 1;
-            // 
-            // engineAnalysisControl
-            // 
-            this.engineAnalysisControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.engineAnalysisControl.Location = new System.Drawing.Point(10, 9);
-            this.engineAnalysisControl.Name = "engineAnalysisControl";
-            this.engineAnalysisControl.Size = new System.Drawing.Size(585, 170);
-            this.engineAnalysisControl.TabIndex = 0;
             // 
             // tabPage3
             // 
@@ -158,7 +139,7 @@
             this.tabPage3.Controls.Add(this.addEngineToList);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(610, 563);
+            this.tabPage3.Size = new System.Drawing.Size(610, 575);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "engine..";
             // 
@@ -462,27 +443,9 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(610, 563);
+            this.tabPage1.Size = new System.Drawing.Size(610, 575);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "epd testing..";
-            // 
-            // epdTabDisplay
-            // 
-            this.epdTabDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.epdTabDisplay.Location = new System.Drawing.Point(9, 247);
-            this.epdTabDisplay.Name = "epdTabDisplay";
-            this.epdTabDisplay.Size = new System.Drawing.Size(598, 310);
-            this.epdTabDisplay.TabIndex = 44;
-            // 
-            // chessPlot1
-            // 
-            this.chessPlot1.Location = new System.Drawing.Point(746, 29);
-            this.chessPlot1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.chessPlot1.Name = "chessPlot1";
-            this.chessPlot1.Size = new System.Drawing.Size(318, 211);
-            this.chessPlot1.TabIndex = 43;
             // 
             // groupBox3
             // 
@@ -737,7 +700,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(610, 563);
+            this.tabPage2.Size = new System.Drawing.Size(610, 575);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "regression..";
             // 
@@ -746,14 +709,14 @@
             this.tabPage4.BackColor = System.Drawing.SystemColors.Menu;
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(610, 563);
+            this.tabPage4.Size = new System.Drawing.Size(610, 575);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "tuning..";
             // 
             // gl_eval
             // 
             this.gl_eval.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.gl_eval.Location = new System.Drawing.Point(571, 12);
+            this.gl_eval.Location = new System.Drawing.Point(610, 12);
             this.gl_eval.Name = "gl_eval";
             this.gl_eval.Size = new System.Drawing.Size(10, 568);
             this.gl_eval.TabIndex = 9;
@@ -765,12 +728,49 @@
             this.cboard.Size = new System.Drawing.Size(543, 571);
             this.cboard.TabIndex = 8;
             // 
+            // engineAnalysisControl
+            // 
+            this.engineAnalysisControl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.engineAnalysisControl.Location = new System.Drawing.Point(10, 8);
+            this.engineAnalysisControl.Name = "engineAnalysisControl";
+            this.engineAnalysisControl.Size = new System.Drawing.Size(585, 171);
+            this.engineAnalysisControl.TabIndex = 0;
+            this.engineAnalysisControl.Load += new System.EventHandler(this.engineAnalysisControl_Load);
+            // 
+            // moveList
+            // 
+            this.moveList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.moveList.Location = new System.Drawing.Point(10, 191);
+            this.moveList.Name = "moveList";
+            this.moveList.Size = new System.Drawing.Size(585, 376);
+            this.moveList.TabIndex = 1;
+            // 
+            // epdTabDisplay
+            // 
+            this.epdTabDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.epdTabDisplay.Location = new System.Drawing.Point(9, 247);
+            this.epdTabDisplay.Name = "epdTabDisplay";
+            this.epdTabDisplay.Size = new System.Drawing.Size(598, 322);
+            this.epdTabDisplay.TabIndex = 44;
+            // 
+            // chessPlot1
+            // 
+            this.chessPlot1.Location = new System.Drawing.Point(746, 29);
+            this.chessPlot1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.chessPlot1.Name = "chessPlot1";
+            this.chessPlot1.Size = new System.Drawing.Size(318, 211);
+            this.chessPlot1.TabIndex = 43;
+            // 
             // mainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.InactiveBorder;
-            this.ClientSize = new System.Drawing.Size(1207, 599);
+            this.ClientSize = new System.Drawing.Size(1246, 611);
             this.Controls.Add(this.gl_eval);
             this.Controls.Add(this.cboard);
             this.Controls.Add(this.tabControl1);

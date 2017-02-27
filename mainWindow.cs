@@ -334,6 +334,9 @@ namespace epdTester
             ActiveEngine.UseLog(useLogCheckbox.Checked);
         }
 
-      
+        private void engineAnalysisControl_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

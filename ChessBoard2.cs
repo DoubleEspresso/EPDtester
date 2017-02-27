@@ -134,7 +134,7 @@ namespace epdTester
             }
             set
             {
-                float tmp = (value < -12f ? 0 : value > 12f ? 1.0f : value / 24.0f + 0.5f); // map to [0, 1] range
+                float tmp = (value < -4f ? 0 : value > 4f ? 1.0f : value / 8.0f + 0.5f); // map to [0, 1] range
                 eval = -boardPane.Height * 0.5f + boardPane.Height * tmp; // map to [-width/2, width/2]
             }
         }
@@ -629,7 +629,7 @@ namespace epdTester
         public void RefreshBoard()
         {
             boardPane.SafeInvalidate(true);
-            if (ActiveEngine != null && mode == Mode.ANALYSIS && ActiveEngine.Thinking)
+            if (ActiveEngine != null && mode == Mode.ANALYSIS && !ActiveEngine.Thinking)
             {
                 gi.ClearAnalysisPane();
                 ActiveEngine.Command("stop");
