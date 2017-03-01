@@ -47,6 +47,8 @@ namespace epdTester
         BackgroundWorker eval_worker = new BackgroundWorker();
         mainWindow mw = null;
         public Engine ChessEngine { get { return ActiveEngine; } }
+        bool mouseRightClick = false;
+        int startDragLoc = -1;
 
         public ChessBoard2(Engine e, GL boardPane, GL evalPane, mainWindow mw)
         {
@@ -152,7 +154,7 @@ namespace epdTester
                 float curr_pos = 0;
                 float dist_left = target - curr_pos;
                 float total_dist = dist_left;
-                float dx = 8f;
+                float dx = 12f;
 
                 int j = 1;
                 while (Math.Abs(dist_left) > 1.1f * dx && j < 250)
@@ -182,7 +184,7 @@ namespace epdTester
                     evalPane.SafeInvalidate(true);
                     boardPane.SafeInvalidate(true);
                 }
-                Thread.Sleep(200); // wait here 
+                Thread.Sleep(300); // wait here 
                 newEvalAvail.Reset();
                 updating = false;
             }
@@ -359,27 +361,26 @@ namespace epdTester
             }
 
             //GLGraphics.renderPreviousArrows();
-            //if (mouseRightClick)
-            //{
-            //    Vec2 tmp = squareFromMouse(startDragPos);
-            //    int r = (int)(7 - tmp.x);
-            //    int c = (int)tmp.y;
-            //    Vec2 start = new Vec2((oX + c * dX) + 0.63 * dX, (oY + r * dY) + 0.5 * dY);
-            //    Vec2 tmp2 = squareFromMouse(MousePos);
-            //    if (!tmp.equals(tmp2))
-            //    {
-            //        r = (int)(7 - tmp2.x);
-            //        c = (int)tmp2.y;
-            //        if (r > 7 || r < 0) r = (r > 7 ? 7 : 0); // keep it on the board
-            //        if (c > 7 || c < 0) c = (c > 7 ? 7 : 0);
-            //        Vec2 end = new Vec2((oX + c * dX) + 0.63 * dX, (oY + r * dY) + 0.5 * dY);
-            //        GLGraphics.storeArrowData(start, end, (float)(0.25 * dX));
-            //        GLGraphics.renderArrow(start, end, (float)(0.25 * dX));
-            //    }
+            if (mouseRightClick)
+            {
+                int r = 7-(int)(startDragLoc >> 3);
+                int c = (int)(startDragLoc & 7);
+                Vec2 start = new Vec2((oX + c * dX) + 0.63 * dX, (oY + r * dY) + 0.5 * dY);
+                int s2 = SquareFromMouseLoc(MousePos);
+                if (startDragLoc != s2)
+                {
+                    r = 7-(int)(s2 >> 3);
+                    c = (int)(s2 & 7);
+                    if (r > 7 || r < 0) r = (r > 7 ? 7 : 0); // keep it on the board
+                    if (c > 7 || c < 0) c = (c > 7 ? 7 : 0);
+                    Vec2 end = new Vec2((oX + c * dX) + 0.63 * dX, (oY + r * dY) + 0.5 * dY);
+                    GLGraphics.storeArrowData(start, end, (float)(0.25 * dX));
+                    GLGraphics.renderArrow(start, end, (float)(0.25 * dX));
+                }
 
-            //}
-            // render dragging piece last, so it renders *over* all other textures.
-            renderDraggingPiece(dX, dY);
+            }
+                // render dragging piece last, so it renders *over* all other textures.
+                renderDraggingPiece(dX, dY);
         }
         private void renderPiece(double x, double y, int r, int c)
         {
@@ -443,6 +444,8 @@ namespace epdTester
             {
                 case MouseButtons.Right:
                     id.reset();
+                    mouseRightClick = true;
+                    startDragLoc = SquareFromMouseLoc(e.Location);
                     break;
                 case MouseButtons.Left:
                     int s = SquareFromMouseLoc(e.Location);
@@ -511,6 +514,8 @@ namespace epdTester
                 }
             }
             id.reset();
+            mouseRightClick = false;
+            startDragLoc = -1;
         }
         public bool UpdateGameMoves()
         {

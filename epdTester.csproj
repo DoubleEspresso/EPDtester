@@ -132,6 +132,7 @@
     <Compile Include="GLPane.Designer.cs">
       <DependentUpon>GLPane.cs</DependentUpon>
     </Compile>
+    <Compile Include="GLGraphics.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="LogViewer.cs">
       <SubType>Form</SubType>
