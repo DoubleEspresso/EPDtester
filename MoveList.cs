@@ -25,6 +25,10 @@ namespace epdTester
         {
             cb = b;
         }
+        public void ClearText()
+        {
+            mList.Clear();
+        }
         public bool highlightMove(int c, int idx)
         {
             string idxString = Convert.ToString((int)Math.Floor((double)idx / 2) + (idx % 2 == 0 ? 0 : 1)) + ".";

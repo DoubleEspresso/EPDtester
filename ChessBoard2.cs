@@ -135,7 +135,7 @@ namespace epdTester
             set
             {
                 float tmp = (value < -4f ? 0 : value > 4f ? 1.0f : value / 8.0f + 0.5f); // map to [0, 1] range
-                eval = -boardPane.Height * 0.5f + boardPane.Height * tmp; // map to [-width/2, width/2]
+                eval = -boardPane.Height * 0.5f + boardPane.Height * tmp; // map to [-height/2, height/2]
             }
         }
         List<float> EvalVertices
@@ -152,7 +152,7 @@ namespace epdTester
                 float curr_pos = 0;
                 float dist_left = target - curr_pos;
                 float total_dist = dist_left;
-                float dx = 5f;
+                float dx = 8f;
 
                 int j = 1;
                 while (Math.Abs(dist_left) > 1.1f * dx && j < 250)
@@ -180,7 +180,9 @@ namespace epdTester
                 {
                     y = v;
                     evalPane.SafeInvalidate(true);
+                    boardPane.SafeInvalidate(true);
                 }
+                Thread.Sleep(200); // wait here 
                 newEvalAvail.Reset();
                 updating = false;
             }
@@ -206,38 +208,83 @@ namespace epdTester
             GL.Viewport(0, 0, evalPane.Width, boardPane.Height);
             GL.Clear(GL.DEPTH_BUFFER_BIT | GL.COLOR_BUFFER_BIT);
             GL.LoadIdentity();
-            GL.ClearColor(0f, 0f, 0f, 1f);
+            //GL.ClearColor(0f, 0f, 0f, 1f);
+
+            // Enable blending
+            GL.Enable(GL.BLEND);
+            GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 
             // draw background
             GL.Color3f(0.6f, 0.6f, 0.6f);
-
-            GL.Begin(GL.QUADS);
-            GL.Vertex2f(0, 0);
-            GL.Vertex2f(evalPane.Width, 0);
-            GL.Vertex2f(evalPane.Width, boardPane.Height);
-            GL.Vertex2f(0, boardPane.Height);
-            GL.End();
-
             float w = evalPane.Width;
             float h = 0.5f * boardPane.Height;
+
+            GL.Begin(GL.QUADS);
+            GL.Vertex2f(0, w/2f);
+            GL.Vertex2f(evalPane.Width, w/2f);
+            GL.Vertex2f(evalPane.Width, boardPane.Height-w/2f);
+            GL.Vertex2f(0, boardPane.Height-w/2f);
+            GL.End();
+
+            // rounded cornerssss
+            float[] color = new float[4] { 0.6f, 0.6f, 0.6f, 1f };
+            render_rounded_corner(new Vec2(w / 2f, w / 2f), w / 2f, false, color); // top   
+           
+            render_rounded_corner(new Vec2(w / 2f, 2 * h - w / 2f), w / 2f, true, color); // bottom
+
             {
                 GL.Begin(GL.QUADS);
                 GL.ClearColor(1f, 1f, 1f, 1f);
-                GL.Color3f(0.2f, 0.2f, 0.2f);
+                GL.Color4f(0.2f, 0.2f, 0.2f, 0.5f);
 
                 GL.Vertex2f(0, h);
 
-                GL.Color3f((y < 0f ? 0.01f + Math.Abs(y / 100.0f) : 0), (y >= 0 ? 0.01f + Math.Abs(y / 100.0f) : 0), 0.01f);
+                GL.Color4f((y < 0f ? 0.01f + Math.Abs(y / 100.0f) : 0), (y >= 0 ? 0.01f + Math.Abs(y / 100.0f) : 0), 0.01f, 0.5f);
 
                 GL.Vertex2f(0, h + y);
 
-                GL.Color3f((y < 0f ? 0.01f + Math.Abs(y / 100.0f) : 0), (y >= 0 ? 0.01f + Math.Abs(y / 100.0f) : 0), 0.01f);
+                GL.Color4f((y < 0f ? 0.01f + Math.Abs(y / 100.0f) : 0), (y >= 0 ? 0.01f + Math.Abs(y / 100.0f) : 0), 0.01f, 0.5f);
 
                 GL.Vertex2f(w, h + y);
                 GL.Vertex2f(w, h);
 
                 GL.End();
             }
+            if (y != 0)
+            {
+                color = new float[4] { (y < 0f ? 0.01f + Math.Abs(y / 100.0f) : 0), (y >= 0 ? 0.01f + Math.Abs(y / 100.0f) : 0), 0.01f, 0.5f };
+                float d = (y < 0) ? h + y + 1f : h + y;
+                render_rounded_corner(new Vec2(w / 2f, d), w / 2f, (y > 0), color); // top
+            }
+            GL.Disable(GL.BLEND);
+        }
+
+        Vec2[] rounded_cap(Vec2 center, float radius, bool bot, int pts)
+        {
+            Vec2[] res = new Vec2[pts];
+            float dtheta = (bot ? 1.0f : -1.0f) * (float) Math.PI / (float) pts;
+
+            for(int j=0; j< pts; ++j)
+            {
+                res[j] = new Vec2(radius * Math.Cos(j * dtheta), radius * Math.Sin(j * dtheta));
+                res[j].x += center.x;
+                res[j].y += center.y;
+            }
+            return res;
+        }
+
+        void render_rounded_corner(Vec2 center, float radius, bool bot, float[] color)
+        {
+            int nb_points = 200;
+            Vec2[] points = rounded_cap(center, radius, bot, nb_points);
+
+            GL.Begin(GL.TRIANGLE_FAN);
+            for (int j = 0; j < nb_points; ++j)
+            {
+                GL.Color4f(color[0], color[1], color[2], color[3]);
+                GL.Vertex3f((float)points[j].x, (float)points[j].y, 0f);
+            }
+            GL.End();
         }
 
         void Render()
@@ -256,7 +303,7 @@ namespace epdTester
         {
             boardPane.Width = w-4;
             boardPane.Height = h;
-            evalPane.Width = (int) Math.Max(12, 0.01f * boardPane.Width);
+            evalPane.Width = (int) Math.Max(12, 0.01f * boardPane.Width)-2;
             evalPane.Height = h;
         }
         public void RenderBoard()
@@ -563,6 +610,22 @@ namespace epdTester
                     {
                         Log.WriteLine("..ERROR: failed to set game from pgn string");
                     }
+                }
+            }
+            else if (e.Control && e.KeyCode == Keys.N)
+            {
+                if (ActiveEngine != null && ActiveEngine.Thinking)
+                {
+                    ActiveEngine.Command("stop");
+                }
+                Log.WriteLine("..clearing board");
+                pos = new Position(Position.StartFen);
+                pos.UpdatePosition();
+                mw.MoveList.ClearText();
+                RefreshBoard();
+                if (ActiveEngine != null && ActiveEngine.Thinking)
+                {
+                    ActiveEngine.Command("go infinite");
                 }
             }
         }
