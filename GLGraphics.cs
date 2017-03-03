@@ -120,14 +120,15 @@ namespace epdTester
             switch (type)
             {
                 case 0: // selection
-                    colors = new float[] { 0.25f, 0.9f, 0.25f, 0.4f };
+                    colors = new float[] { 0.25f, 0.9f, 0.25f, 0.3f };
                     break;
                 case 1: // check
-                    colors = new float[] { 0.8f, 0.3f, 0.3f, 0.4f };
+                    colors = new float[] { 0.8f, 0.3f, 0.3f, 0.3f };
                     break;
                 case 2: // capture (potential)
-                    colors = new float[] { 0.8f, 0.5f, 0.5f, 0.4f };
+                    colors = new float[] { 0.8f, 0.5f, 0.5f, 0.3f };
                     break;
+
             }
             GL.Enable(GL.BLEND);
             GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);

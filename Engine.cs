@@ -206,6 +206,7 @@ namespace epdTester
             public string currmove;
             public string cpu;
             public string pv;
+            public int[] bestmove = new int[] { 0, 0 };
             public List<double> evals;
         }
         private AnalysisUIData FormatForAnalysisUI()
@@ -220,10 +221,10 @@ namespace epdTester
             data.hashfull = string.Format("{0:F3}k", (float)d.hashhits / 1000.0f); //Convert.ToString(d.hashhits);
             data.currmove = Convert.ToString("n/a");
             data.cpu = Convert.ToString("n/a");
-            data.pv = FormatPV(d.pv); //"[" + String.Format("{0:F2}", eval) + "]  " + FormatPV(d.pv);
+            data.pv = FormatPV(d.pv, ref data); // todo fixme
             return data;
         }
-        string FormatPV(string moves)
+        string FormatPV(string moves, ref AnalysisUIData data)
         {
             if (String.IsNullOrWhiteSpace(moves)) return "";
             try
@@ -239,6 +240,8 @@ namespace epdTester
                     if (p.doMove(fto[0], fto[1], p.PieceOn(fto[0]), p.ToMove()))
                     {
                         san_moves += p.toSan(move);// + " ";
+                        data.bestmove[0] = fto[0];
+                        data.bestmove[1] = fto[1];
                         break;
                     }
                     //else break;

@@ -302,7 +302,7 @@ namespace epdTester
         {
             // fixme
             ActiveEngine.SetBestMoveCallback(onEPDtestBestMoveParsed);
-            //epdTabDisplay.SelectedTest.startTest(timePerPosition);
+            epdTabDisplay.SelectedTest.startTest(timePerPosition);
         }
         uint timePerPosition = 1000;
         private void epdFixedTimePosition_TextChanged(object sender, EventArgs e)
@@ -316,7 +316,7 @@ namespace epdTester
         private void stopEpdTest_Click(object sender, EventArgs e)
         {
             //fixme
-            //epdTabDisplay.SelectedTest.CancelTest();
+            epdTabDisplay.SelectedTest.CancelTest();
         }
         public static void CloseEngineInstances()
         {

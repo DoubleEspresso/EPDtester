@@ -56,7 +56,7 @@ namespace epdTester
             if (cb != null)
             {
                 float eval = (float)d.evals[d.evals.Count - 1]; // should be scaled -100 to 100 or so..
-                cb.updateEval(eval);
+                cb.updateEval(eval, d.bestmove);
             }
             //cb.UpdateAnalysisGraph(d.evals);
             //updateEvalGraph(d.evals);
