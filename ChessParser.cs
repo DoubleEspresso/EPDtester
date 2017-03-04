@@ -12,7 +12,8 @@ namespace epdTester
         public struct Data
         {
             public uint depth;
-            public uint ms;
+            public uint seldepth;
+            public uint time;
             public int eval;
             public uint hashhits;
             public uint nodes;
@@ -43,8 +44,15 @@ namespace epdTester
         }
         public float BranchingFactor()
         {
-            if (History == null || History.Count < 2) return -1;
-            return -1;
+            if (History == null || History.Count <= 2) return 0;
+            double bf = 0; int count = 1;
+            for (int j = History.Count - 1; j >= 1; --j)
+            {
+                if (History[j].nodes <= 0 || History[j - 1].nodes <= 0) continue; // skip invalid node parsing
+                bf += (double) History[j].nodes / (double) History[j - 1].nodes;
+                count++;
+            }
+            return (float) bf / count;
         }
         public float AverageHashHits()
         {
@@ -144,10 +152,11 @@ namespace epdTester
                         switch (token)
                         {
                             case "cp": d.eval = Convert.ToInt32(tokens[++j]); break;
-                            case "depth": d.depth = Convert.ToUInt32(tokens[++j]); break;
-                            case "nodes": d.nodes = Convert.ToUInt32(tokens[++j]); break;
                             case "tbhits": d.hashhits = Convert.ToUInt32(tokens[++j]); break;
+                            case "depth": d.depth = Convert.ToUInt32(tokens[++j]); break;
+                            case "nodes": d.nodes = Convert.ToUInt32(tokens[++j]);  break;
                             case "nps": d.nps = Convert.ToUInt32(tokens[++j]); break;
+                            case "time": d.time = Convert.ToUInt32(tokens[++j]); break;
                             case "bestmove": d.bestmove = tokens[++j]; break;
                             case "pv": 
                                 for (int k = ++j; k < tokens.Length - 1; ++k) d.pv += tokens[k] + " "; j = tokens.Length - 1; break;

@@ -204,8 +204,11 @@ namespace epdTester
             public string nps;
             public string hashfull;
             public string currmove;
+            public string hashhits;
             public string cpu;
             public string pv;
+            public string time;
+            public string branch_factor;
             public int[] bestmove = new int[] { 0, 0 };
             public List<double> evals;
         }
@@ -216,10 +219,14 @@ namespace epdTester
             AnalysisUIData data = new AnalysisUIData();
             data.evals = new List<double>();
             data.depth = Convert.ToString(d.depth);
+            data.time = string.Format("{0:F2}s", d.time/1000.0);
             double eval = d.eval / 100.0; data.evals.Add(eval);
-            data.nps = string.Format("{0:F3}k", (float)d.nps / 1000.0f);// Convert.ToString(d.nps);
-            data.hashfull = string.Format("{0:F3}k", (float)d.hashhits / 1000.0f); //Convert.ToString(d.hashhits);
+            data.nps = string.Format("{0:F1}k", (float)d.nps / 1000.0f);// Convert.ToString(d.nps);
+            data.hashhits = string.Format("{0:F1}k", (float)d.hashhits / 1000.0f); //Convert.ToString(d.hashhits);
             data.currmove = Convert.ToString("n/a");
+            data.branch_factor = string.Format("{0:F2}", Parser.BranchingFactor());
+
+            // cpu and memory usage
             data.cpu = Convert.ToString("n/a");
             data.pv = FormatPV(d.pv, ref data); // todo fixme
             return data;

@@ -49,6 +49,9 @@ namespace epdTester
             nps_box.Text = d.nps;
             move_box.Text = d.pv;
             eval_box.Text = string.Format("{0:F3}", d.evals[d.evals.Count - 1]);
+            time_box.Text = d.time;
+            hashhits_box.Text = d.hashhits;
+            branch_box.Text = d.branch_factor;
             //hashfull.Text = d.hashfull;
             //currmove.Text = d.currmove;
             //cpu.Text = d.cpu;
@@ -72,6 +75,10 @@ namespace epdTester
             }
             else
             {
+                cb.ChessEngine.Command("stop");
+                Thread.Sleep(100);
+                cb.ChessEngine.Command("position fen " + cb.pos.toFen());
+                Thread.Sleep(100);
                 cb.ChessEngine.Command("go infinite");
                 button1.Text = "stop";
             }
