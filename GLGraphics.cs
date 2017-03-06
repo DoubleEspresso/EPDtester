@@ -174,7 +174,8 @@ namespace epdTester
             GL.Translatef(-(float)start.x, -(float)start.y, 0f);
 
             GL.Begin(GL.TRIANGLES);
-            GL.Color4f(0.2f, 0.2f, 0.7f, 0.7f);
+            //GL.Color4f(0.2f, 0.2f, 0.7f, 0.7f); // purple
+            GL.Color4f(0.20f, 0.70f, 0.20f, 0.8f); // green
 
             GL.Vertex2d(x0, y0); GL.Vertex2d(x1, y1); GL.Vertex2d(x2, yy2);
             GL.Vertex2d(x1, y0); GL.Vertex2d(x1, yy2); GL.Vertex2d(x0, yy2);

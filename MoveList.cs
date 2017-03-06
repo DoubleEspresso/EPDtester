@@ -12,7 +12,7 @@ namespace epdTester
 {
     public partial class MoveList : UserControl
     {
-        public ChessBoard2 cb = null;
+        public ChessBoard cb = null;
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         static extern bool HideCaret(IntPtr hWnd);
 
@@ -21,7 +21,7 @@ namespace epdTester
             InitializeComponent();
             mList.Clear();
         }
-        public void SetBoard(ChessBoard2 b)
+        public void SetBoard(ChessBoard b)
         {
             cb = b;
         }

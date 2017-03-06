@@ -34,7 +34,7 @@ namespace epdTester
         public enum Type { UCI, WINBOARD, UNKNOWN }
         public Type EngineProtocol = Type.UCI;
         public ChessParser Parser = new UCIParser();
-        public ChessBoard2 chessBoard = null;
+        public ChessBoard chessBoard = null;
 
         public Engine() { }
         public bool canOpen()

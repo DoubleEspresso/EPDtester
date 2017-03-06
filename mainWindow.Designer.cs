@@ -31,6 +31,18 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(mainWindow));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.dbGroup = new System.Windows.Forms.GroupBox();
+            this.dbGroupBox = new System.Windows.Forms.GroupBox();
+            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label17 = new System.Windows.Forms.Label();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.label18 = new System.Windows.Forms.Label();
+            this.createDB = new System.Windows.Forms.Button();
+            this.lookupResult = new System.Windows.Forms.Label();
+            this.moveList = new epdTester.MoveList();
+            this.engineAnalysisControl = new epdTester.EngineAnalysisControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.engineDetailsGroupBox = new System.Windows.Forms.GroupBox();
             this.status = new System.Windows.Forms.Label();
@@ -61,6 +73,8 @@
             this.removeEngineFromList = new System.Windows.Forms.Button();
             this.addEngineToList = new System.Windows.Forms.Button();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.epdTabDisplay = new epdTester.EpdTabDisplay();
+            this.chessPlot1 = new epdTester.ChessPlot();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.label7 = new System.Windows.Forms.Label();
             this.EPDTestCorrect_label = new System.Windows.Forms.Label();
@@ -90,12 +104,10 @@
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.gl_eval = new epdTester.GL();
             this.cboard = new epdTester.GL();
-            this.engineAnalysisControl = new epdTester.EngineAnalysisControl();
-            this.moveList = new epdTester.MoveList();
-            this.epdTabDisplay = new epdTester.EpdTabDisplay();
-            this.chessPlot1 = new epdTester.ChessPlot();
             this.tabControl1.SuspendLayout();
             this.tabPage5.SuspendLayout();
+            this.dbGroup.SuspendLayout();
+            this.dbGroupBox.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.engineDetailsGroupBox.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -121,13 +133,137 @@
             // tabPage5
             // 
             this.tabPage5.BackColor = System.Drawing.SystemColors.Menu;
-            this.tabPage5.Controls.Add(this.engineAnalysisControl);
+            this.tabPage5.Controls.Add(this.dbGroup);
             this.tabPage5.Controls.Add(this.moveList);
+            this.tabPage5.Controls.Add(this.engineAnalysisControl);
             this.tabPage5.Location = new System.Drawing.Point(4, 22);
             this.tabPage5.Name = "tabPage5";
             this.tabPage5.Size = new System.Drawing.Size(610, 575);
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "board..";
+            // 
+            // dbGroup
+            // 
+            this.dbGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.dbGroup.Controls.Add(this.dbGroupBox);
+            this.dbGroup.Controls.Add(this.lookupResult);
+            this.dbGroup.Location = new System.Drawing.Point(10, 334);
+            this.dbGroup.Name = "dbGroup";
+            this.dbGroup.Size = new System.Drawing.Size(585, 238);
+            this.dbGroup.TabIndex = 2;
+            this.dbGroup.TabStop = false;
+            this.dbGroup.Text = "DB..";
+            // 
+            // dbGroupBox
+            // 
+            this.dbGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.dbGroupBox.Controls.Add(this.textBox3);
+            this.dbGroupBox.Controls.Add(this.label15);
+            this.dbGroupBox.Controls.Add(this.textBox1);
+            this.dbGroupBox.Controls.Add(this.label17);
+            this.dbGroupBox.Controls.Add(this.textBox2);
+            this.dbGroupBox.Controls.Add(this.label18);
+            this.dbGroupBox.Controls.Add(this.createDB);
+            this.dbGroupBox.Location = new System.Drawing.Point(7, 19);
+            this.dbGroupBox.Name = "dbGroupBox";
+            this.dbGroupBox.Size = new System.Drawing.Size(572, 71);
+            this.dbGroupBox.TabIndex = 3;
+            this.dbGroupBox.TabStop = false;
+            this.dbGroupBox.Text = "file settings..";
+            // 
+            // textBox3
+            // 
+            this.textBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox3.Location = new System.Drawing.Point(405, 41);
+            this.textBox3.Name = "textBox3";
+            this.textBox3.Size = new System.Drawing.Size(41, 20);
+            this.textBox3.TabIndex = 28;
+            // 
+            // label15
+            // 
+            this.label15.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(450, 45);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(60, 13);
+            this.label15.TabIndex = 27;
+            this.label15.Text = "max sz (gb)";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox1.Location = new System.Drawing.Point(87, 41);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(312, 20);
+            this.textBox1.TabIndex = 7;
+            // 
+            // label17
+            // 
+            this.label17.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(6, 44);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(80, 13);
+            this.label17.TabIndex = 6;
+            this.label17.Text = "pgn file (create)";
+            // 
+            // textBox2
+            // 
+            this.textBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox2.Location = new System.Drawing.Point(87, 17);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(312, 20);
+            this.textBox2.TabIndex = 5;
+            // 
+            // label18
+            // 
+            this.label18.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(6, 20);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(51, 13);
+            this.label18.TabIndex = 4;
+            this.label18.Text = "binary file";
+            // 
+            // createDB
+            // 
+            this.createDB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.createDB.Location = new System.Drawing.Point(518, 40);
+            this.createDB.Name = "createDB";
+            this.createDB.Size = new System.Drawing.Size(48, 25);
+            this.createDB.TabIndex = 1;
+            this.createDB.Text = "create";
+            this.createDB.UseVisualStyleBackColor = true;
+            this.createDB.Click += new System.EventHandler(this.createDB_Click);
+            // 
+            // lookupResult
+            // 
+            this.lookupResult.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.lookupResult.AutoSize = true;
+            this.lookupResult.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lookupResult.Location = new System.Drawing.Point(91, 93);
+            this.lookupResult.Name = "lookupResult";
+            this.lookupResult.Size = new System.Drawing.Size(25, 13);
+            this.lookupResult.TabIndex = 2;
+            this.lookupResult.Text = "res";
+            // 
+            // moveList
+            // 
+            this.moveList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.moveList.Location = new System.Drawing.Point(10, 185);
+            this.moveList.Name = "moveList";
+            this.moveList.Size = new System.Drawing.Size(585, 143);
+            this.moveList.TabIndex = 1;
+            // 
+            // engineAnalysisControl
+            // 
+            this.engineAnalysisControl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.engineAnalysisControl.Location = new System.Drawing.Point(10, 8);
+            this.engineAnalysisControl.Name = "engineAnalysisControl";
+            this.engineAnalysisControl.Size = new System.Drawing.Size(585, 171);
+            this.engineAnalysisControl.TabIndex = 0;
             // 
             // tabPage3
             // 
@@ -447,6 +583,24 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "epd testing..";
             // 
+            // epdTabDisplay
+            // 
+            this.epdTabDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.epdTabDisplay.Location = new System.Drawing.Point(9, 247);
+            this.epdTabDisplay.Name = "epdTabDisplay";
+            this.epdTabDisplay.Size = new System.Drawing.Size(598, 322);
+            this.epdTabDisplay.TabIndex = 44;
+            // 
+            // chessPlot1
+            // 
+            this.chessPlot1.Location = new System.Drawing.Point(746, 29);
+            this.chessPlot1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.chessPlot1.Name = "chessPlot1";
+            this.chessPlot1.Size = new System.Drawing.Size(318, 211);
+            this.chessPlot1.TabIndex = 43;
+            // 
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.label7);
@@ -728,43 +882,6 @@
             this.cboard.Size = new System.Drawing.Size(543, 571);
             this.cboard.TabIndex = 8;
             // 
-            // engineAnalysisControl
-            // 
-            this.engineAnalysisControl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.engineAnalysisControl.Location = new System.Drawing.Point(10, 8);
-            this.engineAnalysisControl.Name = "engineAnalysisControl";
-            this.engineAnalysisControl.Size = new System.Drawing.Size(585, 171);
-            this.engineAnalysisControl.TabIndex = 0;
-            this.engineAnalysisControl.Load += new System.EventHandler(this.engineAnalysisControl_Load);
-            // 
-            // moveList
-            // 
-            this.moveList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.moveList.Location = new System.Drawing.Point(10, 191);
-            this.moveList.Name = "moveList";
-            this.moveList.Size = new System.Drawing.Size(585, 376);
-            this.moveList.TabIndex = 1;
-            // 
-            // epdTabDisplay
-            // 
-            this.epdTabDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.epdTabDisplay.Location = new System.Drawing.Point(9, 247);
-            this.epdTabDisplay.Name = "epdTabDisplay";
-            this.epdTabDisplay.Size = new System.Drawing.Size(598, 322);
-            this.epdTabDisplay.TabIndex = 44;
-            // 
-            // chessPlot1
-            // 
-            this.chessPlot1.Location = new System.Drawing.Point(746, 29);
-            this.chessPlot1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.chessPlot1.Name = "chessPlot1";
-            this.chessPlot1.Size = new System.Drawing.Size(318, 211);
-            this.chessPlot1.TabIndex = 43;
-            // 
             // mainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -780,6 +897,10 @@
             this.ResizeEnd += new System.EventHandler(this.ResizeFinished);
             this.tabControl1.ResumeLayout(false);
             this.tabPage5.ResumeLayout(false);
+            this.dbGroup.ResumeLayout(false);
+            this.dbGroup.PerformLayout();
+            this.dbGroupBox.ResumeLayout(false);
+            this.dbGroupBox.PerformLayout();
             this.tabPage3.ResumeLayout(false);
             this.engineDetailsGroupBox.ResumeLayout(false);
             this.engineDetailsGroupBox.PerformLayout();
@@ -859,6 +980,16 @@
         private MoveList moveList;
         private EngineAnalysisControl engineAnalysisControl;
         private GL gl_eval;
+        private System.Windows.Forms.GroupBox dbGroup;
+        private System.Windows.Forms.GroupBox dbGroupBox;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Button createDB;
+        private System.Windows.Forms.Label lookupResult;
+        private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.Label label15;
     }
 }
 

@@ -17,9 +17,10 @@ namespace epdTester
         static List<Engine> engines = new List<Engine>(); // static so we can delete them on application exit.
         List<EpdFile> tests = new List<EpdFile>();
         public Engine ActiveEngine = null;
-        public ChessBoard2 board2 = null;
+        public ChessBoard board = null;
         List<string> epd_filenames = new List<string>(); // for epd test selection
         public MoveList MoveList { get { return moveList; } }
+        BackgroundWorker db_Worker = null;
 
         public mainWindow()
         {
@@ -29,9 +30,17 @@ namespace epdTester
             EPDTestProgress_label.Text = "";
             EPDTestCorrect_label.Text = "";
             label7.Text = "";
+
+            board = new ChessBoard(null, cboard, gl_eval, this);
+            moveList.SetBoard(board);
+
+            /*initialize worker threads*/
+            db_Worker = new BackgroundWorker();
+            db_Worker.DoWork += new DoWorkEventHandler(dbLookup_Work);
+            db_Worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(dbLookup_WorkerFinished);
+            db_Worker.WorkerReportsProgress = false;
+            db_Worker.WorkerSupportsCancellation = false;
             
-            board2 = new ChessBoard2(null, cboard, gl_eval, this);
-            moveList.SetBoard(board2);
         }
         protected override void OnLoad(EventArgs e)
         {
@@ -49,7 +58,7 @@ namespace epdTester
             float mind = (float)Math.Min(w, h);
             float nw = (w >= mind ? mind : w);
             float nh = (h >= mind ? mind : h);
-            if (board2 != null) board2.SetDims((int)nw-40, (int)nh-65);
+            if (board != null) board.SetDims((int)nw - 40, (int)nh - 65);
             Width = (int)(nw + tabControl1.Width); Height = (int)nh;
         }
         /*EPD file management*/
@@ -201,7 +210,7 @@ namespace epdTester
         private void startEngine_Click(object sender, EventArgs args)
         {
             // close any active engines connected to the main board
-            if (board2 != null) board2.CloseEngine();
+            if (board != null) board.CloseEngine();
             status.Text = "";
 
             int idx = engineList.SelectedIndex;
@@ -217,27 +226,27 @@ namespace epdTester
                 {
                     Log.WriteLine("..WARNING: enigne-{0} failed to start!", e.Name);
                 }
-                else if (board2 != null)
+                else if (board != null)
                 {
-                    board2.SetEngine(e);
+                    board.SetEngine(e);
 
                     // note: take engine out of "game" mode so it does not try to stop
                     // on best-move parsing (causes illegal engine moves/crashes)
                     // todo : if we toggle this option, we need to re-set the callback.
-                    board2.ChessEngine.Parser.CallbackOnBestmove = null;
+                    board.ChessEngine.Parser.CallbackOnBestmove = null;
 
-                    engineAnalysisControl.Initialize(board2.ChessEngine, board2);
-                   
-                    board2.mode = ChessBoard2.Mode.ANALYSIS;
-                    engineAnalysisControl.enableGoClick(board2.hasEngine());
-                    
+                    engineAnalysisControl.Initialize(board.ChessEngine, board);
+
+                    board.mode = ChessBoard.Mode.ANALYSIS;
+                    engineAnalysisControl.enableGoClick(board.hasEngine());
+
                 }
                 updateDisplay(e);
             }
         }
         private void setEPDdirectory_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog fd = new FolderBrowserDialog(); 
+            FolderBrowserDialog fd = new FolderBrowserDialog();
             if (fd.ShowDialog() == DialogResult.OK &&
                 !string.IsNullOrWhiteSpace(fd.SelectedPath) &&
                 Directory.Exists(fd.SelectedPath))
@@ -297,7 +306,7 @@ namespace epdTester
             EPDTestCorrect_label.Text = nbCorrect + " / " + totalTests;
             //epdTabDisplay.SelectedTest.BestMoveEvent.Set();
             Log.WriteLine("...set betsmove event");
-        }        
+        }
         private void epdStart_Click(object sender, EventArgs e)
         {
             // fixme
@@ -320,10 +329,10 @@ namespace epdTester
         }
         public static void CloseEngineInstances()
         {
-            int count = 0; 
+            int count = 0;
             foreach (Engine e in engines)
             {
-                e.SaveSettings(count); 
+                e.SaveSettings(count);
                 e.Close();
                 ++count;
             }
@@ -334,9 +343,94 @@ namespace epdTester
             ActiveEngine.UseLog(useLogCheckbox.Checked);
         }
 
-        private void engineAnalysisControl_Load(object sender, EventArgs e)
+        public class DBEntry
         {
+            public string san_move = "";
+            public float white_p = 0;
+            public float black_p = 0;
+            public float draw_p = 0;
+            public float total = 0;
+        }
+        List<DBEntry> ParseDBLookup(string text)
+        {
+            List<DBEntry> parsed_results = new List<DBEntry>();
+            string[] lines = text.Split('\n');
+            if (lines.Length <= 0) return parsed_results;
+            Position p = new Position(board.pos.toFen()); // avoid corrupting the currently displayed position 
 
+            for (int j = 0; j < lines.Length; ++j)
+            {
+                DBEntry e = new DBEntry();
+                string line = lines[j];
+                string[] tokens = line.Split(' ');
+                if (tokens.Length <= 0 || tokens.Length < 4) continue;
+                e.san_move = p.toSan(tokens[0], false);
+
+                e.total = (float)(Convert.ToDouble(tokens[1]) + Convert.ToDouble(tokens[2]) + Convert.ToDouble(tokens[3]));
+                e.white_p = (float)Convert.ToDouble(tokens[1]) / e.total;
+                e.draw_p = (float)Convert.ToDouble(tokens[2]) / e.total;
+                e.black_p = (float)Convert.ToDouble(tokens[3]) / e.total;
+
+                parsed_results.Add(e);
+            }
+            return parsed_results;
+        }
+
+        List<DBEntry> results = new List<DBEntry>();
+        public void lookupPosition()
+        {
+            if (db_Worker != null) db_Worker.RunWorkerAsync();
+        }
+
+        private void dbLookup_Work(object sender, DoWorkEventArgs e)
+        {
+            try
+            {
+                // launch background thread..
+                results.Clear();
+                string fen = board.pos.toFen();
+                string r = Native.PGNLookup("A:\\code\\chess\\testing\\epd\\books\\db.bin", fen); // todo : load this from settings/UI components
+                if (!string.IsNullOrWhiteSpace(r))
+                {
+                    results = ParseDBLookup(r);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.WriteLine("..exception looking up current position: {0}", ex.Message);
+            }
+        }
+
+        private void dbLookup_WorkerFinished(object sender, RunWorkerCompletedEventArgs e)
+        {
+            string combined = "";
+            foreach (DBEntry entry in results)
+            {
+                combined += String.Format("{0,-6} {1,6:F1}%   {2,6:F1}%   {3,6:F1}%   ({4,3:F0})\n",
+                    entry.san_move,
+                    entry.white_p * 100,
+                    entry.draw_p * 100,
+                    entry.black_p * 100,
+                    entry.total);
+            }
+            if (string.IsNullOrWhiteSpace(combined)) lookupResult.Text = String.Format("..nothing found in database");
+            else lookupResult.Text = combined;
+        }
+
+        private void createDB_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!Native.CreateFromPGN("A:\\code\\chess\\testing\\epd\\books\\all_games.pgn", "A:\\code\\chess\\testing\\epd\\books\\db.bin", 500))
+                {
+                    MessageBox.Show("..failed to create testdb.bin!");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Log.WriteLine("..exception looking up current position: {0}", ex.Message);
+            }
         }
     }
 }

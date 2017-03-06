@@ -9,7 +9,7 @@ namespace epdTester
     public partial class EngineAnalysisControl : UserControl
     {
         Engine e = null;
-        ChessBoard2 cb = null;
+        ChessBoard cb = null;
 
         public EngineAnalysisControl()
         {
@@ -17,7 +17,7 @@ namespace epdTester
             button1.Enabled = false;
         }
 
-        public void Initialize(Engine engine, ChessBoard2 b)
+        public void Initialize(Engine engine, ChessBoard b)
         {
             this.e = engine;
             e.AnalysisUICallback += EngineStreamRecieved;

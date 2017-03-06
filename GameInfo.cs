@@ -13,8 +13,8 @@ namespace epdTester
     public partial class GameInfo : Form
     {
         Position pos = null;
-        ChessBoard2 board = null;
-        public GameInfo(Position p, ChessBoard2 cb)
+        ChessBoard board = null;
+        public GameInfo(Position p, ChessBoard cb)
         {     
             InitializeComponent();
             this.pos = p;

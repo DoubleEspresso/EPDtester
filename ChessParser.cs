@@ -158,8 +158,8 @@ namespace epdTester
                             case "nps": d.nps = Convert.ToUInt32(tokens[++j]); break;
                             case "time": d.time = Convert.ToUInt32(tokens[++j]); break;
                             case "bestmove": d.bestmove = tokens[++j]; break;
-                            case "pv": 
-                                for (int k = ++j; k < tokens.Length - 1; ++k) d.pv += tokens[k] + " "; j = tokens.Length - 1; break;
+                            case "pv":  d.pv += tokens[++j]; break;
+                                //for (int k = ++j; k < tokens.Length - 1; ++k) d.pv += tokens[k] + " "; j = tokens.Length - 1; break;
                             default: ++skipped; break;
                         }
                     }
